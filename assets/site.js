@@ -1,4 +1,5 @@
-// leptris.github.io — reveals, count-ups, bar growth. No dependencies.
+// leptris.github.io — reveals, count-ups, bar growth, hero ticker, code tabs.
+// No dependencies.
 (function () {
   "use strict";
 
@@ -57,5 +58,44 @@
       cio.unobserve(e.target);
     });
   }, { threshold: 0.6 });
-  document.querySelectorAll("[data-count]").forEach(function (el) { cio.observe(el); });
+  document.querySelectorAll("[data-count],[data-raw]").forEach(function (el) { cio.observe(el); });
+
+  // Hero ticker: slide out, swap, slide in — every 2.8 s
+  var ticker = document.querySelector(".ticker");
+  if (ticker) {
+    var phrases = [
+      "hard memory bounds",
+      "zero dependencies",
+      "one arena per parse",
+      "64 bytes per element",
+      "438/438 on XPath 1.0"
+    ];
+    var item = ticker.querySelector(".ticker-item");
+    var idx = 0;
+    if (!reduced && phrases.length > 1) {
+      setInterval(function () {
+        item.classList.add("tick-out");
+        setTimeout(function () {
+          idx = (idx + 1) % phrases.length;
+          item.textContent = phrases[idx];
+          item.classList.remove("tick-out");
+          item.classList.add("tick-pre");
+          void item.offsetWidth; // flush so tick-pre applies before the transition
+          item.classList.remove("tick-pre");
+        }, 460);
+      }, 2800);
+    }
+  }
+
+  // Code showcase tabs
+  var tabs = document.querySelectorAll(".show-tab");
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      tabs.forEach(function (t) { t.classList.remove("active"); });
+      document.querySelectorAll(".show-panel").forEach(function (p) { p.classList.remove("active"); });
+      tab.classList.add("active");
+      var panel = document.getElementById(tab.getAttribute("data-panel"));
+      if (panel) panel.classList.add("active");
+    });
+  });
 })();
