@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — leptris</title>
+<meta name="description" content="lep · hare, tris · three. The three-hares motif from the Dunhuang caves to this parser: speed of the chase, containment of the circle.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,300..700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <img class="mark" src="assets/favicon.svg" alt="">
+    <a class="wordmark" href="/">LEPTRIS</a>
+    <nav>
+      <a href="index.html#speed" class="nav-extra">Speed</a>
+      <a href="index.html#bound" class="nav-extra">Bounds</a>
+      <a href="index.html#install" class="nav-extra">Install</a>
+      <a href="https://github.com/leptris/leptris">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section class="page-head">
+  <div class="wrap">
+    <p class="sec-label">About</p>
+    <h1 class="sec-title">Why <em>leptris</em>?</h1>
+    <p class="sec-lede">
+      lep · hare — tris · three. A thousand-year-old image of three hares
+      sharing three ears, and the two promises this library makes: speed,
+      and containment.
+    </p>
+  </div>
+</section>
+
+<div class="prose">
+
+  <svg class="logo-svg about-medallion" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="the three-hares medallion">
+    <defs>
+      <g id="hare-a">
+        <path d="M100 100 C 98.5 84, 97.5 66, 99.2 50.5 C 99.7 45.9, 102.6 45.7, 103.4 50.2 C 106.2 65.5, 105.4 83, 104 99 Z"/>
+        <circle cx="104.5" cy="57" r="10.6"/>
+        <circle cx="107.6" cy="55.1" r="1.7" class="eye"/>
+        <path d="M114.5 63.5 A 58 58 0 0 1 63 106" fill="none" stroke-width="21" stroke-linecap="round" class="body"/>
+        <path d="M111 68.5 C 118.5 71, 124 76.5, 126 84" fill="none" stroke-width="6.5" stroke-linecap="round" class="body"/>
+      </g>
+    </defs>
+    <circle cx="100" cy="100" r="94" fill="none" stroke-width="2.5" class="ring"/>
+    <circle cx="100" cy="100" r="86" fill="none" stroke-width="1" class="ring-fine"/>
+    <use href="#hare-a"/>
+    <use href="#hare-a" transform="rotate(120 100 100)"/>
+    <use href="#hare-a" transform="rotate(240 100 100)"/>
+  </svg>
+  <p class="medallion-caption">the leptris mark — rotate it 120°, it is the same</p>
+
+  <h2>The motif</h2>
+  <p>
+    On the ceilings of the Buddhist cave temples at <strong>Dunhuang</strong>,
+    at the edge of the Gobi where the Silk Road funnels into China, painters
+    of the Sui and Tang dynasties left a small puzzle: <strong>three hares
+    chasing each other in a circle, and between them only three ears</strong>.
+    Each hare looks fully equipped — two apiece — yet count them and there
+    are three, not six. The design turns on perfect three-fold rotation:
+    every ear belongs to two hares at once, and nothing in the pattern is
+    redundant.
+  </p>
+  <p>
+    The image traveled. It appears in Buddhist caves and on ceramics in
+    China, in the metalwork and manuscripts of central Asia and Persia, and
+    — centuries later — carved into the roof bosses and painted on the
+    chancel arches of parish churches across England and northern Europe,
+    where it is still called the <em>three hares</em>. One image, carried
+    along the whole length of the Silk Road, understood everywhere it
+    landed. A design meant for wide acceptance.
+  </p>
+
+  <hr class="asterism">
+
+  <h2>The name</h2>
+  <p>
+    <strong>leptris</strong> says exactly what it is:
+  </p>
+  <table class="name-table">
+    <tr><th>morpheme</th><th>root</th><th>meaning</th></tr>
+    <tr><td class="morph">lep</td><td>lepus (Latin)</td><td>hare</td></tr>
+    <tr><td class="morph">tris</td><td>treis (Greek)</td><td>three</td></tr>
+  </table>
+  <p>
+    Hares are fast — famously, alarmingly fast. Three of them run in a
+    circle, and the circle is closed. That is the whole design brief of this
+    library, stated in seven letters.
+  </p>
+
+  <hr class="asterism">
+
+  <h2>What the hares promise</h2>
+  <p>
+    <strong>Speed.</strong> Hares in full chase. The parse path is a
+    vectorized scan over the document; the tree is carved from one
+    contiguous arena with indices where other libraries walk pointers;
+    repeated XPath queries are served from a subtree-interval index at
+    effectively no cost. On text-heavy documents leptris parses
+    <strong>3.4× faster than pugixml</strong>; through Ruby it does a
+    4.38 MB parse-and-serialize in 18 ms where Nokogiri takes 123 ms.
+  </p>
+  <p>
+    <strong>Containment.</strong> The circle closes. One arena per parse,
+    sized from the document before the first node exists; elements at
+    64 bytes, attributes at 40; mutation storage in chained blocks owned by
+    the document; everything released in a single call. A hard bound on
+    memory you can state before you parse — a self-sufficient core with
+    <strong>zero required dependencies</strong>, nothing hidden behind the
+    ring.
+  </p>
+  <p>
+    And like the motif itself, the library is built to travel: pure C99,
+    the same bounded core behind bindings for Ruby, Python, and the shell.
+  </p>
+
+  <hr class="asterism">
+
+  <p>
+    <a href="index.html">← Back to the front page</a> ·
+    <a href="https://github.com/leptris/leptris">github.com/leptris/leptris</a>
+  </p>
+
+</div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <img class="mini-mark" src="assets/favicon.svg" alt="">
+    <span>libleptris — MIT license</span>
+    <span class="sep">❧</span>
+    <a href="https://github.com/leptris/leptris">github.com/leptris/leptris</a>
+    <span class="sep">❧</span>
+    <span class="formerly">formerly taurus</span>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

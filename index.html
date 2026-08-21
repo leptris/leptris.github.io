@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>leptris — the XML parser with hard bounds</title>
+<title>leptris — the XML parser with hard memory bounds</title>
 <meta name="description" content="libleptris: a C99 XML 1.0 parser, W3C-conformant XPath 1.0 engine, and SAX feed. Fast as hares, contained as a circle — hard memory bounds, zero required dependencies.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,300..700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,300..700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
@@ -18,10 +18,10 @@
     <img class="mark" src="assets/favicon.svg" alt="">
     <a class="wordmark" href="/">LEPTRIS</a>
     <nav>
-      <a href="#name">The name</a>
-      <a href="#speed">Speed</a>
-      <a href="#bound">Bounds</a>
-      <a href="#install">Install</a>
+      <a href="about.html">About</a>
+      <a href="#speed" class="nav-extra">Speed</a>
+      <a href="#bound" class="nav-extra">Bounds</a>
+      <a href="#install" class="nav-extra">Install</a>
       <a href="https://github.com/leptris/leptris">GitHub</a>
     </nav>
   </div>
@@ -29,101 +29,84 @@
 
 <main>
 
-<section class="hero wrap" id="top">
-  <div class="hero-copy">
-    <p class="hero-kicker reveal">C99 &middot; XML 1.0 &middot; XPath 1.0 &middot; SAX</p>
-    <h1 class="display reveal" data-d="1">Fast as hares.<br><em>Contained as a circle.</em></h1>
-    <p class="hero-lede reveal" data-d="2">
-      <strong>libleptris</strong> is an XML parser, W3C-conformant XPath engine and
-      SAX feed in pure C99 — zero required dependencies, one arena per
-      document, and a memory ceiling you can state before you parse.
+<!-- ————— hero ————— -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-medallion logo-svg on-lapis reveal">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="leptris — three hares sharing three ears">
+        <defs>
+          <g id="hare-h">
+            <path d="M100 100 C 98.5 84, 97.5 66, 99.2 50.5 C 99.7 45.9, 102.6 45.7, 103.4 50.2 C 106.2 65.5, 105.4 83, 104 99 Z"/>
+            <circle cx="104.5" cy="57" r="10.6"/>
+            <circle cx="107.6" cy="55.1" r="1.7" class="eye"/>
+            <path d="M114.5 63.5 A 58 58 0 0 1 63 106" fill="none" stroke-width="21" stroke-linecap="round" class="body"/>
+            <path d="M111 68.5 C 118.5 71, 124 76.5, 126 84" fill="none" stroke-width="6.5" stroke-linecap="round" class="body"/>
+          </g>
+        </defs>
+        <circle cx="100" cy="100" r="94" fill="none" stroke-width="2.5" class="ring"/>
+        <circle cx="100" cy="100" r="86" fill="none" stroke-width="1" class="ring-fine"/>
+        <use href="#hare-h"/>
+        <use href="#hare-h" transform="rotate(120 100 100)"/>
+        <use href="#hare-h" transform="rotate(240 100 100)"/>
+      </svg>
+    </div>
+    <div class="reveal" data-d="1">
+      <span class="etym">lep · hare — tris · three</span>
+      <span class="etym-sub">lepus (Latin, hare) + treis (Greek, three) — the three hares of Dunhuang</span>
+    </div>
+    <h1 class="hero-title reveal" data-d="2">The XML parser with
+      <span class="ticker" aria-label="hard memory bounds"><span class="ticker-item">hard memory bounds</span></span>
+    </h1>
+    <p class="hero-lede reveal" data-d="3">
+      <strong>libleptris</strong> is an XML 1.0 parser, W3C-conformant XPath
+      engine and SAX feed in pure C99 — zero required dependencies, one arena
+      per document, and a memory ceiling you can state before you parse.
     </p>
-    <div class="cta-row reveal" data-d="3">
+    <div class="hero-actions reveal" data-d="3">
       <a class="btn solid" href="#install">Get started</a>
       <a class="btn" href="https://github.com/leptris/leptris">Source</a>
     </div>
   </div>
-  <div class="hero-medallion reveal" data-d="2">
-    <div class="logo-svg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="leptris — three hares">
-  <defs>
-    <g id="hare">
-      <!-- ear: from the shared center outward, tapered, slightly canted -->
-      <path d="M100 100 C 98.5 84, 97.5 66, 99.2 50.5 C 99.7 45.9, 102.6 45.7, 103.4 50.2
-               C 106.2 65.5, 105.4 83, 104 99 Z" />
-      <!-- head -->
-      <circle cx="104.5" cy="57" r="10.6"/>
-      <!-- eye: punched out of the head -->
-      <circle cx="107.6" cy="55.1" r="1.7" class="eye"/>
-      <!-- body + haunch: one sweeping arc behind the head -->
-      <path d="M114.5 63.5
-               A 58 58 0 0 1 63 106"
-               fill="none" stroke-width="21" stroke-linecap="round" class="body"/>
-      <!-- foreleg kick -->
-      <path d="M111 68.5 C 118.5 71, 124 76.5, 126 84" fill="none"
-            stroke-width="6.5" stroke-linecap="round" class="body"/>
-    </g>
-  </defs>
-
-  <!-- outer ring: the circle that contains the chase -->
-  <circle cx="100" cy="100" r="94" fill="none" stroke-width="2.5" class="ring"/>
-  <circle cx="100" cy="100" r="86" fill="none" stroke-width="1" class="ring-fine"/>
-
-  <use href="#hare"/>
-  <use href="#hare" transform="rotate(120 100 100)"/>
-  <use href="#hare" transform="rotate(240 100 100)"/>
-</svg></div>
-    <p class="medallion-caption">three hares &middot; three ears &middot; dunhuang</p>
-  </div>
 </section>
 
-<div class="stat-strip">
+<!-- ————— stats band ————— -->
+<div class="stats">
   <div class="wrap">
     <div class="stat"><span class="n" data-count="3.4" data-suffix="×">0×</span><span class="l">faster text parse than pugixml</span></div>
     <div class="stat"><span class="n" data-count="6.8" data-suffix="×">0×</span><span class="l">faster than nokogiri, real docs</span></div>
     <div class="stat"><span class="n" data-count="438" data-suffix="/438">0/438</span><span class="l">W3C XPath 1.0 conformance</span></div>
-    <div class="stat"><span class="n" data-count="0" data-prefix="" data-raw="zero">zero</span><span class="l">required runtime dependencies</span></div>
+    <div class="stat"><span class="n" data-raw="zero">zero</span><span class="l">required runtime dependencies</span></div>
   </div>
 </div>
 
-<section class="wrap" id="name">
-  <div class="motif">
+<!-- ————— the name ————— -->
+<section class="sec" id="name">
+  <div class="wrap motif">
     <div class="reveal">
-      <div class="logo-svg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="leptris — three hares">
-  <defs>
-    <g id="hare">
-      <!-- ear: from the shared center outward, tapered, slightly canted -->
-      <path d="M100 100 C 98.5 84, 97.5 66, 99.2 50.5 C 99.7 45.9, 102.6 45.7, 103.4 50.2
-               C 106.2 65.5, 105.4 83, 104 99 Z" />
-      <!-- head -->
-      <circle cx="104.5" cy="57" r="10.6"/>
-      <!-- eye: punched out of the head -->
-      <circle cx="107.6" cy="55.1" r="1.7" class="eye"/>
-      <!-- body + haunch: one sweeping arc behind the head -->
-      <path d="M114.5 63.5
-               A 58 58 0 0 1 63 106"
-               fill="none" stroke-width="21" stroke-linecap="round" class="body"/>
-      <!-- foreleg kick -->
-      <path d="M111 68.5 C 118.5 71, 124 76.5, 126 84" fill="none"
-            stroke-width="6.5" stroke-linecap="round" class="body"/>
-    </g>
-  </defs>
-
-  <!-- outer ring: the circle that contains the chase -->
-  <circle cx="100" cy="100" r="94" fill="none" stroke-width="2.5" class="ring"/>
-  <circle cx="100" cy="100" r="86" fill="none" stroke-width="1" class="ring-fine"/>
-
-  <use href="#hare"/>
-  <use href="#hare" transform="rotate(120 100 100)"/>
-  <use href="#hare" transform="rotate(240 100 100)"/>
-</svg></div>
-      <p class="medallion-caption">the motif, rotated 120°</p>
+      <svg class="logo-svg about-medallion" style="margin-top:0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="the three-hares medallion">
+        <defs>
+          <g id="hare-n">
+            <path d="M100 100 C 98.5 84, 97.5 66, 99.2 50.5 C 99.7 45.9, 102.6 45.7, 103.4 50.2 C 106.2 65.5, 105.4 83, 104 99 Z"/>
+            <circle cx="104.5" cy="57" r="10.6"/>
+            <circle cx="107.6" cy="55.1" r="1.7" class="eye"/>
+            <path d="M114.5 63.5 A 58 58 0 0 1 63 106" fill="none" stroke-width="21" stroke-linecap="round" class="body"/>
+            <path d="M111 68.5 C 118.5 71, 124 76.5, 126 84" fill="none" stroke-width="6.5" stroke-linecap="round" class="body"/>
+          </g>
+        </defs>
+        <circle cx="100" cy="100" r="94" fill="none" stroke-width="2.5" class="ring"/>
+        <circle cx="100" cy="100" r="86" fill="none" stroke-width="1" class="ring-fine"/>
+        <use href="#hare-n"/>
+        <use href="#hare-n" transform="rotate(120 100 100)"/>
+        <use href="#hare-n" transform="rotate(240 100 100)"/>
+      </svg>
+      <p class="medallion-caption">each hare two ears — three among them</p>
     </div>
     <div class="motif-text">
-      <p class="sec-kicker reveal">The name</p>
+      <p class="sec-label reveal">The name</p>
       <h2 class="sec-title reveal">Three hares, <em>three ears</em></h2>
       <p class="reveal" data-d="1">
-        On the ceilings of the Dunhuang caves, and centuries later on the
-        beams of parish churches across Europe, the same image appears:
+        On the ceilings of the Dunhuang caves, and centuries later on carved
+        roof bosses in parish churches across Europe, the same image appears:
         <strong>three hares chasing in a circle, sharing three ears</strong> —
         each hare seems to have two, yet there are only three among them.
       </p>
@@ -134,93 +117,94 @@
         allocation bounded at parse time, a hard memory ceiling, a
         self-sufficient core with nothing hidden behind the ring.
       </p>
-      <p class="motif-sign reveal" data-d="3">— from Dunhuang to your build, wide acceptance</p>
+      <p class="reveal" data-d="3"><a href="about.html">The full story of the motif&nbsp;→</a></p>
     </div>
   </div>
 </section>
 
-<hr class="rule">
-
-<section class="wrap" id="features">
-  <p class="sec-kicker reveal">What it is</p>
-  <h2 class="sec-title reveal">A parser built like a <em>system</em>, not a script</h2>
-  <p class="sec-lede reveal" data-d="1">
-    Every design choice optimizes for the same pair: throughput you can
-    measure, and resource behavior you can promise.
-  </p>
-
-  <div class="feat-grid">
-    <div class="feat feat-speed reveal">
-      <span class="big">3.4×<small> / text-heavy DOM</small></span>
-      <h3>Speed, measured honestly</h3>
-      <p>
-        Interleaved A/B gates against pugixml and libxml2 on every shape —
-        text-heavy, attr-heavy, deep, pretty, markup-rich. Median-of-runs,
-        fresh build dirs, the harness published alongside the numbers.
-        Serialize is 1.5–1.6× ahead of pugixml; the XPath engine serves
-        repeated <code>//x</code> from a subtree-interval index at
-        effectively no cost.
-      </p>
-    </div>
-    <div class="feat feat-bound green reveal" data-d="1">
-      <span class="big">1<small> arena per parse</small></span>
-      <h3>Hard resource bounds</h3>
-      <p>
-        The parser pre-sizes one contiguous arena from the document itself
-        — element, attribute, text and markup blocks carved from a single
-        allocation, then retained for reuse. No hidden per-node mallocs, no
-        unbounded growth mid-parse, allocations visible to your allocator
-        hooks.
-      </p>
-    </div>
-    <div class="feat feat-conform reveal">
-      <h3>Conformant where it counts</h3>
-      <p>
-        XPath 1.0: <strong>438/438</strong> on the W3C suite. XML 1.0
-        namespaces, DTD validation phases 1–7, XInclude, exclusive C14N —
-        semantics pinned by 586 tests plus large-document and
-        allocation-failure suites in CI.
-      </p>
-    </div>
-    <div class="feat feat-compact reveal" data-d="1">
-      <span class="big">64<small> B element · 40 B attr</small></span>
-      <h3>Compact by construction</h3>
-      <p>
-        One cache line per element and per attribute; compact self-relative
-        edges; zero-copy views into the document buffer. A 4 MB document
-        parses into roughly 3 MB of tree.
-      </p>
-    </div>
-    <div class="feat feat-sax green reveal" data-d="2">
-      <h3>DOM and SAX, one core</h3>
-      <p>
-        Streaming SAX with all eleven events beats libxml2&rsquo;s SAX on
-        every measured shape — same scanner, same bounds, no DOM required.
-      </p>
-    </div>
-    <div class="feat feat-bindings reveal" data-d="1">
-      <h3>Ruby &amp; Python today</h3>
-      <p>
-        <code>gem leptris</code> and <code>pip leptris</code> wrap the C
-        surface with GC-safe handles. The 4.38 MB real-world document:
-        <strong>18 ms</strong> parse+serialize through Ruby vs
-        Nokogiri&rsquo;s 123 ms. Rust is next.
-      </p>
-    </div>
-    <div class="feat feat-cli red reveal" data-d="2">
-      <h3>A CLI that respects your pipe</h3>
-      <p>
-        <code>leptris parse | xpath | format</code> — MECE output modes
-        (XML / JSON / text), reads files or stdin, man pages included.
-        Not a demo binary: the same public API, nothing private.
-      </p>
-    </div>
-  </div>
-</section>
-
-<section class="bench" id="speed">
+<!-- ————— features ————— -->
+<section class="sec-alt" id="features">
   <div class="wrap">
-    <p class="sec-kicker reveal">The race</p>
+    <p class="sec-label reveal">What it is</p>
+    <h2 class="sec-title reveal">A parser built like a <em>system</em>, not a script</h2>
+    <p class="sec-lede reveal" data-d="1">
+      Every design choice optimizes for the same pair: throughput you can
+      measure, and resource behavior you can promise.
+    </p>
+
+    <div class="feat-grid">
+      <div class="feat feat-speed reveal">
+        <span class="big">3.4×<small> / text-heavy DOM</small></span>
+        <h3>Speed, measured honestly</h3>
+        <p>
+          Interleaved A/B gates against pugixml and libxml2 on every shape —
+          text-heavy, attr-heavy, deep, pretty, markup-rich. Median-of-runs,
+          fresh build dirs, the harness published alongside the numbers.
+          Serialize is 1.5–1.6× ahead of pugixml; the XPath engine serves
+          repeated <code>//x</code> from a subtree-interval index at
+          effectively no cost.
+        </p>
+      </div>
+      <div class="feat feat-bound green reveal" data-d="1">
+        <span class="big">1<small> arena per parse</small></span>
+        <h3>Hard resource bounds</h3>
+        <p>
+          The parser pre-sizes one contiguous arena from the document itself
+          — element, attribute, text and markup blocks carved from a single
+          allocation, then retained for reuse. No hidden per-node mallocs, no
+          unbounded growth mid-parse.
+        </p>
+      </div>
+      <div class="feat feat-conform reveal">
+        <h3>Conformant where it counts</h3>
+        <p>
+          XPath 1.0: <strong>438/438</strong> on the W3C suite. XML 1.0
+          namespaces, DTD validation phases 1–7, XInclude, exclusive C14N —
+          semantics pinned by 586 tests plus large-document and
+          allocation-failure suites in CI.
+        </p>
+      </div>
+      <div class="feat feat-compact gold reveal" data-d="1">
+        <span class="big">64<small> B element · 40 B attr</small></span>
+        <h3>Compact by construction</h3>
+        <p>
+          One cache line per element and per attribute; compact self-relative
+          edges; zero-copy views into the document buffer. A 4 MB document
+          parses into roughly 3 MB of tree.
+        </p>
+      </div>
+      <div class="feat feat-sax green reveal" data-d="2">
+        <h3>DOM and SAX, one core</h3>
+        <p>
+          Streaming SAX with all eleven events beats libxml2&rsquo;s SAX on
+          every measured shape — same scanner, same bounds, no DOM required.
+        </p>
+      </div>
+      <div class="feat feat-bindings gold reveal" data-d="1">
+        <h3>Ruby &amp; Python today</h3>
+        <p>
+          <code>gem leptris</code> and <code>pip leptris</code> wrap the C
+          surface with GC-safe handles. The 4.38 MB real-world document:
+          <strong>18 ms</strong> parse+serialize through Ruby vs
+          Nokogiri&rsquo;s 123 ms. Rust is next.
+        </p>
+      </div>
+      <div class="feat feat-cli reveal" data-d="2">
+        <h3>A CLI that respects your pipe</h3>
+        <p>
+          <code>leptris parse | xpath | format</code> — MECE output modes
+          (XML / JSON / text), reads files or stdin, man pages included.
+          Not a demo binary: the same public API, nothing private.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ————— benchmarks ————— -->
+<section class="sec" id="speed">
+  <div class="wrap">
+    <p class="sec-label reveal">The race</p>
     <h2 class="sec-title reveal">Numbers from the <em>open harness</em></h2>
     <p class="sec-lede reveal" data-d="1">
       Every figure below reproduces from <code>benchmarks/matrix</code> in
@@ -297,81 +281,151 @@
   </div>
 </section>
 
-<section class="wrap" id="bound">
-  <p class="sec-kicker reveal">The circle</p>
-  <h2 class="sec-title reveal">Memory you can <em>promise</em></h2>
-  <p class="sec-lede reveal" data-d="1">
-    The arena is sized from the document before the first node is carved;
-    mutation storage grows in chained blocks owned by the document. What
-    you allocate is what you hold — stated up front, released all at once.
-  </p>
-  <div class="reveal" data-d="2">
-  <table class="mem-table">
-    <tr><th>node</th><th>resident</th><th>why</th></tr>
-    <tr><td>element</td><td class="bytes">64 B</td><td class="note">one cache line; self-relative int32 edges</td></tr>
-    <tr><td>attribute</td><td class="bytes">40 B</td><td class="note">views into the buffer; entity flag packed in the hash word</td></tr>
-    <tr><td>text node</td><td class="bytes">64 B</td><td class="note">borrowed content until first expansion</td></tr>
-    <tr><td>comment / CDATA / PI</td><td class="bytes">48 B</td><td class="note">carved from the same arena block as elements</td></tr>
-    <tr><td>parse arena</td><td class="bytes">1 allocation</td><td class="note">retained and reused across documents</td></tr>
-  </table>
+<!-- ————— bounds ————— -->
+<section class="sec-alt" id="bound">
+  <div class="wrap">
+    <p class="sec-label reveal">The circle</p>
+    <h2 class="sec-title reveal">Memory you can <em>promise</em></h2>
+    <p class="sec-lede reveal" data-d="1">
+      The arena is sized from the document before the first node is carved;
+      mutation storage grows in chained blocks owned by the document. What
+      you allocate is what you hold — stated up front, released all at once.
+    </p>
+    <div class="reveal" data-d="2">
+    <table class="mem-table">
+      <tr><th>node</th><th>resident</th><th>why</th></tr>
+      <tr><td>element</td><td class="bytes">64 B</td><td class="note">one cache line; self-relative int32 edges</td></tr>
+      <tr><td>attribute</td><td class="bytes">40 B</td><td class="note">views into the buffer; entity flag packed in the hash word</td></tr>
+      <tr><td>text node</td><td class="bytes">64 B</td><td class="note">borrowed content until first expansion</td></tr>
+      <tr><td>comment / CDATA / PI</td><td class="bytes">48 B</td><td class="note">carved from the same arena block as elements</td></tr>
+      <tr><td>parse arena</td><td class="bytes">1 allocation</td><td class="note">retained and reused across documents</td></tr>
+    </table>
+    </div>
   </div>
 </section>
 
-<section class="wrap" id="install">
-  <p class="sec-kicker reveal">The chase begins</p>
-  <h2 class="sec-title reveal">Install, <em>four ways</em></h2>
-  <p class="sec-lede reveal" data-d="1">C99 — builds anywhere CMake does. Optional utf8proc and iconv; neither is required.</p>
+<!-- ————— code showcase ————— -->
+<section class="sec" id="code">
+  <div class="wrap">
+    <p class="sec-label reveal">The surface</p>
+    <h2 class="sec-title reveal">Small API, <em>everywhere</em></h2>
+    <p class="sec-lede reveal" data-d="1">
+      One C99 core; the same handles and the same bounds from C, Ruby,
+      Python, or the shell.
+    </p>
 
-  <div class="install-cols">
-    <div class="install-card reveal">
-      <h4>C — CMake</h4>
-      <pre class="code"><span class="c"># vcpkg, or FetchContent:</span>
-<span class="k">include</span>(FetchContent)
+    <div class="showcase reveal" data-d="1">
+      <div class="show-tabs" role="tablist">
+        <button class="show-tab active" data-panel="p-c" role="tab">C</button>
+        <button class="show-tab" data-panel="p-ruby" role="tab">Ruby</button>
+        <button class="show-tab" data-panel="p-python" role="tab">Python</button>
+        <button class="show-tab" data-panel="p-cli" role="tab">CLI</button>
+      </div>
+      <div class="show-panel active" id="p-c" role="tabpanel">
+<pre><span class="c-c">#include</span> <span class="c-s">&lt;leptris.h&gt;</span>
+
+LeptrisStatus st;
+LeptrisDocument* doc = <span class="c-f">leptris_parse_string</span>(xml, len, &amp;st);
+LeptrisElement root = <span class="c-f">leptris_document_root</span>(doc);
+<span class="c-k">for</span> (LeptrisElement e = <span class="c-f">leptris_element_first_child</span>(root, <span class="c-s">"record"</span>);
+     e; e = <span class="c-f">leptris_element_next_sibling</span>(e, <span class="c-s">"record"</span>)) {
+    <span class="c-k">const</span> <span class="c-k">char</span>* id = <span class="c-f">leptris_element_attribute</span>(e, <span class="c-s">"id"</span>);
+}
+<span class="c-k">char</span>* out = <span class="c-f">leptris_document_serialize</span>(doc, NULL);  <span class="c-c">/* caller frees */</span>
+<span class="c-f">leptris_free_string</span>(out);
+<span class="c-f">leptris_document_free</span>(doc);                        <span class="c-c">/* arena, all at once */</span></pre>
+      </div>
+      <div class="show-panel" id="p-ruby" role="tabpanel">
+<pre><span class="c-k">require</span> <span class="c-s">"leptris"</span>
+
+doc  = Leptris::XML.<span class="c-f">parse</span>(File.<span class="c-f">read</span>(<span class="c-s">"records.xml"</span>))
+hits = doc.<span class="c-f">xpath</span>(<span class="c-s">"//record[@id='1042']"</span>)   <span class="c-c"># W3C-conformant XPath 1.0</span>
+
+hits.first.<span class="c-f">each</span> { |n| puts n.text }             <span class="c-c"># GC-safe handles, zero copies</span>
+puts doc.<span class="c-f">to_xml</span>(indent: 2)                     <span class="c-c"># 18 ms for 4.38 MB, parse+serialize</span></pre>
+      </div>
+      <div class="show-panel" id="p-python" role="tabpanel">
+<pre><span class="c-k">import</span> leptris
+
+doc = leptris.<span class="c-f">parse</span>(<span class="c-f">open</span>(<span class="c-s">"records.xml"</span>, <span class="c-s">"rb"</span>).<span class="c-f">read</span>())
+<span class="c-k">for</span> rec <span class="c-k">in</span> doc.<span class="c-f">xpath</span>(<span class="c-s">"//record"</span>):
+    <span class="c-f">print</span>(rec.<span class="c-f">get</span>(<span class="c-s">"id"</span>), rec.<span class="c-f">text</span>)
+
+<span class="c-f">print</span>(doc.<span class="c-f">to_xml</span>(indent=2))</pre>
+      </div>
+      <div class="show-panel" id="p-cli" role="tabpanel">
+<pre><span class="c-p">$</span> leptris parse records.xml --format json | head -3
+<span class="c-p">$</span> leptris xpath records.xml <span class="c-s">"//record[@id='1042']"</span>
+<span class="c-p">$</span> leptris format messy.xml --indent 2
+
+<span class="c-c"># XML / JSON / text — MECE output modes, reads files or stdin,</span>
+<span class="c-c"># man pages included. The same public API, nothing private.</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ————— install ————— -->
+<section class="sec-alt" id="install">
+  <div class="wrap">
+    <p class="sec-label reveal">The chase begins</p>
+    <h2 class="sec-title reveal">Install, <em>four ways</em></h2>
+    <p class="sec-lede reveal" data-d="1">C99 — builds anywhere CMake does. Optional utf8proc and iconv; neither is required.</p>
+
+    <div class="install-grid">
+      <div class="install-card reveal">
+        <h4>C — CMake</h4>
+        <pre><span class="c-c"># vcpkg, or FetchContent:</span>
+<span class="c-k">include</span>(FetchContent)
 FetchContent_Declare(leptris
   GIT_REPOSITORY https://github.com/leptris/leptris)
 FetchContent_MakeAvailable(leptris)
 
-target_link_libraries(yours <span class="k">PRIVATE</span> leptris::leptris)</pre>
-    </div>
-    <div class="install-card reveal" data-d="1">
-      <h4>C — vcpkg</h4>
-      <pre class="code"><span class="c"># manifest mode: add to vcpkg.json</span>
-{ <span class="s">"dependencies"</span>: [ <span class="s">"leptris"</span> ] }
+target_link_libraries(yours <span class="c-k">PRIVATE</span> leptris::leptris)</pre>
+      </div>
+      <div class="install-card reveal" data-d="1">
+        <h4>C — vcpkg</h4>
+        <pre><span class="c-c"># manifest mode: add to vcpkg.json</span>
+{ <span class="c-s">"dependencies"</span>: [ <span class="c-s">"leptris"</span> ] }
 
-<span class="c"># or classic:</span>
+<span class="c-c"># or classic:</span>
 vcpkg install leptris</pre>
-    </div>
-    <div class="install-card reveal" data-d="1">
-      <h4>Ruby</h4>
-      <pre class="code">gem install leptris
+      </div>
+      <div class="install-card reveal" data-d="1">
+        <h4>Ruby</h4>
+        <pre>gem install leptris
 
-<span class="k">require</span> <span class="s">"leptris"</span>
-doc = Leptris::XML.parse(<span class="s">"&lt;greet&gt;hello&lt;/greet&gt;"</span>)
-doc.to_xml        <span class="c"># ⇒ "&lt;greet&gt;hello&lt;/greet&gt;"</span></pre>
-    </div>
-    <div class="install-card reveal" data-d="2">
-      <h4>Python</h4>
-      <pre class="code">pip install leptris
+<span class="c-k">require</span> <span class="c-s">"leptris"</span>
+doc = Leptris::XML.parse(<span class="c-s">"&lt;greet&gt;hello&lt;/greet&gt;"</span>)
+doc.to_xml        <span class="c-c"># ⇒ "&lt;greet&gt;hello&lt;/greet&gt;"</span></pre>
+      </div>
+      <div class="install-card reveal" data-d="2">
+        <h4>Python</h4>
+        <pre>pip install leptris
 
-<span class="k">import</span> leptris
-doc = leptris.parse(<span class="s">"&lt;greet&gt;hello&lt;/greet&gt;"</span>)
-doc.to_xml()       <span class="c"># ⇒ '&lt;greet&gt;hello&lt;/greet&gt;'</span></pre>
+<span class="c-k">import</span> leptris
+doc = leptris.parse(<span class="c-s">"&lt;greet&gt;hello&lt;/greet&gt;"</span>)
+doc.to_xml()       <span class="c-c"># ⇒ '&lt;greet&gt;hello&lt;/greet&gt;'</span></pre>
+      </div>
     </div>
   </div>
+</section>
 
-  <div class="install-card reveal" data-d="2" style="margin-top:1.1rem">
-    <h4>The taste of the C API</h4>
-    <pre class="code"><span class="k">#include</span> <span class="s">&lt;leptris.h&gt;</span>
-
-LeptrisStatus st;
-LeptrisDocument* doc = <span class="f">leptris_parse_string</span>(xml, len, &amp;st);
-<span class="k">for</span> (LeptrisElement e = <span class="f">leptris_element_first_child</span>(root, <span class="s">"record"</span>);
-     e; e = <span class="f">leptris_element_next_sibling</span>(e, <span class="s">"record"</span>)) {
-    <span class="k">const</span> <span class="k">char</span>* id = <span class="f">leptris_element_attribute</span>(e, <span class="s">"id"</span>);
-}
-<span class="k">char</span>* out = <span class="f">leptris_document_serialize</span>(doc, NULL);  <span class="c">/* caller frees */</span>
-<span class="f">leptris_free_string</span>(out);
-<span class="f">leptris_document_free</span>(doc);                        <span class="c">/* arena, all at once */</span></pre>
+<!-- ————— CTA ————— -->
+<section class="cta">
+  <div class="cta-inner">
+    <h2 class="reveal">Fast as hares.<br><em>Contained as a circle.</em></h2>
+    <p class="reveal" data-d="1">
+      Clone it, build it, race it against your current parser — the harness
+      is in the tree.
+    </p>
+    <div class="reveal" data-d="2">
+      <code class="quick">git clone https://github.com/leptris/leptris &amp;&amp; cmake -B build -S .</code>
+    </div>
+    <div class="hero-actions reveal" data-d="3">
+      <a class="btn solid" href="https://github.com/leptris/leptris">GitHub</a>
+      <a class="btn" href="about.html">Why “leptris”?</a>
+    </div>
   </div>
 </section>
 
