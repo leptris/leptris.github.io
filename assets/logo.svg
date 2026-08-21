@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  leptris — the three hares
+  Geometric reading of the Dunhuang three-hare motif: three hares
+  in a ring, three ears shared among them. Speed in the chase,
+  containment in the circle. 3-fold rotational symmetry built from
+  one wedge via <use>.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="leptris — three hares">
+  <defs>
+    <g id="hare">
+      <!-- ear: from the shared center outward, tapered, slightly canted -->
+      <path d="M100 100 C 98.5 84, 97.5 66, 99.2 50.5 C 99.7 45.9, 102.6 45.7, 103.4 50.2
+               C 106.2 65.5, 105.4 83, 104 99 Z" />
+      <!-- head -->
+      <circle cx="104.5" cy="57" r="10.6"/>
+      <!-- eye: punched out of the head -->
+      <circle cx="107.6" cy="55.1" r="1.7" class="eye"/>
+      <!-- body + haunch: one sweeping arc behind the head -->
+      <path d="M114.5 63.5
+               A 58 58 0 0 1 63 106"
+               fill="none" stroke-width="21" stroke-linecap="round" class="body"/>
+      <!-- foreleg kick -->
+      <path d="M111 68.5 C 118.5 71, 124 76.5, 126 84" fill="none"
+            stroke-width="6.5" stroke-linecap="round" class="body"/>
+    </g>
+  </defs>
+
+  <!-- outer ring: the circle that contains the chase -->
+  <circle cx="100" cy="100" r="94" fill="none" stroke-width="2.5" class="ring"/>
+  <circle cx="100" cy="100" r="86" fill="none" stroke-width="1" class="ring-fine"/>
+
+  <use href="#hare"/>
+  <use href="#hare" transform="rotate(120 100 100)"/>
+  <use href="#hare" transform="rotate(240 100 100)"/>
+</svg>
