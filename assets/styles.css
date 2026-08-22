@@ -155,13 +155,11 @@ code { font-family: var(--font-mono); font-size: 0.875em; background: var(--pape
 
 /* logo colors — light contexts */
 .logo-svg .ring { stroke: var(--lapis); }
-.logo-svg .ring-fine { stroke: #b9b09a; }
 .logo-svg .hare path, .logo-svg .hare circle { fill: var(--ink-1); }
 .logo-svg .hare .body { stroke: var(--ink-1); fill: none; }
 .logo-svg .hare .eye { fill: var(--paper); }
 /* logo colors — on lapis */
 .on-lapis.logo-svg .ring { stroke: var(--gold); }
-.on-lapis.logo-svg .ring-fine { stroke: rgba(238, 194, 106, 0.35); }
 .on-lapis.logo-svg .hare path, .on-lapis.logo-svg .hare circle { fill: #f2ede0; }
 .on-lapis.logo-svg .hare .body { stroke: #f2ede0; }
 .on-lapis.logo-svg .hare .eye { fill: var(--lapis-deep); }
