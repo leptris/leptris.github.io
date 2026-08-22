@@ -1,0 +1,102 @@
+---
+interface Props {
+  size?: number;
+}
+const { size = 20 } = Astro.props;
+---
+
+<button
+  type="button"
+  class="theme-toggle"
+  aria-label="Toggle color theme"
+  title="Toggle color theme"
+  data-theme-toggle
+>
+  <svg
+    class="icon icon-sun"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+  </svg>
+  <svg
+    class="icon icon-moon"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    color: var(--color-ink-muted);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  .theme-toggle:hover {
+    color: var(--color-ink);
+    border-color: var(--color-ink-muted);
+    background: var(--color-paper-soft);
+  }
+  .theme-toggle:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+  .icon {
+    display: block;
+  }
+  .icon-moon { display: none; }
+  :global([data-theme='dark']) .icon-sun { display: none; }
+  :global([data-theme='dark']) .icon-moon { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .icon-sun { display: none; }
+    :global(:root:not([data-theme='light'])) .icon-moon { display: block; }
+  }
+</style>
+
+<script>
+  const button = document.querySelector('[data-theme-toggle]');
+  if (button) {
+    button.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const effective = current ?? (systemDark ? 'dark' : 'light');
+      const next = effective === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('leptris-theme', next);
+      } catch {
+        /* localStorage unavailable; session-only preference */
+      }
+      if (window.__applyLeptrisFavicons) {
+        window.__applyLeptrisFavicons(next);
+      }
+      button.setAttribute('aria-pressed', String(next === 'dark'));
+    });
+  }
+</script>

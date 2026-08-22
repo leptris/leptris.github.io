@@ -1,0 +1,175 @@
+---
+import '../styles/brand.css';
+import Nav from './Nav.astro';
+import Footer from './Footer.astro';
+import { SITE } from '~/data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title = SITE.title,
+  description = SITE.description,
+  ogImage = '/logo-leptris_icon-light.png',
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, SITE.url);
+const ogImageURL = new URL(ogImage, SITE.url);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon-light.svg?v=20260823" data-favicon="svg" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-light-96x96.png?v=20260823" data-favicon="png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-light.png?v=20260823" data-favicon="apple" />
+    <link rel="manifest" href="/site.webmanifest?v=20260823" />
+    <meta name="theme-color" content="#243b64" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="leptris" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+
+    <script is:inline>
+      (function () {
+        const FAVICON_VERSION = '20260823';
+        function resolveTheme() {
+          try {
+            const stored = localStorage.getItem('leptris-theme');
+            if (stored === 'dark' || stored === 'light') return stored;
+          } catch { /* localStorage unavailable */ }
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        function applyFavicons(theme) {
+          const links = document.querySelectorAll('link[data-favicon]');
+          const paths = {
+            svg: `/favicon-${theme}.svg`,
+            png: `/favicon-${theme}-96x96.png`,
+            apple: `/apple-touch-icon-${theme}.png`,
+          };
+          for (const link of links) {
+            const kind = link.getAttribute('data-favicon');
+            const base = paths[kind];
+            if (base) link.setAttribute('href', `${base}?v=${FAVICON_VERSION}`);
+          }
+        }
+        applyFavicons(resolveTheme());
+        window.__applyLeptrisFavicons = applyFavicons;
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+          try {
+            if (!localStorage.getItem('leptris-theme')) {
+              applyFavicons(resolveTheme());
+            }
+          } catch { /* ignore */ }
+        });
+      })();
+    </script>
+
+    <script is:inline>
+      (function () {
+        try {
+          const stored = localStorage.getItem('leptris-theme');
+          if (stored === 'dark' || stored === 'light') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch {
+          /* localStorage unavailable; fall back to system preference via CSS */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.classList.add('in');
+              io.unobserve(e.target);
+            }
+          }
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
+      );
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+      function countUp(el: Element) {
+        const target = parseFloat(el.getAttribute('data-count') ?? '');
+        if (Number.isNaN(target)) return;
+        const suffix = el.getAttribute('data-suffix') ?? '';
+        const raw = el.getAttribute('data-raw');
+        if (raw !== null) {
+          el.textContent = raw;
+          return;
+        }
+        if (reduced) {
+          el.textContent = (target % 1 === 0 ? target.toFixed(0) : target.toFixed(1)) + suffix;
+          return;
+        }
+        let t0: number | null = null;
+        const dur = 1100;
+        function step(ts: number) {
+          if (t0 === null) t0 = ts;
+          const p = Math.min((ts - t0) / dur, 1);
+          const ease = 1 - Math.pow(1 - p, 3);
+          const v = target * ease;
+          el.textContent = (target % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + suffix;
+          if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+      const cio = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              countUp(e.target);
+              cio.unobserve(e.target);
+            }
+          }
+        },
+        { threshold: 0.5 },
+      );
+      document.querySelectorAll('[data-count]').forEach((el) => cio.observe(el));
+    </script>
+
+    <style is:global>
+      .skip-link {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        z-index: 100;
+        padding: 0.5rem 1rem;
+        background: var(--color-ink);
+        color: var(--color-paper);
+        border-radius: 0 0 6px 0;
+      }
+      .skip-link:focus {
+        left: 0;
+      }
+    </style>
+  </body>
+</html>

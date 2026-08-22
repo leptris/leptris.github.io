@@ -1,0 +1,17 @@
+---
+import Logo from './Logo.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <Logo size={26} alt="leptris" />
+    <span>libleptris — MIT license · v{VERSIONS.lib}</span>
+    <span class="sep">❧</span>
+    <span>leptris gem v{VERSIONS.gem}</span>
+    <span class="sep">❧</span>
+    <a href={SITE.githubC}>github.com/leptris/leptris</a>
+    <span class="sep">❧</span>
+    <span class="formerly">formerly taurus</span>
+  </div>
+</footer>

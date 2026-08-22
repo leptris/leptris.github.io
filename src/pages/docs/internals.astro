@@ -1,0 +1,130 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE } from '~/data/site';
+---
+
+<BaseLayout
+  title="Internals & FFI — leptris docs"
+  description="How libleptris holds its promises: the pool memory model, compact pointer architecture, ABI stability, the FFI contract, validation coverage, and CI."
+>
+  <DocsShell
+    title="Internals & FFI"
+    lede="How the promises are kept: a pool that owns everything, pointers that fit in int32, an ABI pinned by static asserts, and a binding contract every mirror is gated against."
+  >
+    <h2>Memory model — the pool</h2>
+    <p>
+      Every byte the parser allocates that ends up referenced by a document
+      lives in the document&rsquo;s pool. <code>leptris_document_free</code>
+      destroys the pool and releases everything in one call.
+    </p>
+    <table class="doc-table">
+      <tr><th>allocation</th><th>where it lives</th></tr>
+      <tr><td>node structs (element, text, comment, CDATA, PI, doctype)</td><td class="note">pool, allocated contiguously with content</td></tr>
+      <tr><td>node content strings</td><td class="note">pool, contiguous with the struct (cache locality)</td></tr>
+      <tr><td>attribute names</td><td class="note">pool hash table (interned; dedup across elements)</td></tr>
+      <tr><td>attribute values</td><td class="note">pool, bypassing interning</td></tr>
+      <tr><td>DTD container + hash tables</td><td class="note">pool, DTD subsystem owned by the document</td></tr>
+      <tr><td>XPath intermediates</td><td class="note">pool, freed at result destruction</td></tr>
+    </table>
+    <p>
+      The parse arena is one contiguous allocation, pre-sized from the
+      document itself; element, attribute, text, and markup blocks are carved
+      from it and the arena is retained for reuse across documents. Elements
+      are <strong>64 B</strong>, attributes <strong>40 B</strong> — one cache
+      line each — with zero-copy text views into the input buffer.
+    </p>
+    <p>
+      Tree edges are stored as <strong>int32_t byte offsets</strong>
+      (compact pointers) with an overflow-table fallback for macOS ASLR.
+      A recursion depth guard rejects deeply nested input with a parse error
+      rather than crashing, and per-document strict mode lets strict and
+      lenient parsing coexist in one thread.
+    </p>
+
+    <h2>ABI stability</h2>
+    <p>
+      All public types are opaque pointer typedefs — enforced at compile
+      time:
+    </p>
+    <CodeBlock lang="c" code={`_Static_assert(sizeof(LeptrisDocument) == sizeof(void*), "...");`} />
+    <p>
+      Enum values that bindings hard-code are pinned by the HeaderHygiene
+      test (<code>ctest -R HeaderHygiene</code>). Node kinds are exposed
+      through the public <code>LeptrisNodeKind</code> enum — bindings no
+      longer hard-code numeric node types.
+    </p>
+
+    <h2>The FFI contract</h2>
+    <ul>
+      <li><strong>Opaque handles.</strong> Callers never see struct fields — only accessor functions.</li>
+      <li><strong>Status via output parameter.</strong> The return value is the primary result.</li>
+      <li><strong>Documented ownership.</strong> Every function returning a string or handle carries a <code>Memory:</code> comment — the contract every binding builds on.</li>
+      <li><strong>No exceptions across the boundary.</strong> Errors are status codes; no <code>longjmp</code>.</li>
+      <li><strong>No C-isms.</strong> No varargs, no platform attribute macros in the parsed surface.</li>
+    </ul>
+    <p>
+      Binding generators parse the headers in bindgen mode:
+    </p>
+    <CodeBlock lang="bash" code={`cc -DLEPTRIS_FOR_BINDGEN -E src/include/leptris.h   # strips LEPTRIS_API`} />
+    <Callout>
+      <p>
+        <strong>The binding mirror and the drift gate.</strong> Each binding
+        keeps a hand-maintained mirror of the public interface (Ruby&rsquo;s
+        <code>attach_function</code> list, Python&rsquo;s
+        <code>cdef</code>). CI&rsquo;s drift gate fails on phantom symbols,
+        arity drift, or a missing core surface — mirrors cannot silently rot.
+        A Windows job additionally diffs <code>leptris.dll</code>&rsquo;s
+        export table against the declared surface.
+      </p>
+    </Callout>
+
+    <h2>Validation and conformance</h2>
+    <ul>
+      <li><strong>XML 1.0</strong> with namespaces; first-declaration-wins for redeclared DTD names; internal subsets take precedence over external ones.</li>
+      <li><strong>DTD validation</strong> — parameter entities, INCLUDE/IGNORE conditional sections, ENTITY/ENTITIES unparsed-entity checking, content-model memoization, and external subsets via application-supplied I/O (<code>leptris_document_get_dtd</code> + <code>leptris_dtd_parse_external_subset</code>). Phases 1–7 of the validation ladder.</li>
+      <li><strong>XInclude 1.0</strong> with ownership-transfer splice — included documents are moved, not deep-copied; cycle detection via ancestor-URI tracking.</li>
+      <li><strong>C14N</strong> — Canonical XML 1.0, 1.1, and Exclusive, for digital signatures and hashing.</li>
+      <li><strong>XPath 1.0</strong> — 438/438 on the W3C suite; see <a href="/docs/xpath">the XPath page</a>.</li>
+    </ul>
+    <p>
+      Semantics are pinned by <strong>586 tests</strong> plus
+      large-document and allocation-failure suites.
+      <code>scripts/validate.sh</code> in the repo runs the full battery;
+      <code>VALIDATION.md</code> lists every command.
+    </p>
+
+    <h2>Parse modes — whitespace semantics</h2>
+    <p>
+      By default leptris keeps whitespace-only text nodes — the faithful-DOM
+      behavior of libxml2/Nokogiri, and the only mode that round-trips
+      pretty-printed XML byte-for-byte. For apples-to-apples comparisons
+      against pugixml (which discards them by default), use
+      <code>leptris_parse_string_flags(..., LEPTRIS_PARSE_DROP_WS_TEXT, ...)</code>
+      — the equivalent of libxml2&rsquo;s <code>XML_PARSE_NOBLANKS</code>.
+    </p>
+
+    <h2>Continuous integration</h2>
+    <table class="doc-table">
+      <tr><th>workflow</th><th>trigger</th><th>what it does</th></tr>
+      <tr><td><code>test.yml</code></td><td class="bytes">every push/PR</td><td class="note">build; run the full spec suite</td></tr>
+      <tr><td><code>asan.yml</code></td><td class="bytes">every push/PR</td><td class="note">AddressSanitizer build; verify zero leaks and zero errors</td></tr>
+      <tr><td><code>fuzz-nightly.yml</code></td><td class="bytes">nightly cron</td><td class="note">libFuzzer for 5 minutes; reports crashes</td></tr>
+    </table>
+    <p>
+      Benchmark CI uploads JSON + Markdown results per push, and the perf
+      ledger records measured dead ends alongside wins — see the
+      <a href="/#speed">benchmarks section</a> for headline numbers and the
+      honest floors.
+    </p>
+
+    <h2>Where next</h2>
+    <ul>
+      <li><a href={`${SITE.githubC}/blob/main/docs/FFI.md`}>FFI design document</a> — the full contract.</li>
+      <li><a href={`${SITE.githubRuby}/blob/main/docs/ARCHITECTURE.adoc`}>Gem architecture</a> — the Ruby mirror in detail.</li>
+      <li><a href={`${SITE.githubC}/blob/main/VALIDATION.md`}>Validation commands</a> — reproduce every claim.</li>
+    </ul>
+  </DocsShell>
+</BaseLayout>

@@ -1,0 +1,296 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Ruby — leptris docs"
+  description="The leptris gem: Nokogiri-compatible XML parsing, XPath 1.0, CSS selectors, SAX streaming, namespaces, canonicalization — thin FFI handles over libleptris."
+>
+  <DocsShell
+    title="Ruby — the leptris gem"
+    lede={`A Nokogiri-compatible binding for libleptris v${VERSIONS.lib}. The C DOM is the single source of truth — Ruby objects are thin FFI handles over C pointers. No tree hydration, no parallel Ruby-side model.`}
+  >
+    <h2>Installation</h2>
+    <CodeBlock lang="ruby" title="Gemfile" code={`gem "leptris"`} />
+    <p>
+      Since gem v{VERSIONS.gem}, <strong>precompiled platform gems</strong>
+      vendor libleptris for Linux (glibc and musl), macOS (x86_64/arm64), and
+      Windows (mingw/ucrt): <code>gem install leptris</code> resolves the
+      platform gem and works with no system library and no environment
+      variables. The pure-Ruby gem remains the fallback.
+    </p>
+    <p>
+      Without a platform gem you need <code>libleptris</code> installed
+      (see <a href="/docs/getting-started">getting started</a>), and — if it
+      is not on the default loader path — point at it:
+    </p>
+    <CodeBlock lang="bash" code={`export LEPTRIS_LIB_PATH=/usr/local/lib/libleptris.dylib`} />
+    <Callout kind="warn">
+      <p>
+        If the native library cannot be found at startup, every
+        <code>parse</code> raises <code>LoadError</code>. Set
+        <code>LEPTRIS_LIB_PATH</code> or install a platform gem.
+      </p>
+    </Callout>
+
+    <h2>Parsing</h2>
+    <p>
+      The top-level entry point is <code>Leptris::XML</code> — the direct
+      equivalent of <code>Nokogiri::XML(...)</code>. Parse a string, an IO,
+      or a file:
+    </p>
+    <CodeBlock lang="ruby" code={`require "leptris"
+
+doc = Leptris::XML.parse(<<~XML)
+  <library xmlns="http://example.org/ns">
+    <book id="b1" lang="en">
+      <title>Refactoring</title>
+      <author>Martin Fowler</author>
+    </book>
+    <book id="b2" lang="fr">
+      <title>Programmer en Ruby</title>
+    </book>
+  </library>
+XML
+
+doc.root.name            # => "library"
+doc.root.children.size   # => 5 (2 element children + 3 whitespace text nodes)
+
+doc = Leptris::XML.parse_file("books.xml")`} />
+
+    <h2>Reading nodes</h2>
+    <table class="doc-table">
+      <tr><th>method</th><th>returns</th></tr>
+      <tr><td><code>Document#root</code></td><td class="note">root Element, or <code>nil</code> for an empty document.</td></tr>
+      <tr><td><code>Node#name</code></td><td class="note">element name.</td></tr>
+      <tr><td><code>Node#content</code> <span class="pill">aliases: text, inner_text</span></td><td class="note">all descendant text concatenated.</td></tr>
+      <tr><td><code>Node#[]</code> <span class="pill">aliases: attr, get_attribute</span></td><td class="note">attribute value by name.</td></tr>
+      <tr><td><code>Node#attributes</code></td><td class="note">hash of <code>{'{name => Attr}'}</code>.</td></tr>
+      <tr><td><code>Node#key?</code> <span class="pill">alias: has_attribute?</span></td><td class="note">attribute presence.</td></tr>
+      <tr><td><code>Node#children</code></td><td class="note">NodeSet of all children (elements, text, comments, …).</td></tr>
+      <tr><td><code>Node#element_children</code></td><td class="note">NodeSet of element children only.</td></tr>
+      <tr><td><code>Node#first_element_child</code> / <code>#last_element_child</code></td><td class="note">first/last element child (skips text nodes).</td></tr>
+      <tr><td><code>Node#next_element</code> / <code>#previous_element</code></td><td class="note">next/previous sibling element.</td></tr>
+      <tr><td><code>Node#parent</code>, <code>#next_sibling</code>, <code>#previous_sibling</code></td><td class="note">tree navigation.</td></tr>
+      <tr><td><code>Node#line</code></td><td class="note">1-based source line number.</td></tr>
+      <tr><td><code>Node#type</code> <span class="pill">alias: node_type</span></td><td class="note">integer type code; predicates: <code>#element?</code>, <code>#text?</code>, <code>#comment?</code>, <code>#cdata?</code>, <code>#processing_instruction?</code>.</td></tr>
+    </table>
+    <CodeBlock lang="ruby" code={`doc.root.children.select(&:element?).each do |book|
+  title = book.children.find { |c| c.element? && c.name == "title" }
+  puts "#{book[:id]}: #{title&.content}"
+end
+# b1: Refactoring
+# b2: Programmer en Ruby`} />
+
+    <h3>Tree iteration</h3>
+    <p>
+      <code>Node#traverse</code> walks the subtree in document order via a
+      single C-side callback — one FFI call for the whole traversal, not one
+      per node:
+    </p>
+    <CodeBlock lang="ruby" code={`doc.root.traverse do |node|
+  case node
+  when Leptris::XML::Element   then puts "E  #{node.name}"
+  when Leptris::XML::Text      then puts "T  #{node.content.inspect}"
+  when Leptris::XML::Comment   then puts "C  #{node.content.inspect}"
+  end
+end`} />
+
+    <h2>Searching — XPath and CSS</h2>
+    <p>
+      <code>Document</code> and <code>Element</code> both support
+      (<code>via Leptris::XML::Searchable</code>):
+      <code>#xpath</code>, <code>#at_xpath</code>, <code>#css</code>,
+      <code>#at_css</code>, <code>#search</code> (dispatches on syntax), and
+      <code>#at</code>.
+    </p>
+    <CodeBlock lang="ruby" code={`doc.xpath("//book")                       # => NodeSet of both <book>
+doc.xpath("count(//book)")                # => 2.0
+doc.xpath("//book[@lang='fr']/title")     # => NodeSet[<title>Programmer en Ruby</title>]
+doc.at_xpath("//book[@id='b1']")          # => <book id="b1" ...>
+doc.at_xpath("string(//book[1]/@id)")     # => "b1"
+
+doc.css("book[lang='en'] title")          # => NodeSet[<title>Refactoring</title>]
+doc.at_css("book#b1 title")               # => <title>Refactoring</title>  (id selector)
+doc.css("book:first-child")               # first <book>`} />
+    <p>
+      Result types follow XPath 1.0 semantics:
+      <code>count(...)</code> → <code>Float</code>,
+      <code>boolean(...)</code> → <code>true</code>/<code>false</code>,
+      <code>string(...)</code> → <code>String</code>, otherwise a
+      <code>Leptris::XML::NodeSet</code>. Prefix XPath
+      (<code>//t:title</code>) resolves against in-scope namespace
+      declarations, dispatched straight to libleptris.
+    </p>
+    <p>The CSS subset (translated via <code>CssToXPath</code>):</p>
+    <ul>
+      <li>Type/universal: <code>book</code>, <code>*</code>; class/ID: <code>.highlight</code>, <code>#b1</code></li>
+      <li>Attribute presence and value: <code>[lang]</code>, <code>[lang='en']</code>, <code>~= ^= $= *=</code></li>
+      <li>Combinators: descendant (space), child (<code>&gt;</code>), comma (multi-selector)</li>
+      <li>Pseudo-classes: <code>:first-child</code>, <code>:last-child</code>, <code>:only-child</code>, <code>:empty</code>, <code>:root</code>, <code>:not(...)</code></li>
+    </ul>
+    <p>For anything more sophisticated, drop down to <code>xpath</code>.</p>
+
+    <h2>Building and mutating</h2>
+    <CodeBlock lang="ruby" code={`doc  = Leptris::XML.parse("<root/>")
+book = doc.create_element("book")
+book[:id] = "b3"
+book.add_child(doc.create_element("title")).content = "New book"
+doc.root.add_child(book)
+
+puts doc.to_xml
+# <?xml version="1.0"?>
+# <root><book id="b3"><title>New book</title></book></root>`} />
+    <table class="doc-table">
+      <tr><th>method</th><th>description</th></tr>
+      <tr><td><code>Document#create_element(name)</code></td><td class="note">detached element owned by the document.</td></tr>
+      <tr><td><code>Document#create_text_node</code> / <code>#create_comment</code> / <code>#create_cdata</code> / <code>#create_processing_instruction</code></td><td class="note">text-class and PI factories.</td></tr>
+      <tr><td><code>Document#fragment(markup)</code></td><td class="note">parse a fragment (multiple top-level children allowed).</td></tr>
+      <tr><td><code>Element#name=</code>, <code>#content=</code></td><td class="note">rename / replace inner text.</td></tr>
+      <tr><td><code>Element#[]=</code> <span class="pill">alias: set_attribute</span></td><td class="note">add/update an attribute (duplicate-rejecting, per XML 1.0).</td></tr>
+      <tr><td><code>Element#remove_attribute</code> <span class="pill">alias: delete</span></td><td class="note">drop an attribute.</td></tr>
+      <tr><td><code>Element#add_child</code> <span class="pill">alias: &lt;&lt;</span></td><td class="note">append a Node, or parse+append a markup String.</td></tr>
+      <tr><td><code>Element#prepend_child</code></td><td class="note">insert as the first child.</td></tr>
+      <tr><td><code>Element#add_next_sibling</code> / <code>#add_previous_sibling</code></td><td class="note">sibling insertion.</td></tr>
+      <tr><td><code>Element#remove_child</code>, <code>Node#unlink</code></td><td class="note">detach from the tree (does not free).</td></tr>
+      <tr><td><code>Element#children=</code></td><td class="note">replace all children.</td></tr>
+      <tr><td><code>Element#replace</code> / <code>#swap</code></td><td class="note">replace in parent.</td></tr>
+      <tr><td><code>Element#wrap</code></td><td class="note">wrap this element in a new one.</td></tr>
+    </table>
+
+    <h2>Namespaces</h2>
+    <CodeBlock lang="ruby" code={`root = doc.root
+root.add_namespace_definition("t", "https://example.org/types")
+puts root.namespaces
+# {"xmlns"=>"http://example.org/ns", "xmlns:t"=>"https://example.org/types"}
+
+doc.xpath("//t:title")`} />
+    <table class="doc-table">
+      <tr><th>method</th><th>description</th></tr>
+      <tr><td><code>Element#namespace</code></td><td class="note">the element&rsquo;s in-scope namespace (or <code>nil</code>).</td></tr>
+      <tr><td><code>Element#namespaces</code></td><td class="note">all in-scope namespaces (inherited) as <code>{'{prefix_or_xmlns => href}'}</code>.</td></tr>
+      <tr><td><code>Element#namespace_definitions</code></td><td class="note">only namespaces declared directly on this element.</td></tr>
+      <tr><td><code>Element#add_namespace_definition</code> <span class="pill">alias: add_namespace</span></td><td class="note">declare <code>xmlns:prefix="href"</code>.</td></tr>
+      <tr><td><code>Element#default_namespace=</code></td><td class="note">declare/replace <code>xmlns="href"</code>.</td></tr>
+      <tr><td><code>Element#remove_namespace_definition</code></td><td class="note">drop a declaration.</td></tr>
+    </table>
+
+    <h2>Serialization and canonicalization</h2>
+    <CodeBlock lang="ruby" code={`doc.to_xml                       # one-line, no indent
+doc.to_xml(indent: 2)            # pretty-printed
+doc.canonicalize                # C14N 1.0
+doc.canonicalize(Leptris::XML::FFI::C14N_1_1)              # C14N 1.1
+doc.canonicalize(exclusive: true)                         # Exclusive C14N
+doc.canonicalize(with_comments: true)                     # keep comments
+doc.canonicalize(exclusive: true, inclusive_namespaces: ["ds"])  # InclusiveNamespaces`} />
+    <p>
+      <code>Document#to_xml(indent:, no_decl:, encoding:)</code>
+      <span class="pill gold">aliases: to_s, serialize</span>;
+      <code>Element#to_xml(...)</code> serializes a subtree;
+      <code>Document#save(path, **opts)</code> writes to a file;
+      <code>#canonicalize</code> <span class="pill gold">alias: c14n</span>
+      covers 1.0 / 1.1 / Exclusive for signatures and hashing.
+    </p>
+
+    <h2>SAX — streaming for very large documents</h2>
+    <p>
+      Subclass <code>Leptris::XML::SAX::Document</code> and override the
+      events you care about. The parser streams in 4 KB chunks; memory is
+      bounded by nesting depth, not document size.
+    </p>
+    <CodeBlock lang="ruby" code={`class Counter < Leptris::XML::SAX::Document
+  attr_reader :elements, :depth
+  def initialize
+    @elements = 0
+    @depth    = 0
+  end
+
+  def start_element(name, attrs = [])
+    @elements += 1
+    @depth    += 1
+    puts "  " * (@depth - 1) + "<#{name}>"
+  end
+
+  def end_element(name)
+    @depth -= 1
+  end
+
+  def characters(str)
+    puts "  " * @depth + "text: #{str.inspect}" unless str.strip.empty?
+  end
+end
+
+parser = Leptris::XML::SAX::Parser.new(Counter.new)
+parser.parse(File.open("huge.xml"))`} />
+    <p>
+      <code>SAX::Parser#parse</code> accepts a <code>String</code>, an
+      <code>IO</code>, or anything responding to <code>#read</code>. Handler
+      callbacks: <code>start_document</code>, <code>end_document</code>,
+      <code>xmldecl(version, encoding, standalone)</code>,
+      <code>start_element(name, attrs)</code>, <code>end_element(name)</code>,
+      <code>characters(str)</code>, <code>comment(str)</code>,
+      <code>cdata_block(str)</code>,
+      <code>processing_instruction(name, content)</code>,
+      <code>start_prefix_mapping(prefix, uri)</code>,
+      <code>end_prefix_mapping(prefix)</code>, <code>warning(str)</code>,
+      <code>error(msg, line, col)</code>.
+    </p>
+
+    <h2>Memory model</h2>
+    <Callout kind="warn">
+      <p>
+        <strong>Document is the only object that owns C memory.</strong>
+        Everything else — <code>Element</code>, <code>Text</code>,
+        <code>Attr</code>, <code>NodeSet</code> — is a borrowed handle, valid
+        only while its Document is alive.
+      </p>
+    </Callout>
+    <ul>
+      <li>Free explicitly with <code>Document#free</code>. After <code>#free</code>, any further call on the document or its nodes raises <code>Leptris::XML::UseAfterFreeError</code>.</li>
+      <li>If you don&rsquo;t call <code>#free</code>, GC will — a finalizer captures the raw pointer address and calls <code>leptris_document_free</code> exactly once.</li>
+      <li>NodeSets holding XPath results own their <code>LeptrisXPathResult</code> and free it on GC.</li>
+      <li>Never hold a <code>Node</code> past its <code>Document</code>. The C memory is gone; using the wrapper is undefined behaviour.</li>
+    </ul>
+
+    <h2>Errors</h2>
+    <p>All Leptris errors descend from <code>Leptris::XML::Error</code>:</p>
+    <ul>
+      <li><code>ParseError</code> — raised by <code>parse</code> / <code>parse_file</code> / SAX on malformed input.</li>
+      <li><code>XPathError</code> — raised by <code>xpath</code> on malformed or unsupported expressions.</li>
+      <li><code>UseAfterFreeError</code> — raised when calling methods on a freed <code>Document</code>.</li>
+      <li><code>Error</code> — generic (mutation precondition failures, etc.).</li>
+    </ul>
+
+    <h2>Migrating from Nokogiri</h2>
+    <p>For most read-only XPath use cases the swap is mechanical:</p>
+    <CodeBlock lang="ruby" title="before / after" code={`# Nokogiri
+require "nokogiri"
+doc = Nokogiri::XML(File.read("doc.xml"))
+doc.xpath("//item[@id='1']").each { |n| puts n.text }
+
+# Leptris
+require "leptris"
+doc = Leptris::XML.parse(File.read("doc.xml"))
+doc.xpath("//item[@id='1']").each { |n| puts n.content }`} />
+    <p>Notable differences:</p>
+    <ul>
+      <li><code>Node#text</code> exists but the canonical name is <code>#content</code>.</li>
+      <li><code>Node#children</code> includes whitespace text nodes (same as Nokogiri); use <code>#element_children</code> to skip them.</li>
+      <li>CSS support is intentionally minimal — for advanced selectors, drop to <code>xpath</code>.</li>
+      <li>No <code>Nokogiri::HTML</code> or <code>Nokogiri::CSS</code> parser — Leptris is XML-only.</li>
+      <li>No XSLT, no RelaxNG / DTD validation API, no schema caching.</li>
+      <li>CRuby only, via the <code>ffi</code> gem — no JRuby / TruffleRuby.</li>
+    </ul>
+
+    <h2>Where next</h2>
+    <ul>
+      <li><a href="/docs/cli">The CLI</a> — the same engine for your shell.</li>
+      <li><a href="/docs/xpath">XPath 1.0</a> — the conformance story behind <code>#xpath</code>.</li>
+      <li><a href={`${SITE.githubRuby}/blob/main/README.adoc`}>Canonical README in leptris-ruby</a>.</li>
+    </ul>
+  </DocsShell>
+</BaseLayout>

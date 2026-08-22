@@ -1,0 +1,45 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import { DOCS_NAV, SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Docs — leptris"
+  description="Guides and reference for libleptris and its Ruby and Python bindings: getting started, Ruby gem, Python, CLI, XPath 1.0 conformance, internals and FFI."
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="sec-label">Documentation</p>
+      <h1 class="sec-title">Pick your <em>surface</em></h1>
+      <p class="sec-lede">
+        One C99 core — libleptris v{VERSIONS.lib} — behind the leptris Ruby
+        gem (v{VERSIONS.gem}), pyleptris for Python, and a pipe-friendly CLI.
+        These guides are curated; the repositories are canonical.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:3rem">
+    <div class="wrap">
+      <div class="card-grid">
+        {DOCS_NAV.map((entry) => (
+          <a class="card" href={entry.href}>
+            <span class="card-tag">guide</span>
+            <h3>{entry.label} <span class="arrow">→</span></h3>
+            <p>{entry.blurb}</p>
+          </a>
+        ))}
+        <a class="card" href="/changelog">
+          <span class="card-tag">reference</span>
+          <h3>Changelog <span class="arrow">→</span></h3>
+          <p>Releases of the C library and the Ruby gem, with canonical links.</p>
+        </a>
+        <a class="card" href={`${SITE.githubC}/tree/main/docs`}>
+          <span class="card-tag">canonical</span>
+          <h3>Repo docs <span class="arrow">→</span></h3>
+          <p>README, guides, FFI design, validation notes — in the source tree.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
