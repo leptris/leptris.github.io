@@ -1,0 +1,126 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE } from '~/data/site';
+---
+
+<BaseLayout
+  title="XPath 1.0 — leptris docs"
+  description="leptris implements all of XPath 1.0: 13 axes, 27 functions, 15 operators, full predicate syntax — 438/438 on the W3C conformance suite, faster than libxml2 on every measured query."
+>
+  <DocsShell
+    title="XPath 1.0 — complete, and quick"
+    lede="All 13 axes, 27 functions, 15 operators, full predicate syntax. 438/438 on the W3C XPath 1.0 conformance suite — served by a bytecode VM that beats libxml2 on every measured query."
+  >
+    <h2>The engine</h2>
+    <p>
+      Expressions compile to a <strong>bytecode VM</strong>:
+      compile-once, evaluate-many dispatch with per-axis specialization,
+      predicate fast paths, absolute-path fusion, a per-document element
+      index with attribute buckets, fused axis+predicate opcodes, and memcpy
+      fast paths for index-backed queries. Repeated <code>//x</code> queries
+      are served from a subtree-interval index at effectively no cost.
+    </p>
+
+    <h2>Axes — all thirteen</h2>
+    <table class="doc-table">
+      <tr><th>axis</th><th>shorthand</th><th>notes</th></tr>
+      <tr><td><code>ancestor</code></td><td class="bytes"></td><td class="note">excludes self</td></tr>
+      <tr><td><code>ancestor-or-self</code></td><td class="bytes"></td><td class="note"></td></tr>
+      <tr><td><code>attribute</code></td><td class="bytes">@attr</td><td class="note">works on all nodes</td></tr>
+      <tr><td><code>child</code></td><td class="bytes">default</td><td class="note">the default axis</td></tr>
+      <tr><td><code>descendant</code></td><td class="bytes"></td><td class="note">excludes self</td></tr>
+      <tr><td><code>descendant-or-self</code></td><td class="bytes">//</td><td class="note">fused with name tests (<code>//foo</code>)</td></tr>
+      <tr><td><code>following</code></td><td class="bytes"></td><td class="note">excludes descendants</td></tr>
+      <tr><td><code>following-sibling</code></td><td class="bytes"></td><td class="note"></td></tr>
+      <tr><td><code>namespace</code></td><td class="bytes"></td><td class="note">namespace nodes</td></tr>
+      <tr><td><code>parent</code></td><td class="bytes">..</td><td class="note"></td></tr>
+      <tr><td><code>preceding</code></td><td class="bytes"></td><td class="note">excludes ancestors</td></tr>
+      <tr><td><code>preceding-sibling</code></td><td class="bytes"></td><td class="note"></td></tr>
+      <tr><td><code>self</code></td><td class="bytes">.</td><td class="note"></td></tr>
+    </table>
+    <p>
+      All axes maintain <strong>document order</strong> as the spec requires.
+      Node tests: name tests, <code>*</code>, <code>ns:*</code>,
+      <code>text()</code>, <code>comment()</code>,
+      <code>processing-instruction()</code> (with and without target),
+      <code>node()</code>.
+    </p>
+
+    <h2>Predicates and abbreviated syntax</h2>
+    <ul>
+      <li>Position predicates — <code>[N]</code> (1-based), <code>[last()]</code>, <code>[position()=N]</code></li>
+      <li>Boolean predicates — <code>[@attr]</code>, <code>[child]</code></li>
+      <li>Value predicates — <code>[@id='1']</code>, with fast paths</li>
+      <li>Multiple sequential predicates — <code>[1][@id]</code></li>
+      <li>Complex predicates — <code>[position() mod 2 = 0]</code></li>
+    </ul>
+    <Callout>
+      <p>
+        <strong>27 functions</strong> (node-set, string, boolean, number),
+        <strong>15 operators</strong> — the complete XPath 1.0 expression
+        surface, verified against the W3C suite:
+        <strong>438/438</strong>.
+      </p>
+    </Callout>
+
+    <h2>Mixed nodesets</h2>
+    <p>
+      Results can mix element nodes and synthetic attribute nodes —
+      <code>//a/@x</code> is consumable through the public result API
+      (<code>leptris_xpath_result_node_kind / get_node / node_name /
+      node_value</code>) without touching internals. Bindings expose this
+      through the result-scoped kind quartet, never through raw node tags.
+    </p>
+
+    <h2>Measured — vs libxml2</h2>
+    <p>
+      From <code>benchmarks/xpath/bench_diagnostic</code> on a ~5 KB catalog
+      fixture, CPU time:
+    </p>
+    <table class="doc-table">
+      <tr><th>query</th><th>leptris</th><th>libxml2</th><th>advantage</th></tr>
+      <tr><td><code>self::*</code> (per-call floor)</td><td class="bytes">0.57 µs</td><td class="bytes">0.89 µs</td><td class="note">1.6× faster</td></tr>
+      <tr><td><code>child::*</code></td><td class="bytes">0.71 µs</td><td class="bytes">0.94 µs</td><td class="note">1.3× faster</td></tr>
+      <tr><td><code>attribute::id</code></td><td class="bytes">0.63 µs</td><td class="bytes">2.52 µs</td><td class="note">4.0× faster</td></tr>
+      <tr><td><code>descendant::*</code></td><td class="bytes">0.72 µs</td><td class="bytes">0.96 µs</td><td class="note">1.3× faster</td></tr>
+      <tr><td><code>//book</code></td><td class="bytes">0.55 µs</td><td class="bytes">~1 µs</td><td class="note">1.8× faster</td></tr>
+      <tr><td><code>//*</code></td><td class="bytes">0.56 µs</td><td class="bytes">~1 µs</td><td class="note">1.8× faster</td></tr>
+      <tr><td><code>count(//book[@id='b1'])</code></td><td class="bytes">1.13 µs</td><td class="bytes">~3 µs</td><td class="note">2.7× faster</td></tr>
+      <tr><td><code>descendant::*[@id]</code></td><td class="bytes">0.77 µs</td><td class="bytes">1.02 µs</td><td class="note">1.3× faster</td></tr>
+      <tr><td><code>/catalog</code></td><td class="bytes">0.53 µs</td><td class="bytes">~1 µs</td><td class="note">1.9× faster</td></tr>
+    </table>
+    <p>
+      leptris leads on <strong>all ten</strong> XPath benchmarks. The
+      element index currently accelerates absolute paths and root-context
+      descendant queries; extending it to relative-descendant queries is on
+      the roadmap.
+    </p>
+
+    <h2>Using it</h2>
+    <CodeBlock lang="c" code={`LeptrisXPathResult r = leptris_xpath_eval(doc, NULL, "//item[@price > 10]");
+if (r) {
+    size_t n = leptris_xpath_result_count(r);
+    for (size_t i = 0; i < n; i++) {
+        LeptrisNodeRef node = leptris_xpath_result_node(r, i);
+        printf("  %s\\n", leptris_node_name(node));
+    }
+    leptris_xpath_result_free(r);
+}`} />
+    <p>
+      From Ruby: <code>doc.xpath("//item")</code>; from Python:
+      <code>doc.xpath("//item")</code>; from the shell:
+      <code>leptris xpath doc.xml "//item"</code>. See
+      <a href="/docs/ruby">Ruby</a>, <a href="/docs/python">Python</a>, and
+      <a href="/docs/cli">CLI</a>.
+    </p>
+
+    <h2>Where next</h2>
+    <ul>
+      <li><a href={`${SITE.githubRuby}/blob/main/docs/XPATH_SPEC_COMPLIANCE.md`}>The compliance ledger</a> — per-feature status in leptris-ruby.</li>
+      <li><a href={`${SITE.githubC}/blob/main/docs/guide/xpath-queries.md`}>Canonical XPath guide</a> — <code>docs/guide/xpath-queries.md</code>.</li>
+    </ul>
+  </DocsShell>
+</BaseLayout>

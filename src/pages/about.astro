@@ -1,0 +1,125 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import Logo from '~/components/Logo.astro';
+---
+
+<BaseLayout
+  title="About — leptris"
+  description="lep · hare, tris · three. The three-hares motif from the Dunhuang caves to this parser: speed of the chase, containment of the circle."
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="sec-label">About</p>
+      <h1 class="sec-title">Why <em>leptris</em>?</h1>
+      <p class="sec-lede">
+        lep · hare — tris · three. A thousand-year-old image of three hares
+        sharing three ears, and the two promises this library makes: speed,
+        and containment.
+      </p>
+    </div>
+  </section>
+
+  <div class="prose">
+    <Logo variant="full" size={340} class="medallion" alt="the leptris mark — three hares sharing three ears" />
+    <p class="medallion-caption">the full leptris mark — rotate it 120°, it is the same</p>
+
+    <h2>The motif</h2>
+    <p>
+      On the ceilings of the Buddhist cave temples at <strong>Dunhuang</strong>,
+      at the edge of the Gobi where the Silk Road funnels into China, painters
+      of the Sui and Tang dynasties left a small puzzle: <strong>three hares
+      chasing each other in a circle, and between them only three ears</strong>.
+      Each hare looks fully equipped — two apiece — yet count them and there
+      are three, not six. The design turns on perfect three-fold rotation:
+      every ear belongs to two hares at once, and nothing in the pattern is
+      redundant.
+    </p>
+    <p>
+      The image traveled. It appears in Buddhist caves and on ceramics in
+      China, in the metalwork and manuscripts of central Asia and Persia, and
+      — centuries later — carved into the roof bosses and painted on the
+      chancel arches of parish churches across England and northern Europe,
+      where it is still called the <em>three hares</em>. One image, carried
+      along the whole length of the Silk Road, understood everywhere it
+      landed. A design meant for wide acceptance.
+    </p>
+
+    <hr class="asterism" />
+
+    <h2>The name</h2>
+    <p>
+      <strong>leptris</strong> says exactly what it is:
+    </p>
+    <table class="name-table">
+      <tr><th>morpheme</th><th>root</th><th>meaning</th></tr>
+      <tr><td class="morph">lep</td><td>lepus (Latin)</td><td>hare</td></tr>
+      <tr><td class="morph">tris</td><td>treis (Greek)</td><td>three</td></tr>
+    </table>
+    <p>
+      Hares are fast — famously, alarmingly fast. Three of them run in a
+      circle, and the circle is closed. That is the whole design brief of this
+      library, stated in seven letters.
+    </p>
+
+    <hr class="asterism" />
+
+    <h2>What the hares promise</h2>
+    <p>
+      <strong>Speed.</strong> Hares in full chase. The parse path is a
+      vectorized scan over the document; the tree is carved from one
+      contiguous arena with indices where other libraries walk pointers;
+      repeated XPath queries are served from a subtree-interval index at
+      effectively no cost. On text-heavy documents leptris parses
+      <strong>3.4× faster than pugixml</strong>; through Ruby it does a
+      4.38 MB parse-and-serialize in 18 ms where Nokogiri takes 123 ms.
+    </p>
+    <p>
+      <strong>Containment.</strong> The circle closes. One arena per parse,
+      sized from the document before the first node exists; elements at
+      64 bytes, attributes at 40; mutation storage in chained blocks owned by
+      the document; everything released in a single call. A hard bound on
+      memory you can state before you parse — a self-sufficient core with
+      <strong>zero required dependencies</strong>, nothing hidden behind the
+      ring.
+    </p>
+    <p>
+      And like the motif itself, the library is built to travel: pure C99,
+      the same bounded core behind bindings for Ruby, Python, and the shell.
+    </p>
+
+    <hr class="asterism" />
+
+    <h2>The mark</h2>
+    <p>
+      The leptris mark comes in two forms, and each has one job:
+    </p>
+    <table class="name-table">
+      <tr><th>form</th><th>use</th></tr>
+      <tr><td class="morph">icon</td><td>The everyday mark — the three hares in their ring. Mastheads, favicons, footers, cargo pockets. This is the one you see everywhere.</td></tr>
+      <tr><td class="morph">full</td><td>The complete artwork, shown where the motif itself is the subject — this page. It carries the whole design at once, so it is reserved for the story.</td></tr>
+    </table>
+    <p>
+      Both forms ship in a light and a dark palette, tuned to their
+      background. This site follows your color scheme — and the mark follows
+      the site.
+    </p>
+
+    <hr class="asterism" />
+
+    <h2>The project</h2>
+    <p>
+      <strong>libleptris</strong> is the C99 core: XML 1.0 parsing with
+      namespaces, a W3C-conformant XPath 1.0 engine, streaming SAX, XInclude,
+      DTD validation, and canonical XML. The <strong>leptris</strong> Ruby
+      gem and <strong>pyleptris</strong> wrap the same public ABI with GC-safe
+      handles — thin mirrors over the same bounded core, verified by a drift
+      gate in CI. The project was previously called <em>taurus</em>.
+    </p>
+
+    <p>
+      <a href="/">← Back to the front page</a> ·
+      <a href="/docs">Read the docs</a> ·
+      <a href="https://github.com/leptris/leptris">github.com/leptris/leptris</a>
+    </p>
+  </div>
+</BaseLayout>

@@ -1,0 +1,25 @@
+---
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { NAV, SITE } from '~/data/site';
+
+const current = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? current === '/' : current.startsWith(href);
+---
+
+<header class="masthead">
+  <div class="wrap">
+    <Logo size={30} alt="leptris — three hares mark" />
+    <a class="wordmark" href="/">LEPTRIS</a>
+    <nav>
+      {NAV.map((item) => (
+        <a href={item.href} class={item.href === '/changelog' ? 'nav-extra' : ''} aria-current={isActive(item.href) ? 'page' : undefined}>
+          {item.label}
+        </a>
+      ))}
+      <a href={SITE.githubC}>GitHub</a>
+      <ThemeToggle />
+    </nav>
+  </div>
+</header>

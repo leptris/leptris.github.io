@@ -1,0 +1,128 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Getting started (C) — leptris docs"
+  description="Build, install, and link libleptris from source or vcpkg: CMake and Meson targets, pkg-config, build options, ASAN and fuzzing builds."
+>
+  <DocsShell
+    title="Getting started — the C core"
+    lede={`Build libleptris v${VERSIONS.lib} from source or vcpkg, link it into a C99 project, and parse your first document in under a minute.`}
+  >
+    <h2>Requirements</h2>
+    <ul>
+      <li><strong>CMake ≥ 3.20</strong> and a C99 compiler (GCC, Clang, MSVC, MinGW).</li>
+      <li>Optional: <strong>utf8proc</strong> (Unicode validation) and <strong>iconv</strong> (encoding conversion). Neither is required — builds without them have zero runtime dependencies.</li>
+    </ul>
+
+    <h2>Build from source</h2>
+    <CodeBlock lang="bash" title="clone + release build" code={`git clone https://github.com/leptris/leptris.git
+cd leptris
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+sudo cmake --install build --prefix /usr/local`} />
+
+    <p>
+      LTO is enabled by default for <code>Release</code> and
+      <code>RelWithDebInfo</code> builds. Disable it with
+      <code>-DLEPTRIS_ENABLE_LTO=OFF</code> if your toolchain cannot link LTO
+      objects.
+    </p>
+
+    <h2>Install from vcpkg</h2>
+    <CodeBlock lang="bash" code={`git clone https://github.com/microsoft/vcpkg
+./vcpkg/vcpkg install leptris`} />
+    <p>
+      The repository ships a <code>vcpkg.json</code> manifest and a
+      <code>portfile.cmake</code> template following the jemalloc convention.
+      System packages (Homebrew, apt, apk, MSYS2) are pending — watch the
+      changelog.
+    </p>
+
+    <h2>Link it</h2>
+    <p>After installation the library is discoverable three ways:</p>
+    <CodeBlock lang="cmake" title="CMake — the import target" code={`cmake_minimum_required(VERSION 3.20)
+project(myapp LANGUAGES C CXX)
+
+find_package(leptris CONFIG REQUIRED)
+target_link_libraries(myapp PRIVATE leptris::leptris)`} />
+    <CodeBlock lang="python" title="Meson" code={`leptris_dep = dependency('leptris')
+executable('your_app', 'main.c', dependencies: leptris_dep)`} />
+    <CodeBlock lang="bash" title="pkg-config" code={`gcc myapp.c $(pkg-config --cflags --libs leptris)`} />
+
+    <h2>First program</h2>
+    <CodeBlock lang="c" title="hello-parse.c" code={`#include <leptris.h>
+#include <stdio.h>
+#include <string.h>
+
+int main(void) {
+    const char* xml = "<root><item>hello</item></root>";
+
+    LeptrisStatus status = LEPTRIS_OK;
+    LeptrisDocument doc = leptris_parse_string(xml, strlen(xml), &status);
+    if (!doc) {
+        fprintf(stderr, "parse failed: %d\\n", status);
+        return 1;
+    }
+
+    LeptrisElement root = leptris_document_root(doc);
+    printf("root element: %s\\n", leptris_element_name(root));
+
+    LeptrisXPathResult items = leptris_xpath_eval(doc, NULL, "//item");
+    printf("item count: %zu\\n", leptris_xpath_result_count(items));
+    leptris_xpath_result_free(items);
+
+    leptris_document_free(doc);  /* releases the entire pool */
+    return 0;
+}`} />
+    <Callout>
+      <p>
+        <strong>One rule to remember:</strong> everything you get from a
+        document — names, text, XPath results — lives in the document&rsquo;s
+        pool and dies with <code>leptris_document_free</code>. Free the
+        document, and you have freed it all.
+      </p>
+    </Callout>
+
+    <h2>Build options</h2>
+    <table class="doc-table">
+      <tr><th>option</th><th>default</th><th>description</th></tr>
+      <tr><td><code>BUILD_TESTING</code></td><td class="bytes">ON</td><td class="note">Build the Google Test suite under <code>test/</code>.</td></tr>
+      <tr><td><code>LEPTRIS_BUILD_CLI</code></td><td class="bytes">ON</td><td class="note">Build the <code>leptris</code> command-line tool.</td></tr>
+      <tr><td><code>LEPTRIS_BUILD_BENCHMARKS</code></td><td class="bytes">OFF</td><td class="note">Performance comparison targets (libxml2 / pugixml).</td></tr>
+      <tr><td><code>LEPTRIS_BUILD_MAN_PAGES</code></td><td class="bytes">OFF</td><td class="note">Generate man pages from the AsciiDoc sources.</td></tr>
+      <tr><td><code>LEPTRIS_ENABLE_UTF8PROC</code></td><td class="bytes">ON</td><td class="note">UTF-8 validation via utf8proc.</td></tr>
+      <tr><td><code>LEPTRIS_ENABLE_ICONV</code></td><td class="bytes">ON</td><td class="note">Encoding conversion via iconv (ISO-8859-1, Shift-JIS, …).</td></tr>
+      <tr><td><code>LEPTRIS_ENABLE_ASAN</code></td><td class="bytes">OFF</td><td class="note">Build with AddressSanitizer.</td></tr>
+      <tr><td><code>LEPTRIS_ENABLE_FUZZING</code></td><td class="bytes">OFF</td><td class="note">Build the libFuzzer harness.</td></tr>
+      <tr><td><code>LEPTRIS_BUILD_DOCS</code></td><td class="bytes">OFF</td><td class="note">Generate the Doxygen API reference.</td></tr>
+    </table>
+
+    <h2>Development builds</h2>
+    <CodeBlock lang="bash" title="ASAN — memory safety" code={`cmake -B build-asan -S . -DLEPTRIS_ENABLE_ASAN=ON -DBUILD_TESTING=ON
+cmake --build build-asan
+ASAN_OPTIONS=detect_leaks=1 ctest --test-dir build-asan`} />
+    <CodeBlock lang="bash" title="Fuzzer (requires LLVM clang)" code={`brew install llvm   # macOS
+export CC=/opt/homebrew/opt/llvm/bin/clang
+cmake -B build-fuzz -S . -DLEPTRIS_ENABLE_FUZZING=ON
+cmake --build build-fuzz --target fuzz_parse
+./build-fuzz/fuzz_parse -max_total_time=600 corpus/`} />
+    <CodeBlock lang="bash" title="Doxygen API reference" code={`brew install doxygen
+cmake -B build -S . -DLEPTRIS_BUILD_DOCS=ON
+cmake --build build --target docs
+open build/docs/api-generated/html/index.html`} />
+
+    <h2>Where next</h2>
+    <ul>
+      <li><a href="/docs/xpath">The XPath 1.0 engine</a> — axes, functions, conformance.</li>
+      <li><a href="/docs/ruby">The Ruby gem</a> — same core, Nokogiri-compatible surface.</li>
+      <li><a href="/docs/internals">Internals &amp; FFI</a> — the memory model behind the bounds.</li>
+      <li><a href={`${SITE.githubC}/blob/main/docs/guide/getting-started.md`}>Canonical guide in the repo</a> — <code>docs/guide/*.md</code>.</li>
+    </ul>
+  </DocsShell>
+</BaseLayout>

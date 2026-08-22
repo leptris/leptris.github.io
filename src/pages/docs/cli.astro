@@ -1,0 +1,53 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import { SITE } from '~/data/site';
+---
+
+<BaseLayout
+  title="CLI — leptris docs"
+  description="The leptris command-line tool: parse, xpath, format — MECE output modes (XML/JSON/text), files or stdin, man pages and shell completions."
+>
+  <DocsShell
+    title="CLI — leptris"
+    lede="A command-line XML tool that respects your pipe. Built by default with the C library (LEPTRIS_BUILD_CLI=ON), it speaks the same public API — nothing private."
+  >
+    <h2>Commands</h2>
+    <CodeBlock lang="bash" title="parse — inspect a document" code={`leptris parse document.xml
+leptris parse document.xml --format json | head -3
+leptris parse - < small.xml     # reads stdin`} />
+    <CodeBlock lang="bash" title="xpath — query a document" code={`leptris xpath document.xml "//record[@id='1042']"
+leptris xpath --count document.xml 'count(//item)'`} />
+    <CodeBlock lang="bash" title="format — pretty-print" code={`leptris format --indent 4 < ugly.xml > pretty.xml
+leptris format messy.xml --indent 2`} />
+    <CodeBlock lang="bash" title="version" code={`leptris version`} />
+
+    <h2>Contract</h2>
+    <ul>
+      <li><strong>MECE output modes</strong> — XML, JSON, or text; one mode per invocation, no mixing.</li>
+      <li><strong>Files or stdin</strong> — every reading subcommand accepts a path or <code>-</code>.</li>
+      <li><strong>Exit codes</strong> — 0 on success, 1 on parse error or invalid usage. Pipe-friendly by design.</li>
+      <li><strong>Layer contract</strong> — the CLI never touches XML structures directly; everything goes through the public API in <code>src/include/</code>. No internal includes under <code>cli/</code>.</li>
+    </ul>
+
+    <h2>Man pages and completions</h2>
+    <p>
+      Full man pages ship with the project — <code>leptris(1)</code>,
+      <code>leptris-parse(1)</code>, <code>leptris-xpath(1)</code>,
+      <code>leptris-format(1)</code> — in
+      <a href={`${SITE.githubRuby}/tree/main/docs/man`}>docs/man</a> of the
+      leptris-ruby repository. Shell completions for
+      <a href={`${SITE.githubRuby}/blob/main/docs/completion/leptris.bash`}>bash</a>
+      and <a href={`${SITE.githubRuby}/blob/main/docs/completion/leptris.zsh`}>zsh</a>
+      live alongside them. Build man pages from source with
+      <code>-DLEPTRIS_BUILD_MAN_PAGES=ON</code>.
+    </p>
+
+    <h2>Where next</h2>
+    <ul>
+      <li><a href="/docs/getting-started">Getting started</a> — building the CLI from source.</li>
+      <li><a href="/docs/xpath">XPath 1.0</a> — what the <code>xpath</code> subcommand can evaluate.</li>
+    </ul>
+  </DocsShell>
+</BaseLayout>

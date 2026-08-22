@@ -1,0 +1,380 @@
+---
+import { codeToHtml } from 'shiki';
+import BaseLayout from '~/components/BaseLayout.astro';
+import Logo from '~/components/Logo.astro';
+import CodeTabs from '~/components/CodeTabs.vue';
+import BenchBars from '~/components/BenchBars.vue';
+import { SITE, VERSIONS } from '~/data/site';
+
+const hl = async (code: string, lang: string) =>
+  codeToHtml(code, { lang, theme: 'github-dark' });
+
+const tabs = [
+  {
+    label: 'C',
+    html: await hl(
+      `#include <leptris.h>
+
+LeptrisStatus st;
+LeptrisDocument* doc = leptris_parse_string(xml, len, &st);
+LeptrisElement root = leptris_document_root(doc);
+for (LeptrisElement e = leptris_element_first_child(root, "record");
+     e; e = leptris_element_next_sibling(e, "record")) {
+    const char* id = leptris_element_attribute(e, "id");
+}
+char* out = leptris_document_serialize(doc, NULL);  /* caller frees */
+leptris_free_string(out);
+leptris_document_free(doc);                        /* arena, all at once */`,
+      'c',
+    ),
+  },
+  {
+    label: 'Ruby',
+    html: await hl(
+      `require "leptris"
+
+doc  = Leptris::XML.parse(File.read("records.xml"))
+hits = doc.xpath("//record[@id='1042']")   # W3C-conformant XPath 1.0
+
+hits.first.each { |n| puts n.text }        # GC-safe handles, zero copies
+puts doc.to_xml(indent: 2)                 # 18 ms for 4.38 MB, parse+serialize`,
+      'ruby',
+    ),
+  },
+  {
+    label: 'Python',
+    html: await hl(
+      `import leptris
+
+doc = leptris.parse(open("records.xml", "rb").read())
+for rec in doc.xpath("//record"):
+    print(rec.get("id"), rec.text)
+
+print(doc.to_xml(indent=2))`,
+      'python',
+    ),
+  },
+  {
+    label: 'CLI',
+    html: await hl(
+      `$ leptris parse records.xml --format json | head -3
+$ leptris xpath records.xml "//record[@id='1042']"
+$ leptris format messy.xml --indent 2
+
+# XML / JSON / text — MECE output modes, reads files or stdin,
+# man pages included. The same public API, nothing private.`,
+      'shell',
+    ),
+  },
+];
+
+const benchBlocks = [
+  {
+    title: 'Real-world document, 4.38 MB — parse + serialize, through Ruby',
+    sub: '10,000 records, pretty-printed, encoding-declared; same process, same harness (serialbench)',
+    rows: [
+      { who: 'leptris', ver: 'via binding', val: '18 ms', w: 14.6 },
+      { who: 'Ox', val: '118 ms', w: 95.9, them: true },
+      { who: 'Nokogiri', ver: 'libxml2', val: '123 ms', w: 100, them: true },
+    ],
+  },
+  {
+    title: '2 MB text-heavy DOM parse — vs pugixml, C harness',
+    sub: 'median of interleaved runs, identical Release flags, same machine',
+    rows: [
+      { who: 'leptris', val: '193 µs', w: 29.1 },
+      { who: 'pugixml', val: '663 µs', w: 100, them: true },
+    ],
+  },
+  {
+    title: 'Write side — serialize, vs pugixml',
+    sub: '2 MB text-heavy and attr-heavy documents',
+    rows: [
+      { who: 'leptris', ver: 'text 2 MB', val: '420 µs', w: 64.6 },
+      { who: 'pugixml', ver: 'text 2 MB', val: '650 µs', w: 100, them: true },
+      { who: 'leptris', ver: 'attr-heavy', val: '449 µs', w: 64.9 },
+      { who: 'pugixml', ver: 'attr-heavy', val: '692 µs', w: 100, them: true },
+    ],
+  },
+];
+---
+
+<BaseLayout>
+  <!-- ————— hero ————— -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-medallion reveal">
+        <Logo size={82} alt="leptris — three hares rotor" />
+      </div>
+      <div class="reveal" data-d="1">
+        <span class="etym">lep · hare — tris · three</span>
+        <span class="etym-sub">lepus (Latin, hare) + treis (Greek, three) — the three hares of Dunhuang</span>
+      </div>
+      <h1 class="hero-title reveal" data-d="2">
+        The XML parser with <em>hard memory bounds</em>
+      </h1>
+      <p class="hero-lede reveal" data-d="3">
+        <strong>libleptris</strong> is an XML 1.0 parser, W3C-conformant XPath
+        engine and SAX feed in pure C99 — zero required dependencies, one arena
+        per document, and a memory ceiling you can state before you parse.
+      </p>
+      <div class="hero-actions reveal" data-d="3">
+        <a class="btn solid" href="/docs/getting-started">Get started</a>
+        <a class="btn" href={SITE.githubC}>Source</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— stats band ————— -->
+  <div class="stats">
+    <div class="wrap">
+      <div class="stat"><span class="n" data-count="3.4" data-suffix="×">0×</span><span class="l">faster text parse than pugixml</span></div>
+      <div class="stat"><span class="n" data-count="6.8" data-suffix="×">0×</span><span class="l">faster than nokogiri, real docs</span></div>
+      <div class="stat"><span class="n" data-count="438" data-suffix="/438">0/438</span><span class="l">W3C XPath 1.0 conformance</span></div>
+      <div class="stat"><span class="n" data-raw="zero">zero</span><span class="l">required runtime dependencies</span></div>
+    </div>
+  </div>
+
+  <!-- ————— the name ————— -->
+  <section class="sec" id="name">
+    <div class="wrap motif">
+      <div class="reveal">
+        <Logo variant="full" size={300} class="medallion" alt="the three-hares medallion" />
+        <p class="medallion-caption">each hare two ears — three among them</p>
+      </div>
+      <div class="motif-text">
+        <p class="sec-label reveal">The name</p>
+        <h2 class="sec-title reveal">Three hares, <em>three ears</em></h2>
+        <p class="reveal" data-d="1">
+          On the ceilings of the Dunhuang caves, and centuries later on carved
+          roof bosses in parish churches across Europe, the same image appears:
+          <strong>three hares chasing in a circle, sharing three ears</strong> —
+          each hare seems to have two, yet there are only three among them.
+        </p>
+        <p class="reveal" data-d="2">
+          That is the contract of this library. <strong>Speed:</strong> hares in
+          full chase — vectorized scans, one contiguous arena, indices where
+          others walk. <strong>Containment:</strong> the circle — every
+          allocation bounded at parse time, a hard memory ceiling, a
+          self-sufficient core with nothing hidden behind the ring.
+        </p>
+        <p class="reveal" data-d="3"><a href="/about">The full story of the motif&nbsp;→</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— features ————— -->
+  <section class="sec-alt" id="features">
+    <div class="wrap">
+      <p class="sec-label reveal">What it is</p>
+      <h2 class="sec-title reveal">A parser built like a <em>system</em>, not a script</h2>
+      <p class="sec-lede reveal" data-d="1">
+        Every design choice optimizes for the same pair: throughput you can
+        measure, and resource behavior you can promise.
+      </p>
+
+      <div class="feat-grid">
+        <div class="feat feat-speed reveal">
+          <span class="big">3.4×<small> / text-heavy DOM</small></span>
+          <h3>Speed, measured honestly</h3>
+          <p>
+            Interleaved A/B gates against pugixml and libxml2 on every shape —
+            text-heavy, attr-heavy, deep, pretty, markup-rich. Median-of-runs,
+            fresh build dirs, the harness published alongside the numbers.
+            Serialize is 1.5–1.6× ahead of pugixml; the XPath engine serves
+            repeated <code>//x</code> from a subtree-interval index at
+            effectively no cost.
+          </p>
+        </div>
+        <div class="feat feat-bound green reveal" data-d="1">
+          <span class="big">1<small> arena per parse</small></span>
+          <h3>Hard resource bounds</h3>
+          <p>
+            The parser pre-sizes one contiguous arena from the document itself
+            — element, attribute, text and markup blocks carved from a single
+            allocation, then retained for reuse. No hidden per-node mallocs, no
+            unbounded growth mid-parse.
+          </p>
+        </div>
+        <div class="feat feat-conform reveal">
+          <h3>Conformant where it counts</h3>
+          <p>
+            XPath 1.0: <strong>438/438</strong> on the W3C suite. XML 1.0
+            namespaces, DTD validation phases 1–7, XInclude, exclusive C14N —
+            semantics pinned by 586 tests plus large-document and
+            allocation-failure suites in CI.
+          </p>
+        </div>
+        <div class="feat feat-compact gold reveal" data-d="1">
+          <span class="big">64<small> B element · 40 B attr</small></span>
+          <h3>Compact by construction</h3>
+          <p>
+            One cache line per element and per attribute; compact self-relative
+            edges; zero-copy views into the document buffer. A 4 MB document
+            parses into roughly 3 MB of tree.
+          </p>
+        </div>
+        <div class="feat feat-sax green reveal" data-d="2">
+          <h3>DOM and SAX, one core</h3>
+          <p>
+            Streaming SAX with all eleven events beats libxml2&rsquo;s SAX on
+            every measured shape — same scanner, same bounds, no DOM required.
+          </p>
+        </div>
+        <div class="feat feat-bindings gold reveal" data-d="1">
+          <h3>Ruby &amp; Python today</h3>
+          <p>
+            <code>gem leptris</code> and <code>pip leptris</code> wrap the C
+            surface with GC-safe handles. The 4.38 MB real-world document:
+            <strong>18 ms</strong> parse+serialize through Ruby vs
+            Nokogiri&rsquo;s 123 ms. Rust is next.
+          </p>
+        </div>
+        <div class="feat feat-cli reveal" data-d="2">
+          <h3>A CLI that respects your pipe</h3>
+          <p>
+            <code>leptris parse | xpath | format</code> — MECE output modes
+            (XML / JSON / text), reads files or stdin, man pages included.
+            Not a demo binary: the same public API, nothing private.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— benchmarks ————— -->
+  <section class="sec" id="speed">
+    <div class="wrap">
+      <p class="sec-label reveal">The race</p>
+      <h2 class="sec-title reveal">Numbers from the <em>open harness</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        Every figure below reproduces from <code>benchmarks/matrix</code> in
+        the repository — min/median over interleaved runs, fresh Release
+        builds, medians reported because library minimums wobble under CI load.
+      </p>
+
+      <div class="reveal" data-d="1">
+        <BenchBars client:visible blocks={benchBlocks} />
+      </div>
+
+      <p class="bench-note reveal">
+        Shapes where pugixml still leads (attr-heavy parse ~1.5×, its duplicate-allowing
+        attribute API ~1.6× on raw append) are documented with their measured floors in
+        the repository&rsquo;s perf ledger — nothing is cherry-picked, and the harness
+        that produced every number is in the tree.
+      </p>
+    </div>
+  </section>
+
+  <!-- ————— bounds ————— -->
+  <section class="sec-alt" id="bound">
+    <div class="wrap">
+      <p class="sec-label reveal">The circle</p>
+      <h2 class="sec-title reveal">Memory you can <em>promise</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        The arena is sized from the document before the first node is carved;
+        mutation storage grows in chained blocks owned by the document. What
+        you allocate is what you hold — stated up front, released all at once.
+      </p>
+      <div class="reveal" data-d="2">
+        <table class="doc-table">
+          <tr><th>node</th><th>resident</th><th>why</th></tr>
+          <tr><td>element</td><td class="bytes">64 B</td><td class="note">one cache line; self-relative int32 edges</td></tr>
+          <tr><td>attribute</td><td class="bytes">40 B</td><td class="note">views into the buffer; entity flag packed in the hash word</td></tr>
+          <tr><td>text node</td><td class="bytes">64 B</td><td class="note">borrowed content until first expansion</td></tr>
+          <tr><td>comment / CDATA / PI</td><td class="bytes">48 B</td><td class="note">carved from the same arena block as elements</td></tr>
+          <tr><td>parse arena</td><td class="bytes">1 allocation</td><td class="note">retained and reused across documents</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— code showcase ————— -->
+  <section class="sec" id="code">
+    <div class="wrap">
+      <p class="sec-label reveal">The surface</p>
+      <h2 class="sec-title reveal">Small API, <em>everywhere</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        One C99 core; the same handles and the same bounds from C, Ruby,
+        Python, or the shell.
+      </p>
+
+      <div class="reveal" data-d="1">
+        <CodeTabs client:visible tabs={tabs} />
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— install ————— -->
+  <section class="sec-alt" id="install">
+    <div class="wrap">
+      <p class="sec-label reveal">The chase begins</p>
+      <h2 class="sec-title reveal">Install, <em>four ways</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        C99 — builds anywhere CMake does. Optional utf8proc and iconv; neither
+        is required. Current release: libleptris <strong>v{VERSIONS.lib}</strong>,
+        Ruby gem <strong>v{VERSIONS.gem}</strong>.
+      </p>
+
+      <div class="install-grid">
+        <div class="install-card reveal">
+          <h4>C — CMake</h4>
+          <pre>{`# vcpkg, or FetchContent:
+include(FetchContent)
+FetchContent_Declare(leptris
+  GIT_REPOSITORY https://github.com/leptris/leptris)
+FetchContent_MakeAvailable(leptris)
+
+target_link_libraries(yours PRIVATE leptris::leptris)`}</pre>
+        </div>
+        <div class="install-card reveal" data-d="1">
+          <h4>C — vcpkg</h4>
+          <pre>{`# manifest mode: add to vcpkg.json
+{ "dependencies": [ "leptris" ] }
+
+# or classic:
+vcpkg install leptris`}</pre>
+        </div>
+        <div class="install-card reveal" data-d="1">
+          <h4>Ruby</h4>
+          <pre>{`gem install leptris
+
+require "leptris"
+doc = Leptris::XML.parse("<greet>hello</greet>")
+doc.to_xml        # => "<greet>hello</greet>"`}</pre>
+        </div>
+        <div class="install-card reveal" data-d="2">
+          <h4>Python</h4>
+          <pre>{`pip install leptris
+
+import leptris
+doc = leptris.parse("<greet>hello</greet>")
+doc.to_xml()       # => '<greet>hello</greet>'`}</pre>
+        </div>
+      </div>
+
+      <p class="sec-lede reveal" data-d="2" style="margin-top:2.4rem; margin-bottom:0">
+        Full build matrix, link flags, and per-language setup:
+        <a href="/docs/getting-started">the getting-started guide&nbsp;→</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ————— CTA ————— -->
+  <section class="cta">
+    <div class="cta-inner">
+      <h2 class="reveal">Fast as hares.<br /><em>Contained as a circle.</em></h2>
+      <p class="reveal" data-d="1">
+        Clone it, build it, race it against your current parser — the harness
+        is in the tree.
+      </p>
+      <div class="reveal" data-d="2">
+        <code class="quick">git clone https://github.com/leptris/leptris && cmake -B build -S .</code>
+      </div>
+      <div class="hero-actions reveal" data-d="3">
+        <a class="btn solid" href={SITE.githubC}>GitHub</a>
+        <a class="btn" href="/about">Why “leptris”?</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

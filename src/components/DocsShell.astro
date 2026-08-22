@@ -1,0 +1,49 @@
+---
+import { DOCS_NAV } from '~/data/site';
+
+interface Props {
+  title: string;
+  lede: string;
+}
+
+const { title, lede } = Astro.props;
+const current = Astro.url.pathname;
+---
+
+<section class="page-head">
+  <div class="wrap">
+    <p class="sec-label">Documentation</p>
+    <h1 class="sec-title">{title}</h1>
+    <p class="sec-lede">{lede}</p>
+  </div>
+</section>
+
+<div class="docs-layout">
+  <nav class="docs-nav" aria-label="Docs">
+    <p class="docs-nav-label">Guides</p>
+    <ul>
+      {DOCS_NAV.map((entry) => (
+        <li>
+          <a href={entry.href} aria-current={current === entry.href ? 'page' : undefined}>
+            {entry.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="docs-nav-label">Reference</p>
+    <ul>
+      <li><a href="/changelog">Changelog</a></li>
+      <li><a href="/about">About the mark</a></li>
+    </ul>
+  </nav>
+  <div class="prose docs-prose">
+    <slot />
+    <div class="docs-canonical">
+      <p>
+        <strong>This is the curated guide.</strong> The repositories are canonical:
+        when this page and the repo disagree, the repo wins. Full documentation
+        lives with the source.
+      </p>
+    </div>
+  </div>
+</div>

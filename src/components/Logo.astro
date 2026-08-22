@@ -1,0 +1,46 @@
+---
+interface Props {
+  size?: number;
+  variant?: 'icon' | 'full';
+  alt?: string;
+  class?: string;
+}
+
+const {
+  size = 32,
+  variant = 'icon',
+  alt = 'leptris',
+  class: className = '',
+} = Astro.props;
+
+const base = variant === 'full' ? 'logo-leptris_full' : 'logo-leptris_icon';
+const dims = `width:${size}px;height:${size}px`;
+---
+
+<span class:list={['brand-logo', className]} style={dims} role="img" aria-label={alt}>
+  <img src={`/${base}-light.svg`} alt="" width={size} height={size} class="logo-light" loading="eager" decoding="async" />
+  <img src={`/${base}-dark.svg`} alt="" width={size} height={size} class="logo-dark" loading="eager" decoding="async" />
+</span>
+
+<style>
+  .brand-logo {
+    display: inline-block;
+    position: relative;
+    flex-shrink: 0;
+    line-height: 0;
+  }
+  .brand-logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .brand-logo .logo-dark {
+    display: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .brand-logo .logo-light { display: none; }
+    :global(:root:not([data-theme='light'])) .brand-logo .logo-dark { display: block; }
+  }
+  :global([data-theme='dark']) .brand-logo .logo-light { display: none; }
+  :global([data-theme='dark']) .brand-logo .logo-dark { display: block; }
+</style>
