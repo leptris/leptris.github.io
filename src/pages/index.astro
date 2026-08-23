@@ -70,6 +70,7 @@ const benchBlocks = [
   {
     title: 'Real-world document, 4.38 MB — parse + serialize, through Ruby',
     sub: '10,000 records, pretty-printed, encoding-declared; same process, same harness (serialbench)',
+    chip: '6.8× vs nokogiri',
     rows: [
       { who: 'leptris', ver: 'via binding', val: '18 ms', w: 14.6 },
       { who: 'Ox', val: '118 ms', w: 95.9, them: true },
@@ -79,6 +80,7 @@ const benchBlocks = [
   {
     title: '2 MB text-heavy DOM parse — vs pugixml, C harness',
     sub: 'median of interleaved runs, identical Release flags, same machine',
+    chip: '3.4× vs pugixml',
     rows: [
       { who: 'leptris', val: '193 µs', w: 29.1 },
       { who: 'pugixml', val: '663 µs', w: 100, them: true },
@@ -87,6 +89,7 @@ const benchBlocks = [
   {
     title: 'Write side — serialize, vs pugixml',
     sub: '2 MB text-heavy and attr-heavy documents',
+    chip: '1.5× vs pugixml',
     rows: [
       { who: 'leptris', ver: 'text 2 MB', val: '420 µs', w: 64.6 },
       { who: 'pugixml', ver: 'text 2 MB', val: '650 µs', w: 100, them: true },
@@ -141,7 +144,7 @@ const benchBlocks = [
   </div>
 
   <!-- ————— the name ————— -->
-  <section class="sec" id="name">
+  <section class="sec" id="name" data-ghost="01">
     <div class="wrap motif">
       <div class="reveal">
         <div class="orbit">
@@ -171,7 +174,7 @@ const benchBlocks = [
   </section>
 
   <!-- ————— features ————— -->
-  <section class="sec-alt sec-tint-periwinkle" id="features">
+  <section class="sec-alt sec-tint-periwinkle" id="features" data-ghost="02">
     <div class="wrap">
       <p class="sec-label reveal" data-num="02">What it is</p>
       <h2 class="sec-title reveal">A parser built like a <em>system</em>, not a script</h2>
@@ -254,7 +257,7 @@ const benchBlocks = [
   </section>
 
   <!-- ————— benchmarks ————— -->
-  <section class="sec" id="speed">
+  <section class="sec" id="speed" data-ghost="03">
     <div class="wrap">
       <p class="sec-label reveal" data-num="03">The race</p>
       <h2 class="sec-title reveal">Numbers from the <em>open harness</em></h2>
@@ -278,7 +281,7 @@ const benchBlocks = [
   </section>
 
   <!-- ————— bounds ————— -->
-  <section class="sec-alt sec-tint-sage" id="bound">
+  <section class="sec-alt sec-tint-sage" id="bound" data-ghost="04">
     <div class="wrap">
       <p class="sec-label reveal" data-num="04">The circle</p>
       <h2 class="sec-title reveal">Memory you can <em>promise</em></h2>
@@ -301,7 +304,7 @@ const benchBlocks = [
   </section>
 
   <!-- ————— code showcase ————— -->
-  <section class="sec" id="code">
+  <section class="sec" id="code" data-ghost="05">
     <div class="wrap">
       <p class="sec-label reveal" data-num="05">The surface</p>
       <h2 class="sec-title reveal">Small API, <em>everywhere</em></h2>
@@ -317,7 +320,7 @@ const benchBlocks = [
   </section>
 
   <!-- ————— install ————— -->
-  <section class="sec-alt sec-tint-rose" id="install">
+  <section class="sec-alt sec-tint-rose" id="install" data-ghost="06">
     <div class="wrap">
       <p class="sec-label reveal" data-num="06">The chase begins</p>
       <h2 class="sec-title reveal">Install, <em>four ways</em></h2>
