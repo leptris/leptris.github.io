@@ -16,6 +16,8 @@ export const VERSIONS = {
   libDate: '2026-08-23',
   gem: '1.2.0',
   gemDate: '2026-08-23',
+  py: '1.3.1',
+  pyDate: '2026-08-23',
 } as const;
 
 export interface NavEntry {
@@ -26,6 +28,8 @@ export interface NavEntry {
 export const NAV: NavEntry[] = [
   { href: '/', label: 'Home' },
   { href: '/docs', label: 'Docs' },
+  { href: '/benchmarks', label: 'Benchmarks' },
+  { href: '/blog', label: 'Blog' },
   { href: '/changelog', label: 'Changelog' },
   { href: '/about', label: 'About' },
 ];

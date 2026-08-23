@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '~/components/BaseLayout.astro';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<BaseLayout
+  title="Blog — leptris"
+  description="Releases, engineering stories, and the honest benchmark ledger — from the leptris team."
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="sec-label">Blog</p>
+      <h1 class="sec-title">Chasing <em>out loud</em></h1>
+      <p class="sec-lede">
+        Releases, engineering stories, and the benchmark ledger — wins and
+        losses both. When the hares stumble, you read about it here.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:3rem">
+    <div class="wrap">
+      <div class="card-grid">
+        {posts.map((post) => (
+          <a class="card" href={`/blog/${post.id}/`}>
+            <span class="card-tag">
+              {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+            </span>
+            <h3>{post.data.title} <span class="arrow">→</span></h3>
+            <p>{post.data.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

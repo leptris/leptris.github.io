@@ -16,7 +16,7 @@ const isActive = (href: string) =>
       {NAV.map((item) => (
         <a
           href={item.href}
-          class={item.href === '/' || item.href === '/changelog' ? 'nav-extra' : ''}
+          class={item.href === '/docs' || item.href === '/about' ? '' : 'nav-extra'}
           aria-current={isActive(item.href) ? 'page' : undefined}
         >
           {item.label}
