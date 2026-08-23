@@ -21,8 +21,32 @@ import { SITE, VERSIONS } from '~/data/site';
 
   <section class="sec" style="padding-top:3rem">
     <div class="wrap prose" style="max-width:60rem">
+      <h2>libleptris <span class="pill">v1.4.0</span></h2>
+      <p><span class="pill periwinkle">2026-08-23</span> — the C core. Current release: the bindings-parity drop.</p>
+      <ul>
+        <li><strong>Pull (StAX-style) parsing</strong> — <code>leptris_pull_new/_next/_free</code> over the streaming SAX core: host-driven events with zero C→host callbacks; memory bounded by the input slice, not the document.</li>
+        <li><strong>Iterparse, bounded</strong> — <code>leptris_iterparse_new/_next/_free</code>: each top-level child materializes in its own pool and is released on the next yield; peak memory bounded by the largest subtree, not the document.</li>
+        <li><strong>Compiled XPath</strong> — <code>leptris_xpath_compile/_compiled_eval/_compiled_free</code>: one parse for a handle&rsquo;s lifetime, skipping the per-call cache probe; the handle is immutable, so concurrent evaluation from many threads is safe.</li>
+        <li><strong>Per-parse options</strong> — <code>LeptrisParseOptions</code> + <code>leptris_parse_string_ex</code>: scoped strict/depth/flags with thread defaults restored on return.</li>
+        <li>Plus truthful serialization encoding declarations. Binding-side adoption of the new APIs follows.</li>
+      </ul>
+      <p><a href={`${SITE.githubC}/blob/main/CHANGELOG.md`}>Full changelog in the repo →</a></p>
+
+      <hr class="asterism" />
+
+      <h2>leptris (Python) <span class="pill">v1.6.1</span> — every operation beats lxml</h2>
+      <p><span class="pill periwinkle">2026-08-23</span> — the accelerator release.</p>
+      <ul>
+        <li><strong>v1.6.0 — the C accelerator.</strong> Cost accounting showed the entire remaining gap to lxml was Python object construction (~0.10 µs per Element). A ~180-line abi3 accelerator (<code>_leptrisaccel</code>) moved Element allocation to C — 0.026 µs each — while the whole API surface stays in Python, attached onto the C heap type. Wheels ship it compiled; without a toolchain the package degrades to the equivalent pure-Python class (<code>LEPTRIS_PURE=1</code> forces it).</li>
+        <li><strong>Final scoreboard vs lxml 6.0.2</strong> (macOS arm64, py3.10, libleptris 1.3.0): parse 8×, <code>count()</code> 4.7×, ID predicates 10×, price predicates 5.3×, serialize 3.7×, <code>//book</code> (100) 1.9× <em>win</em>, union (200) 1.5× <em>win</em>, traversal (401) 18.0 vs 21.6 µs — <strong>1.2× win</strong>. Every operation.</li>
+        <li><strong>v1.6.1 — five wheels + sdist on PyPI.</strong> cp39-abi3 wheels for macOS arm64/x86_64, manylinux x86_64/aarch64, and Windows — the manylinux aarch64 wheel builds natively on an arm runner (1.6.0&rsquo;s emulated build had silently skipped it). pip-resolvable, accelerator confirmed inside every wheel.</li>
+      </ul>
+      <p><a href={`${SITE.githubPy}/blob/main/CHANGELOG.md`}>Full changelog in leptris-py →</a></p>
+
+      <hr class="asterism" />
+
       <h2>libleptris <span class="pill">v1.3.0</span></h2>
-      <p><span class="pill periwinkle">2026-08-23</span> — the C core. Current release: the concurrency and EXSLT drop.</p>
+      <p><span class="pill periwinkle">2026-08-23</span> — the C core: the concurrency and EXSLT drop.</p>
       <ul>
         <li><strong>EXSLT extension pack</strong> — <code>leptris_exslt_enable(doc)</code> activates 15 native handlers: <code>str:</code>replace/tokenize/split/concat/padding, <code>set:</code>distinct/intersection/difference/leading/trailing, <code>math:</code>max/min/abs/sqrt/power.</li>
         <li><strong>Thread-safe error reporting</strong> — <code>leptris_last_error()</code> is thread-local; parse failures record a message with byte offset; failing XPath evaluations snapshot into a per-document slot (<code>leptris_document_last_error</code>). Parse-error positions via <code>leptris_last_error_position</code> — XMLSyntaxError/Nokogiri parity.</li>
@@ -45,6 +69,12 @@ import { SITE, VERSIONS } from '~/data/site';
         <li><strong>Releases</strong> — fully automated release PRs: changelog drafted from conventional commits, notes embedded in the PR body.</li>
       </ul>
       <p><a href={`${SITE.githubC}/blob/main/CHANGELOG.md`}>Full changelog in the repo →</a></p>
+
+      <hr class="asterism" />
+
+      <h2>leptris gem <span class="pill">v1.4.0</span></h2>
+      <p><span class="pill periwinkle">2026-08-23</span> — the Ruby binding, in lockstep with libleptris v1.4.0. Binding-side adoption of the pull/iterparse/compiled-XPath faces follows.</p>
+      <p><a href={`${SITE.githubRuby}/blob/main/CHANGELOG.md`}>Full changelog in leptris-ruby →</a></p>
 
       <hr class="asterism" />
 

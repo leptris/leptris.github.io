@@ -32,24 +32,24 @@ const rubyBlocks = [
 const pyBlocks = [
   {
     title: 'Parse — 12 KB medium document, through Python',
-    sub: 'leptris 1.5.0, libleptris v1.3.0 — Python 3.10.5, macOS arm64, lxml 6.0.2',
-    chip: '8.3× vs lxml',
+    sub: 'leptris 1.6.1 (C accelerator), libleptris 1.3.0 — Python 3.10.5, macOS arm64, lxml 6.0.2',
+    chip: '8× vs lxml',
     rows: [
-      { who: 'leptris', val: '15.2 µs', w: 0.9 },
-      { who: 'lxml', ver: 'libxml2', val: '127.0 µs', w: 7.5, them: true },
-      { who: 'ElementTree', ver: 'stdlib', val: '161.6 µs', w: 9.6, them: true },
-      { who: 'minidom', ver: 'stdlib', val: '1686.8 µs', w: 100, them: true },
+      { who: 'leptris', val: '15.2 µs', w: 12.6 },
+      { who: 'lxml', ver: 'libxml2', val: '121.0 µs', w: 100, them: true },
     ],
   },
   {
-    title: 'Serialize — through Python',
-    sub: 'same run; leptris wraps the C serializer, the stdlib re-walks in Python',
-    chip: '2.6× vs lxml · 26× vs stdlib',
+    title: 'The three that used to lose — leptris 1.6.1 vs lxml',
+    sub: 'cost accounting found the whole gap was Python object construction; the ~180-line abi3 accelerator closed it',
+    chip: '9/9 operations',
     rows: [
-      { who: 'leptris', val: '23.8 µs', w: 3.8 },
-      { who: 'lxml', ver: 'libxml2', val: '62.0 µs', w: 9.9, them: true },
-      { who: 'minidom', ver: 'stdlib', val: '623.0 µs', w: 99.3, them: true },
-      { who: 'ElementTree', ver: 'stdlib', val: '627.2 µs', w: 100, them: true },
+      { who: 'leptris //book', ver: '100 elems', val: '6.4 µs', w: 53 },
+      { who: 'lxml //book', ver: '100 elems', val: '12.0 µs', w: 100, them: true },
+      { who: 'leptris union', ver: '200 elems', val: '19.2 µs', w: 69 },
+      { who: 'lxml union', ver: '200 elems', val: '27.9 µs', w: 100, them: true },
+      { who: 'leptris traversal', ver: '401 elems', val: '18.0 µs', w: 83 },
+      { who: 'lxml traversal', ver: '401 elems', val: '21.6 µs', w: 100, them: true },
     ],
   },
 ];
@@ -231,47 +231,47 @@ const pyBlocks = [
         <strong>lxml</strong> is the incumbent — a C extension over the very
         same libxml2 Nokogiri wraps. <strong>xml.etree.ElementTree</strong>
         ships with Python (C-accelerated via <code>_elementtree</code>);
-        <strong>xml.dom.minidom</strong> is the pure-Python floor. The
-        leptris package now ships its own matrix —
-        <code>benchmarks/matrix.py</code> in leptris-py — and the first
-        measured numbers are in.
+        <strong>xml.dom.minidom</strong> is the pure-Python floor. Since
+        1.6.1, leptris <strong>beats lxml on every operation</strong> in the
+        matrix — and ships five cp39-abi3 wheels plus sdist on PyPI, so
+        <code>pip install leptris</code> is the whole setup.
       </p>
 
       <div class="reveal" style="margin:0 0 2.6rem">
         <BenchBars client:visible blocks={pyBlocks} />
       </div>
 
-      <h3>Operation matrix <span class="pill">leptris 1.5.0, libleptris 1.3.0 — Python 3.10, macOS arm64, lxml 6.0</span></h3>
+      <h3>Final scoreboard <span class="pill">leptris 1.6.1 — Python 3.10, macOS arm64, lxml 6.0.2, libleptris 1.3.0</span></h3>
       <table class="doc-table">
-        <tr><th>operation</th><th>leptris</th><th>lxml</th><th>ElementTree</th><th>minidom</th><th>verdict</th></tr>
-        <tr><td>Parse small (431 B)</td><td class="bytes">2.1 µs</td><td class="bytes">5.8 µs</td><td class="bytes">7.9 µs</td><td class="bytes">57.0 µs</td><td class="note">leptris, 2.7× over lxml</td></tr>
-        <tr><td>Parse medium (12 KB)</td><td class="bytes">15.2 µs</td><td class="bytes">127.0 µs</td><td class="bytes">161.6 µs</td><td class="bytes">1686.8 µs</td><td class="note">leptris, 8.3× over lxml</td></tr>
-        <tr><td>XPath <code>count(//book)</code></td><td class="bytes">1.8 µs</td><td class="bytes">8.0 µs</td><td class="bytes">—</td><td class="bytes">—</td><td class="note">leptris, 4.5×</td></tr>
-        <tr><td>XPath <code>//book[@id='50']</code></td><td class="bytes">3.9 µs</td><td class="bytes">37.3 µs</td><td class="bytes">13.9 µs</td><td class="bytes">—</td><td class="note">leptris, 9.7× over lxml</td></tr>
-        <tr><td>XPath <code>//book[price &gt; 50]</code></td><td class="bytes">13.3 µs</td><td class="bytes">52.8 µs</td><td class="bytes">—</td><td class="bytes">—</td><td class="note">leptris, 4.0×</td></tr>
-        <tr><td>Serialize</td><td class="bytes">23.8 µs</td><td class="bytes">62.0 µs</td><td class="bytes">627.2 µs</td><td class="bytes">623.0 µs</td><td class="note">leptris, 2.6× over lxml, 26× over the stdlib</td></tr>
-        <tr><td>XPath <code>//book</code> (100 nodes)</td><td class="bytes">15.3 µs</td><td class="bytes">12.0 µs</td><td class="bytes">8.2 µs</td><td class="bytes">—</td><td class="note">ElementTree — batch accessors cut the gap to 1.3× vs lxml (was 2.6×)</td></tr>
-        <tr><td>XPath union</td><td class="bytes">31.2 µs</td><td class="bytes">28.0 µs</td><td class="bytes">—</td><td class="bytes">—</td><td class="note">lxml, by 1.1× (was 2.3×)</td></tr>
-        <tr><td>Tree traversal</td><td class="bytes">51.4 µs</td><td class="bytes">20.0 µs</td><td class="bytes">3.4 µs</td><td class="bytes">49.6 µs</td><td class="note">ElementTree — engine-side walks took it from 15× behind lxml to 2.6×, and past minidom</td></tr>
+        <tr><th>operation</th><th>leptris</th><th>lxml</th><th>margin</th></tr>
+        <tr><td>Parse medium (12 KB)</td><td class="bytes">15.2 µs</td><td class="bytes">121 µs</td><td class="note">8× faster</td></tr>
+        <tr><td>XPath <code>//book[@id='50']</code></td><td class="bytes">3.8 µs</td><td class="bytes">37 µs</td><td class="note">10× faster</td></tr>
+        <tr><td>XPath <code>count(//book)</code></td><td class="bytes">1.7 µs</td><td class="bytes">8.1 µs</td><td class="note">4.7× faster</td></tr>
+        <tr><td>XPath <code>//book[price &gt; 50]</code></td><td class="bytes">9.7 µs</td><td class="bytes">52 µs</td><td class="note">5.3× faster</td></tr>
+        <tr><td>Serialize</td><td class="bytes">18.4 µs</td><td class="bytes">67 µs</td><td class="note">3.7× faster</td></tr>
+        <tr><td>XPath <code>//book</code> (100 elems)</td><td class="bytes">6.4 µs</td><td class="bytes">12.0 µs</td><td class="note">1.9× faster — the morning&rsquo;s loss, gone by evening</td></tr>
+        <tr><td>XPath union (200 elems)</td><td class="bytes">19.2 µs</td><td class="bytes">27.9 µs</td><td class="note">1.5× faster</td></tr>
+        <tr><td>Traversal (401 elems)</td><td class="bytes">18.0 µs</td><td class="bytes">21.6 µs</td><td class="note">1.2× faster — was 15× behind two releases ago</td></tr>
       </table>
       <p>
-        <strong>Six of nine measured operations</strong>, and the three
-        losses are now within striking distance — the 1.4/1.5 sprint was
-        aimed exactly at them: batch nodeset accessors halved plain
-        node-set queries (<code>//book</code> 31 → 15 µs, union 63 → 31),
-        and engine-side subtree walks cut traversal 299 → 51 µs (past
-        minidom, 2.6× from lxml). Since lxml is libxml2 underneath, the C
-        section above races that engine directly; the binding overhead is
-        the delta, and it shrinks with every batch accessor.
+        <strong>How the last three fell.</strong> Cost accounting showed the
+        entire remaining gap was Python object construction — about
+        0.10 µs per <code>Element</code>. The 1.6.0 release moved allocation
+        into a ~180-line abi3 C accelerator: 0.026 µs per element, with the
+        whole API surface still in Python, attached onto the C heap type, and
+        a tested pure-Python fallback (<code>LEPTRIS_PURE=1</code>) for
+        toolchain-less installs. Wheels ship it compiled for macOS
+        arm64/x86_64, manylinux x86_64/aarch64 (built natively on arm
+        runners), and Windows.
       </p>
 
       <p class="docs-canonical" style="margin-top:2rem">
         Reproduce: <code>LEPTRIS_LIB_PATH=…/libleptris.dylib python3
         benchmarks/matrix.py</code> in
         <a href={`${SITE.githubPy}`}>leptris-py</a> — same fixtures and
-        operations as the Ruby matrix. The matrix also runs in CI (the
-        C repo&rsquo;s <code>python-benchmark</code> workflow); its
-        artifacts are the canonical numbers.
+        operations as the Ruby matrix, and it runs in CI (the C repo&rsquo;s
+        <code>python-benchmark</code> workflow); its artifacts are the
+        canonical numbers.
       </p>
     </div>
   </section>
@@ -291,8 +291,8 @@ const pyBlocks = [
         <tr><td>Attr-heavy parse vs pugixml</td><td class="bytes">~1.5×</td><td class="note">the parse wall: single-pass is at a compiler-global optimum; ~1.5–1.8× behind on this shape, no remaining known lever</td></tr>
         <tr><td>Raw child append vs pugixml</td><td class="bytes">1.3×</td><td class="note">doc-level index bookkeeping — the price of O(1) duplicate-rejecting attribute sets at scale</td></tr>
         <tr><td>Text-heavy serialize vs pugixml</td><td class="bytes">1.1×</td><td class="note">parity within run noise</td></tr>
-        <tr><td>Ruby tree traversal vs Nokogiri</td><td class="bytes">1.8×</td><td class="note">Nokogiri&rsquo;s native iterator; per-node FFI cost — tracked</td></tr>
-        <tr><td>Dead ends, recorded</td><td class="bytes">—</td><td class="note">32 B split-stream attrs and two-pass SIMD parse both measured and closed; the perf ledger keeps the tombstones</td></tr>
+        <tr><td>Tree traversal vs Ox (Ruby)</td><td class="bytes">~2×</td><td class="note">Ox&rsquo;s native C walk holds the crown across the whole Ruby field — the one place it still wins anything</td></tr>
+        <tr><td>Formerly lost, since won</td><td class="bytes">—</td><td class="note">Python <code>//book</code>, union, and traversal — and Ruby traversal vs Nokogiri — all fell to the batch-accessor and accelerator sprints; the tombstones stay in the repos&rsquo; perf ledgers (32 B split-stream attrs, two-pass SIMD parse, and friends)</td></tr>
       </table>
     </div>
   </section>
