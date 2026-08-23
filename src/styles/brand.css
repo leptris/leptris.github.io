@@ -906,7 +906,9 @@ section[data-ghost] > .wrap {
 }
 
 @media (max-width: 720px) {
-  .astro-code {
+  .astro-code,
+  .code-body pre,
+  .show-panel pre {
     white-space: pre-wrap;
     word-break: break-word;
     padding: 1.2rem 1.1rem;
@@ -919,7 +921,8 @@ section[data-ghost] > .wrap {
 
 /* ————— code panels (shiki) ————— */
 .astro-code,
-.code-panel .astro-code {
+.code-body pre,
+.show-panel pre {
   margin: 0;
   padding: 1.6rem 1.7rem;
   max-width: 100%;

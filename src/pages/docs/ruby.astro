@@ -151,6 +151,8 @@ puts doc.to_xml
       <tr><td><code>Document#create_element(name)</code></td><td class="note">detached element owned by the document.</td></tr>
       <tr><td><code>Document#create_text_node</code> / <code>#create_comment</code> / <code>#create_cdata</code> / <code>#create_processing_instruction</code></td><td class="note">text-class and PI factories.</td></tr>
       <tr><td><code>Document#fragment(markup)</code></td><td class="note">parse a fragment (multiple top-level children allowed).</td></tr>
+      <tr><td><code>Leptris::XML::Document.create</code></td><td class="note">empty document with its own memory pool — build without parsing (v{VERSIONS.gem}).</td></tr>
+      <tr><td><code>Document#root=</code></td><td class="note">attach an element as the document root.</td></tr>
       <tr><td><code>Element#name=</code>, <code>#content=</code></td><td class="note">rename / replace inner text.</td></tr>
       <tr><td><code>Element#[]=</code> <span class="pill">alias: set_attribute</span></td><td class="note">add/update an attribute (duplicate-rejecting, per XML 1.0).</td></tr>
       <tr><td><code>Element#remove_attribute</code> <span class="pill">alias: delete</span></td><td class="note">drop an attribute.</td></tr>
@@ -162,6 +164,17 @@ puts doc.to_xml
       <tr><td><code>Element#replace</code> / <code>#swap</code></td><td class="note">replace in parent.</td></tr>
       <tr><td><code>Element#wrap</code></td><td class="note">wrap this element in a new one.</td></tr>
     </table>
+
+    <h3>Building from scratch (no parse)</h3>
+    <p>
+      Since gem v{VERSIONS.gem}, documents can be created empty — no
+      sentinel parse:
+    </p>
+    <CodeBlock lang="ruby" code={`doc  = Leptris::XML::Document.create   # empty document, own pool
+root = doc.create_element("catalog")
+root[:id] = "c1"
+doc.root = root                        # attach the programmatic root
+root.add_child(doc.create_element("title")).content = "Spring"`} />
 
     <h2>Namespaces</h2>
     <CodeBlock lang="ruby" code={`root = doc.root
@@ -194,7 +207,10 @@ doc.canonicalize(exclusive: true, inclusive_namespaces: ["ds"])  # InclusiveName
       <code>Element#to_xml(...)</code> serializes a subtree;
       <code>Document#save(path, **opts)</code> writes to a file;
       <code>#canonicalize</code> <span class="pill periwinkle">alias: c14n</span>
-      covers 1.0 / 1.1 / Exclusive for signatures and hashing.
+      covers 1.0 / 1.1 / Exclusive for signatures and hashing, and
+      <code>Attr#to_xml</code> returns the serialized
+      <code>name="value"</code> form with the five XML special characters
+      escaped.
     </p>
 
     <h2>SAX — streaming for very large documents</h2>

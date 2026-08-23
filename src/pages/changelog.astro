@@ -21,8 +21,34 @@ import { SITE, VERSIONS } from '~/data/site';
 
   <section class="sec" style="padding-top:3rem">
     <div class="wrap prose" style="max-width:60rem">
-      <h2>libleptris <span class="pill">v1.1.2</span></h2>
+      <h2>libleptris <span class="pill">v1.2.0</span></h2>
       <p><span class="pill periwinkle">2026-08-23</span> — the C core. Current release.</p>
+      <ul>
+        <li><strong>Namespace-bound XPath</strong> — <code>LeptrisXPathNsSet</code> + <code>leptris_xpath_eval_ns</code>: prefixed name tests resolve by <em>namespace</em>, matching elements that carry it via any prefix or the default namespace. XPointer <code>xmlns(prefix=uri)</code> components now bind subsequent <code>xpointer()</code> bodies instead of being skipped.</li>
+        <li><strong>Spec fix</strong> — <code>prefix:*</code> name tests were namespace-blind everywhere (<code>//t:*</code> matched every element in the document); now namespace-scoped.</li>
+        <li><strong>Serializer round-trip</strong> — CDATA sections containing <code>]]&gt;</code> split across two sections (the libxml2 technique); element and attribute names emit <code>prefix:name</code> so namespace bindings survive a reparse.</li>
+        <li><strong>Programmatic roots</strong> — <code>leptris_element_create</code>&rsquo;s mutation-block fast path skipped root→doc registration, and <code>leptris_document_free</code> had a use-after-free with programmatic roots (found via the moxml adapter contract, lutaml/moxml#96).</li>
+        <li><strong>Releases</strong> — fully automated release PRs: changelog drafted from conventional commits, notes embedded in the PR body.</li>
+      </ul>
+      <p><a href={`${SITE.githubC}/blob/main/CHANGELOG.md`}>Full changelog in the repo →</a></p>
+
+      <hr class="asterism" />
+
+      <h2>leptris gem <span class="pill">v{VERSIONS.gem}</span></h2>
+      <p><span class="pill periwinkle">{VERSIONS.gemDate}</span> — the Ruby binding, in lockstep with libleptris v1.2.0.</p>
+      <ul>
+        <li><strong><code>Leptris::XML::Document.create</code></strong> — an empty document with its own memory pool; build from scratch, no sentinel parse.</li>
+        <li><strong><code>Document#root=</code></strong> — attach a programmatic root (companion to the moxml Leptris adapter).</li>
+        <li><strong><code>Attr#to_xml</code></strong> — serialized <code>name="value"</code> form with the five XML special characters escaped.</li>
+        <li><strong>Fixes</strong> — <code>Node#text</code> dispatches to <code>#content</code> so subclass overrides are seen; <code>Element#namespace</code> carries the element&rsquo;s own prefix. Pins libleptris v1.2.0, whose fixes close leptris#477.</li>
+        <li><strong>Follow-up</strong> — the namespace-bound XPath face and error introspection are unbound in Ruby as of 1.2.0.</li>
+      </ul>
+      <p><a href={`${SITE.githubRuby}/blob/main/CHANGELOG.md`}>Full changelog in leptris-ruby →</a></p>
+
+      <hr class="asterism" />
+
+      <h2>libleptris <span class="pill">v1.1.2</span></h2>
+      <p><span class="pill periwinkle">2026-08-23</span> — the C core.</p>
       <ul>
         <li><strong>XPath union dedup O(n²) → O(n)</strong> — <code>//name | //item</code> on a 20k-element document: 229 ms → 1.6 ms (~140× faster); multi-context steps dedup at any size.</li>
         <li><strong>Element-index build hashed</strong> — documents with many distinct values (20k unique ids) paid a one-time 300 ms spike on the second query; all three bucket lookups are hashed now (~75×).</li>
@@ -46,8 +72,8 @@ import { SITE, VERSIONS } from '~/data/site';
 
       <hr class="asterism" />
 
-      <h2>leptris gem <span class="pill">v{VERSIONS.gem}</span></h2>
-      <p><span class="pill periwinkle">{VERSIONS.gemDate}</span> — the Ruby binding, in lockstep with libleptris v1.1.2.</p>
+      <h2>leptris gem <span class="pill">v1.1.2</span></h2>
+      <p><span class="pill periwinkle">2026-08-22</span> — the Ruby binding, in lockstep with libleptris v1.1.2.</p>
       <ul>
         <li><strong>v1.1.2</strong> — bindings for the full v1.1.0+ public surface: attribute iteration, the mixed-nodeset API, element prefixes; NodeSets fetch via <code>get_node</code> for all node kinds.</li>
         <li><strong>Since 1.1.1</strong> — <code>Element#each_attribute</code> (O(n) vs the O(n²) index re-walk), <code>Element#prefix</code>, and <strong>precompiled platform gems</strong>: <code>gem install leptris</code> works on x86_64/aarch64-linux (incl. musl), mingw/ucrt Windows, and x86_64/arm64 macOS — no system library, no env vars.</li>

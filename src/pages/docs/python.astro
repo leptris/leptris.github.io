@@ -8,19 +8,19 @@ import { SITE } from '~/data/site';
 
 <BaseLayout
   title="Python — leptris docs"
-  description="pyleptris: the Python binding for libleptris via cffi (ABI mode). Parse, navigate, query with XPath 1.0, and serialize."
+  description="The leptris Python package: libleptris via cffi (ABI mode). Parse, navigate, query with XPath 1.0, and serialize."
 >
   <DocsShell
     crumb="Python"
-    title="Python — pyleptris"
-    lede="The Python binding wraps libleptris via cffi in ABI mode: a single cdef mirroring the public headers. Parse, navigate, query, serialize — same core, same bounds."
+    title="Python — the leptris package"
+    lede="The Python binding wraps libleptris via cffi in ABI mode: a single cdef mirroring the public headers. Parse, navigate, query, serialize — same core, same bounds. It lives in its own repository, leptris-py (formerly the pyleptris binding)."
   >
     <h2>Setup</h2>
     <p>
-      <code>pyleptris</code> publishes to PyPI, with releases built and
-      tested on Linux, macOS, and Windows:
+      The package publishes to PyPI as <code>leptris</code>, with releases
+      built and tested on Linux, macOS, and Windows:
     </p>
-    <CodeBlock lang="bash" code={`pip install pyleptris`} />
+    <CodeBlock lang="bash" code={`pip install leptris`} />
     <p>
       If the native <code>libleptris</code> shared library is not on the
       loader path for your platform, build it from source (see
@@ -32,13 +32,13 @@ cmake --build build --target leptris_shared
 export LEPTRIS_LIB_PATH=$PWD/build/src/libleptris.dylib`} />
 
     <h2>Quick start</h2>
-    <CodeBlock lang="python" code={`from pyleptris import Document
+    <CodeBlock lang="python" code={`from leptris import Document
 
 doc = Document.parse('<root><item id="1">hello</item></root>')
 root = doc.root
-print(root.name)                        # => "root"
-print(root.first_child_element.attribute('id'))  # => "1"
-print(doc.xpath('count(//item)'))       # => 1.0
+print(root.name)                                  # => "root"
+print(root.first_child_element.attribute('id'))   # => "1"
+print(doc.xpath('count(//item)'))                 # => 1.0
 doc.close()`} />
 
     <h2>The surface</h2>
@@ -46,7 +46,6 @@ doc.close()`} />
       <li><code>Document.parse(string)</code> — the entry point.</li>
       <li><code>Document#root</code>, <code>Node#name</code> — navigation mirrors the C element surface.</li>
       <li><code>Document#xpath(expr)</code> — typed XPath 1.0 results: nodesets, booleans, numbers, strings.</li>
-      <li><code>Document#serialize()</code> — output writer with indent options.</li>
       <li><code>Document#close()</code> — releases the pool; the same document-owned memory contract as every binding.</li>
     </ul>
     <Callout>
@@ -59,7 +58,7 @@ doc.close()`} />
 
     <h2>Where next</h2>
     <ul>
-      <li><a href={`${SITE.githubC}/tree/main/bindings/python`}>The binding in the repo</a> — source and tests.</li>
+      <li><a href={`${SITE.githubPy}`}>The binding in its own repo</a> — leptris-py, source and tests.</li>
       <li><a href="/docs/internals">Internals &amp; FFI</a> — the ABI contract the mirror implements.</li>
     </ul>
   </DocsShell>

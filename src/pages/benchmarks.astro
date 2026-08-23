@@ -206,13 +206,13 @@ const rubyBlocks = [
         <strong>lxml</strong> is the incumbent — a C extension over the very
         same libxml2 Nokogiri wraps. <strong>xml.etree.ElementTree</strong>
         ships with Python (C-accelerated via <code>_elementtree</code>);
-        <strong>xml.dom.minidom</strong> is the pure-Python floor. pyleptris
+        <strong>xml.dom.minidom</strong> is the pure-Python floor. The leptris package
         entered the PyPI pipeline in lib v{VERSIONS.lib}; the measured matrix
         against these three is the next harness to land.
       </p>
       <table class="doc-table">
         <tr><th>library</th><th>implementation</th><th>engine</th><th>status</th></tr>
-        <tr><td><strong>pyleptris</strong></td><td>cffi (ABI mode)</td><td class="note">libleptris — this project</td><td class="note">matrix pending — harness next</td></tr>
+        <tr><td><strong>leptris</strong> (py)</td><td>cffi (ABI mode)</td><td class="note">libleptris — this project</td><td class="note">matrix pending — harness next</td></tr>
         <tr><td><strong>lxml</strong></td><td>C extension</td><td class="note">libxml2 / libxslt</td><td class="note">the incumbent; see the libxml2 rows in section 01 for the engine-level race</td></tr>
         <tr><td><strong>ElementTree</strong></td><td>stdlib, C-accelerated</td><td class="note">_elementtree</td><td class="note">in the matrix when the harness lands</td></tr>
         <tr><td><strong>minidom</strong></td><td>stdlib, pure Python</td><td class="note">—</td><td class="note">the floor of the field</td></tr>
@@ -227,7 +227,7 @@ const rubyBlocks = [
         </p>
       </Callout>
       <p class="docs-canonical" style="margin-top:2rem">
-        Race it yourself today: <code>pip install pyleptris</code>, or build
+        Race it yourself today: <code>pip install leptris</code>, or build
         the core (<code>-DLEPTRIS_BUILD_SHARED=ON</code>) and point
         <code>LEPTRIS_LIB_PATH</code> at it — see
         <a href="/docs/python">the Python guide</a>.
