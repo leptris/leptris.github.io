@@ -136,6 +136,23 @@ doc.css("book:first-child")               # first <book>`} />
     </ul>
     <p>For anything more sophisticated, drop down to <code>xpath</code>.</p>
 
+    <h3>EXSLT extensions</h3>
+    <p>
+      Since gem v{VERSIONS.gem}, <code>doc.exslt</code> enables the
+      first-party extension pack — fifteen native C handlers, no
+      interpreted callbacks:
+    </p>
+    <CodeBlock lang="ruby" code={`doc.exslt   # enable on this document
+doc.xpath("str:tokenize(//summary, ', ')")
+doc.xpath("set:difference(//a, //b)")
+doc.xpath("math:max(//price)")`} />
+    <p>
+      <code>str:</code> replace / tokenize / split / concat / padding ·
+      <code>set:</code> distinct / intersection / difference / leading / trailing ·
+      <code>math:</code> max / min / abs / sqrt / power. Per-document —
+      enabling costs nothing until an extension function is called.
+    </p>
+
     <h2>Building and mutating</h2>
     <CodeBlock lang="ruby" code={`doc  = Leptris::XML.parse("<root/>")
 book = doc.create_element("book")

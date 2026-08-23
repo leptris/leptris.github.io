@@ -32,24 +32,24 @@ const rubyBlocks = [
 const pyBlocks = [
   {
     title: 'Parse — 12 KB medium document, through Python',
-    sub: 'leptris 1.3.1, libleptris v1.2.0 — Python 3.10.5, macOS arm64, lxml 6.0.2',
-    chip: '8× vs lxml',
+    sub: 'leptris 1.5.0, libleptris v1.3.0 — Python 3.10.5, macOS arm64, lxml 6.0.2',
+    chip: '8.3× vs lxml',
     rows: [
-      { who: 'leptris', val: '14.9 µs', w: 0.9 },
-      { who: 'lxml', ver: 'libxml2', val: '119.4 µs', w: 7.4, them: true },
-      { who: 'ElementTree', ver: 'stdlib', val: '158.1 µs', w: 9.7, them: true },
-      { who: 'minidom', ver: 'stdlib', val: '1623.6 µs', w: 100, them: true },
+      { who: 'leptris', val: '15.2 µs', w: 0.9 },
+      { who: 'lxml', ver: 'libxml2', val: '127.0 µs', w: 7.5, them: true },
+      { who: 'ElementTree', ver: 'stdlib', val: '161.6 µs', w: 9.6, them: true },
+      { who: 'minidom', ver: 'stdlib', val: '1686.8 µs', w: 100, them: true },
     ],
   },
   {
     title: 'Serialize — through Python',
     sub: 'same run; leptris wraps the C serializer, the stdlib re-walks in Python',
-    chip: '3.6× vs lxml · 15× vs ElementTree',
+    chip: '2.6× vs lxml · 26× vs stdlib',
     rows: [
-      { who: 'leptris', val: '74.6 µs', w: 6.7 },
-      { who: 'lxml', ver: 'libxml2', val: '271.2 µs', w: 24.4, them: true },
-      { who: 'minidom', ver: 'stdlib', val: '581.4 µs', w: 52.4, them: true },
-      { who: 'ElementTree', ver: 'stdlib', val: '1109.8 µs', w: 100, them: true },
+      { who: 'leptris', val: '23.8 µs', w: 3.8 },
+      { who: 'lxml', ver: 'libxml2', val: '62.0 µs', w: 9.9, them: true },
+      { who: 'minidom', ver: 'stdlib', val: '623.0 µs', w: 99.3, them: true },
+      { who: 'ElementTree', ver: 'stdlib', val: '627.2 µs', w: 100, them: true },
     ],
   },
 ];
@@ -241,38 +241,37 @@ const pyBlocks = [
         <BenchBars client:visible blocks={pyBlocks} />
       </div>
 
-      <h3>Operation matrix <span class="pill">leptris 1.3.1 — Python 3.10, macOS arm64, lxml 6.0</span></h3>
+      <h3>Operation matrix <span class="pill">leptris 1.5.0, libleptris 1.3.0 — Python 3.10, macOS arm64, lxml 6.0</span></h3>
       <table class="doc-table">
         <tr><th>operation</th><th>leptris</th><th>lxml</th><th>ElementTree</th><th>minidom</th><th>verdict</th></tr>
-        <tr><td>Parse small (431 B)</td><td class="bytes">2.2 µs</td><td class="bytes">5.8 µs</td><td class="bytes">7.9 µs</td><td class="bytes">53.4 µs</td><td class="note">leptris, 2.6× over lxml</td></tr>
-        <tr><td>Parse medium (12 KB)</td><td class="bytes">14.9 µs</td><td class="bytes">119.4 µs</td><td class="bytes">158.1 µs</td><td class="bytes">1623.6 µs</td><td class="note">leptris, 8× over lxml</td></tr>
-        <tr><td>XPath <code>count(//book)</code></td><td class="bytes">1.7 µs</td><td class="bytes">8.0 µs</td><td class="bytes">—</td><td class="bytes">—</td><td class="note">leptris, 4.6×</td></tr>
-        <tr><td>XPath <code>//book[@id='50']</code></td><td class="bytes">3.4 µs</td><td class="bytes">37.9 µs</td><td class="bytes">12.8 µs</td><td class="bytes">—</td><td class="note">leptris, 11× over lxml</td></tr>
-        <tr><td>XPath <code>//book[price &gt; 50]</code></td><td class="bytes">20.6 µs</td><td class="bytes">49.7 µs</td><td class="bytes">—</td><td class="bytes">—</td><td class="note">leptris, 2.4×</td></tr>
-        <tr><td>Serialize</td><td class="bytes">74.6 µs</td><td class="bytes">271.2 µs</td><td class="bytes">1109.8 µs</td><td class="bytes">581.4 µs</td><td class="note">leptris, 3.6× over lxml, 15× over ElementTree</td></tr>
-        <tr><td>XPath <code>//book</code> (100 nodes)</td><td class="bytes">31.2 µs</td><td class="bytes">12.0 µs</td><td class="bytes">9.9 µs</td><td class="bytes">—</td><td class="note">ElementTree — wrapper materialization, ~0.29 µs/element gap tracked upstream</td></tr>
-        <tr><td>XPath union</td><td class="bytes">63.1 µs</td><td class="bytes">28.0 µs</td><td class="bytes">—</td><td class="bytes">—</td><td class="note">lxml, 2.3×</td></tr>
-        <tr><td>Tree traversal</td><td class="bytes">299.0 µs</td><td class="bytes">19.8 µs</td><td class="bytes">3.4 µs</td><td class="bytes">72.8 µs</td><td class="note">ElementTree — per-node FFI; 1.3.1 cut it 45%, C-side batch accessors next</td></tr>
+        <tr><td>Parse small (431 B)</td><td class="bytes">2.1 µs</td><td class="bytes">5.8 µs</td><td class="bytes">7.9 µs</td><td class="bytes">57.0 µs</td><td class="note">leptris, 2.7× over lxml</td></tr>
+        <tr><td>Parse medium (12 KB)</td><td class="bytes">15.2 µs</td><td class="bytes">127.0 µs</td><td class="bytes">161.6 µs</td><td class="bytes">1686.8 µs</td><td class="note">leptris, 8.3× over lxml</td></tr>
+        <tr><td>XPath <code>count(//book)</code></td><td class="bytes">1.8 µs</td><td class="bytes">8.0 µs</td><td class="bytes">—</td><td class="bytes">—</td><td class="note">leptris, 4.5×</td></tr>
+        <tr><td>XPath <code>//book[@id='50']</code></td><td class="bytes">3.9 µs</td><td class="bytes">37.3 µs</td><td class="bytes">13.9 µs</td><td class="bytes">—</td><td class="note">leptris, 9.7× over lxml</td></tr>
+        <tr><td>XPath <code>//book[price &gt; 50]</code></td><td class="bytes">13.3 µs</td><td class="bytes">52.8 µs</td><td class="bytes">—</td><td class="bytes">—</td><td class="note">leptris, 4.0×</td></tr>
+        <tr><td>Serialize</td><td class="bytes">23.8 µs</td><td class="bytes">62.0 µs</td><td class="bytes">627.2 µs</td><td class="bytes">623.0 µs</td><td class="note">leptris, 2.6× over lxml, 26× over the stdlib</td></tr>
+        <tr><td>XPath <code>//book</code> (100 nodes)</td><td class="bytes">15.3 µs</td><td class="bytes">12.0 µs</td><td class="bytes">8.2 µs</td><td class="bytes">—</td><td class="note">ElementTree — batch accessors cut the gap to 1.3× vs lxml (was 2.6×)</td></tr>
+        <tr><td>XPath union</td><td class="bytes">31.2 µs</td><td class="bytes">28.0 µs</td><td class="bytes">—</td><td class="bytes">—</td><td class="note">lxml, by 1.1× (was 2.3×)</td></tr>
+        <tr><td>Tree traversal</td><td class="bytes">51.4 µs</td><td class="bytes">20.0 µs</td><td class="bytes">3.4 µs</td><td class="bytes">49.6 µs</td><td class="note">ElementTree — engine-side walks took it from 15× behind lxml to 2.6×, and past minidom</td></tr>
       </table>
       <p>
-        <strong>Six of nine measured operations</strong> — parse by wide
-        margins, both predicate shapes, <code>count()</code>, and a 15×
-        serialize gap over the stdlib. The binding&rsquo;s own 1.3.1
-        release was tuned against this matrix: nodeset materialization
-        ~1.6× faster, traversal −45% (element-level sibling chains,
-        <code>__slots__</code>). The three losses are binding-level with
-        known causes and upstream tracks — batch traversal and compiled
-        node-set accessors, the same faces the Ruby binding already has.
-        Since lxml is libxml2 underneath, the C section above races that
-        engine directly; the binding overhead is the delta.
+        <strong>Six of nine measured operations</strong>, and the three
+        losses are now within striking distance — the 1.4/1.5 sprint was
+        aimed exactly at them: batch nodeset accessors halved plain
+        node-set queries (<code>//book</code> 31 → 15 µs, union 63 → 31),
+        and engine-side subtree walks cut traversal 299 → 51 µs (past
+        minidom, 2.6× from lxml). Since lxml is libxml2 underneath, the C
+        section above races that engine directly; the binding overhead is
+        the delta, and it shrinks with every batch accessor.
       </p>
 
       <p class="docs-canonical" style="margin-top:2rem">
         Reproduce: <code>LEPTRIS_LIB_PATH=…/libleptris.dylib python3
         benchmarks/matrix.py</code> in
         <a href={`${SITE.githubPy}`}>leptris-py</a> — same fixtures and
-        operations as the Ruby matrix. The nightly CI workflow lands next;
-        until then these are labeled as a first local run.
+        operations as the Ruby matrix. The matrix also runs in CI (the
+        C repo&rsquo;s <code>python-benchmark</code> workflow); its
+        artifacts are the canonical numbers.
       </p>
     </div>
   </section>

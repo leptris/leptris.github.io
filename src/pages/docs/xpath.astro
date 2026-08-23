@@ -117,6 +117,33 @@ import { SITE } from '~/data/site';
       queries is on the roadmap.
     </p>
 
+    <h2>EXSLT — the extension pack</h2>
+    <p>
+      Since lib v1.3.0, <code>leptris_exslt_enable(doc)</code> activates
+      <strong>15 native handlers</strong> on a document — first-party C
+      implementations, not interpreted callbacks:
+    </p>
+    <ul>
+      <li><code>str:</code> — <code>replace</code>, <code>tokenize</code> (character-set delimiters), <code>split</code> (whole-pattern substrings), <code>concat</code>, <code>padding</code></li>
+      <li><code>set:</code> — <code>distinct</code>, <code>intersection</code>, <code>difference</code>, <code>leading</code>, <code>trailing</code></li>
+      <li><code>math:</code> — <code>max</code>, <code>min</code>, <code>abs</code>, <code>sqrt</code>, <code>power</code></li>
+    </ul>
+    <p>
+      From Ruby: <code>doc.exslt</code> then query as usual. The extension
+      is per-document — enabling it costs nothing until an extension
+      function is called.
+    </p>
+
+    <h2>Thread safety</h2>
+    <p>
+      One document per thread needs no locking; sharing documents
+      read-only across threads is safe. The XPath AST/bytecode cache is
+      mutex-guarded and pin-counted, and <code>leptris_thread_cleanup()</code>
+      drains per-thread caches when worker threads exit. Error reporting is
+      thread-local, with per-document snapshots for XPath failures — the
+      full suite runs ThreadSanitizer-clean.
+    </p>
+
     <h2>Using it</h2>
     <CodeBlock lang="c" code={`LeptrisXPathResult r = leptris_xpath_eval(doc, NULL, "//item[@price > 10]");
 if (r) {

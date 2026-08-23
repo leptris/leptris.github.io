@@ -56,23 +56,25 @@ unbeaten.
 
 **Python — the incumbent's race**, against lxml, ElementTree, and
 minidom. The binding ships its own matrix (the Python twin of the Ruby
-harness), and the 1.3.1 release was tuned against it — nodeset
-materialization ~1.6× faster, traversal −45%. Current numbers
-(Python 3.10, arm64, lxml 6.0):
+harness) and runs it in CI — and the 1.4/1.5 line was aimed squarely at
+its losses: batch nodeset accessors halved plain queries, and
+engine-side subtree walks cut traversal 299 → 51 µs. Current numbers
+(leptris 1.5.0, libleptris 1.3.0, Python 3.10, arm64, lxml 6.0):
 
 | operation | leptris | lxml | ElementTree | winner |
 |---|---:|---:|---:|---|
-| parse small (431 B) | **2.2 µs** | 5.8 µs | 7.9 µs | leptris |
-| parse medium (12 KB) | **14.9 µs** | 119.4 µs | 158.1 µs | leptris |
-| `count(//book)` | **1.7 µs** | 8.0 µs | — | leptris |
-| `//book[@id='50']` | **3.4 µs** | 37.9 µs | 12.8 µs | leptris |
-| serialize | **74.6 µs** | 271.2 µs | 1109.8 µs | leptris |
-| `//book` (100 nodes) | 31.2 µs | 12.0 µs | **9.9 µs** | ElementTree |
-| `//author \| //title` | 63.1 µs | **28.0 µs** | — | lxml |
-| traverse | 299.0 µs | 19.8 µs | **3.4 µs** | ElementTree |
+| parse small (431 B) | **2.1 µs** | 5.8 µs | 7.9 µs | leptris |
+| parse medium (12 KB) | **15.2 µs** | 127.0 µs | 161.6 µs | leptris |
+| `count(//book)` | **1.8 µs** | 8.0 µs | — | leptris |
+| `//book[@id='50']` | **3.9 µs** | 37.3 µs | 13.9 µs | leptris |
+| serialize | **23.8 µs** | 62.0 µs | 627.2 µs | leptris |
+| `//book` (100 nodes) | 15.3 µs | 12.0 µs | **8.2 µs** | ElementTree |
+| `//author \| //title` | 31.2 µs | **28.0 µs** | — | lxml |
+| traverse | 51.4 µs | 20.0 µs | **3.4 µs** | ElementTree |
 
-Six of nine, including a 15× serialize gap over the stdlib — with the
-losses telling you exactly what the binding owes you next.
+Six of nine, including a 26× serialize gap over the stdlib — and the
+three losses are now within striking distance, each of them cut by
+half or better since the first measurement.
 
 ## The ledger of losses
 
@@ -81,10 +83,10 @@ today, in public: attr-heavy parse is ~1.5× behind pugixml (the parse
 wall is at a compiler-global optimum — eleven failed experiments say
 so); raw child append pays 1.3× for the O(1) duplicate-rejecting
 attribute index; in Python, plain nodeset queries materialize a wrapper
-per node (`//book` loses to both lxml and ElementTree, ~0.29 µs per
-element of gap, tracked upstream) and traversal is per-node FFI — 1.3.1
-halved it, and the C-side batch accessors that close it are next on the
-ledger. Each loss has a reason and
+per node (`//book` loses to both lxml and ElementTree — but the batch
+accessors already cut that gap to 1.3× vs lxml) and traversal is
+per-node FFI no longer: engine-side subtree walks took it from 15×
+behind lxml to 2.6×, past minidom. Each loss has a reason and
 an owner; the tombstones of measured dead ends (32-byte split-stream
 attributes, two-pass SIMD) are in the perf ledger for anyone tempted to
 retry them.
