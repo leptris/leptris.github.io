@@ -41,9 +41,11 @@ the **full** logo appears only where the three-hares motif itself is the
 subject (the about page). Both forms ship in light and dark palettes and
 swap with the site theme.
 
-The dunhuang pigment palette (paper, lapis, vermilion, gold, malachite) is
-declared as Tailwind 4 `@theme` tokens in `src/styles/brand.css`, with dark
-variants applied via `prefers-color-scheme` / `[data-theme]`.
+The pastel palette is drawn from the mark's own tones — rose `#d8c2be`,
+periwinkle `#b8b8e1`, sage `#afd3a5` in light mode; salmon `#e19f92`,
+periwinkle `#abb2f6`, pale lime `#cfffa4` in dark mode — declared as
+Tailwind 4 `@theme` tokens in `src/styles/brand.css`, with deep
+text-safe variants for links and labels.
 
 ## Content policy
 

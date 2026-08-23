@@ -44,13 +44,11 @@ puts doc.to_xml(indent: 2)                 # 18 ms for 4.38 MB, parse+serialize`
   {
     label: 'Python',
     html: await hl(
-      `import leptris
+      `from pyleptris import Document
 
-doc = leptris.parse(open("records.xml", "rb").read())
-for rec in doc.xpath("//record"):
-    print(rec.get("id"), rec.text)
-
-print(doc.to_xml(indent=2))`,
+doc = Document.parse(open("records.xml", "rb").read())
+print(doc.xpath("count(//record)"))
+doc.close()`,
       'python',
     ),
   },
@@ -103,24 +101,29 @@ const benchBlocks = [
   <!-- ————— hero ————— -->
   <section class="hero">
     <div class="hero-inner">
-      <div class="hero-medallion reveal">
-        <Logo size={82} alt="leptris — three hares rotor" />
-      </div>
-      <div class="reveal" data-d="1">
+      <div class="hero-copy">
         <span class="etym">lep · hare — tris · three</span>
-        <span class="etym-sub">lepus (Latin, hare) + treis (Greek, three) — the three hares of Dunhuang</span>
+        <h1 class="hero-title">
+          Fast as hares.<br /><em>Contained as a circle.</em>
+        </h1>
+        <p class="hero-lede">
+          <strong>libleptris</strong> parses XML 1.0, evaluates all of
+          XPath 1.0, and streams SAX — in pure C99, with one arena per
+          document and a memory ceiling you can state before you parse.
+        </p>
+        <div class="hero-actions">
+          <a class="btn solid" href="/docs/getting-started">Get started</a>
+          <a class="btn" href="/docs">Read the docs</a>
+        </div>
+        <ul class="hero-points">
+          <li><strong>Speed you can measure</strong> — vectorized scans, one contiguous arena, an open benchmark harness.</li>
+          <li><strong>Memory you can promise</strong> — every allocation bounded at parse time, released in a single call.</li>
+          <li><strong>Nothing behind the ring</strong> — zero required dependencies; the same core from C, Ruby, Python, Rust, or the shell.</li>
+        </ul>
       </div>
-      <h1 class="hero-title reveal" data-d="2">
-        The XML parser with <em>hard memory bounds</em>
-      </h1>
-      <p class="hero-lede reveal" data-d="3">
-        <strong>libleptris</strong> is an XML 1.0 parser, W3C-conformant XPath
-        engine and SAX feed in pure C99 — zero required dependencies, one arena
-        per document, and a memory ceiling you can state before you parse.
-      </p>
-      <div class="hero-actions reveal" data-d="3">
-        <a class="btn solid" href="/docs/getting-started">Get started</a>
-        <a class="btn" href={SITE.githubC}>Source</a>
+      <div class="hero-mark">
+        <Logo size={300} alt="leptris — three hares rotor" />
+        <p class="medallion-caption">speed in the chase — containment in the circle</p>
       </div>
     </div>
   </section>
@@ -186,7 +189,7 @@ const benchBlocks = [
             effectively no cost.
           </p>
         </div>
-        <div class="feat feat-bound green reveal" data-d="1">
+        <div class="feat feat-bound sage reveal" data-d="1">
           <span class="big">1<small> arena per parse</small></span>
           <h3>Hard resource bounds</h3>
           <p>
@@ -205,7 +208,7 @@ const benchBlocks = [
             allocation-failure suites in CI.
           </p>
         </div>
-        <div class="feat feat-compact gold reveal" data-d="1">
+        <div class="feat feat-compact periwinkle reveal" data-d="1">
           <span class="big">64<small> B element · 40 B attr</small></span>
           <h3>Compact by construction</h3>
           <p>
@@ -214,20 +217,21 @@ const benchBlocks = [
             parses into roughly 3 MB of tree.
           </p>
         </div>
-        <div class="feat feat-sax green reveal" data-d="2">
+        <div class="feat feat-sax sage reveal" data-d="2">
           <h3>DOM and SAX, one core</h3>
           <p>
             Streaming SAX with all eleven events beats libxml2&rsquo;s SAX on
             every measured shape — same scanner, same bounds, no DOM required.
           </p>
         </div>
-        <div class="feat feat-bindings gold reveal" data-d="1">
-          <h3>Ruby &amp; Python today</h3>
+        <div class="feat feat-bindings periwinkle reveal" data-d="1">
+          <h3>Four bindings, one core</h3>
           <p>
-            <code>gem leptris</code> and <code>pip leptris</code> wrap the C
-            surface with GC-safe handles. The 4.38 MB real-world document:
-            <strong>18 ms</strong> parse+serialize through Ruby vs
-            Nokogiri&rsquo;s 123 ms. Rust is next.
+            <code>gem leptris</code>, <code>pip pyleptris</code> and the
+            <code>leptris</code> Rust crate wrap the C surface — GC-safe
+            handles in Ruby, Drop-safe wrappers in Rust. The 4.38 MB
+            real-world document: <strong>18 ms</strong> parse+serialize
+            through Ruby vs Nokogiri&rsquo;s 123 ms.
           </p>
         </div>
         <div class="feat feat-cli reveal" data-d="2">
@@ -345,11 +349,12 @@ doc.to_xml        # => "<greet>hello</greet>"`}</pre>
         </div>
         <div class="install-card reveal" data-d="2">
           <h4>Python</h4>
-          <pre>{`pip install leptris
+          <pre>{`pip install pyleptris
 
-import leptris
-doc = leptris.parse("<greet>hello</greet>")
-doc.to_xml()       # => '<greet>hello</greet>'`}</pre>
+from pyleptris import Document
+doc = Document.parse("<greet>hello</greet>")
+print(doc.root.name)   # => "greet"
+doc.close()`}</pre>
         </div>
       </div>
 

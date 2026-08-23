@@ -93,10 +93,14 @@ import { SITE } from '~/data/site';
       <tr><td><code>/catalog</code></td><td class="bytes">0.53 µs</td><td class="bytes">~1 µs</td><td class="note">1.9× faster</td></tr>
     </table>
     <p>
-      leptris leads on <strong>all ten</strong> XPath benchmarks. The
-      element index currently accelerates absolute paths and root-context
-      descendant queries; extending it to relative-descendant queries is on
-      the roadmap.
+      leptris leads on <strong>all ten</strong> XPath benchmarks. Release
+      1.1.2 made union deduplication <strong>~140× faster</strong> on large
+      merged sets (<code>//name | //item</code> on 20k elements: 229 ms →
+      1.6 ms), and 1.1.1 made <code>//text()</code> ~7× faster via
+      single-pass pre-order walks that emit results directly in document
+      order. The element index currently accelerates absolute paths and
+      root-context descendant queries; extending it to relative-descendant
+      queries is on the roadmap.
     </p>
 
     <h2>Using it</h2>

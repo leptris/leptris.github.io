@@ -117,11 +117,7 @@ onBeforeUnmount(() => io?.disconnect());
   display: block;
   height: 100%;
   width: 0;
-  background: linear-gradient(
-    90deg,
-    var(--color-vermilion),
-    color-mix(in srgb, var(--color-vermilion) 70%, var(--color-gold))
-  );
+  background: linear-gradient(90deg, var(--color-rose-deep), var(--color-rose));
   border-radius: 4px 0 0 4px;
   transition: width 1.1s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -135,7 +131,7 @@ onBeforeUnmount(() => io?.disconnect());
   white-space: nowrap;
 }
 .bench-vue :deep(.bar-row .val b) {
-  color: var(--color-vermilion-deep);
+  color: var(--color-rose-deep);
   font-weight: 600;
 }
 @media (max-width: 720px) {

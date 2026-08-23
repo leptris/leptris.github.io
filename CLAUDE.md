@@ -55,12 +55,17 @@ pages.
 
 ### Brand tokens live in `src/styles/brand.css`
 
-Tailwind 4 `@theme` defines the dunhuang pigment palette as both CSS
-variables (`--color-paper`, `--color-lapis`, `--color-vermilion`,
-`--color-gold`, `--color-malachite`, …) and utility classes. Dark variants
-override the same variables under `prefers-color-scheme: dark` and
-`[data-theme='dark']`. Fonts are self-hosted via Fontsource
-(Fraunces Variable + IBM Plex Sans/Mono) — no Google Fonts CDN.
+Tailwind 4 `@theme` defines the pastel palette (sourced from the mark's own
+tones) as both CSS variables (`--color-rose`, `--color-periwinkle`,
+`--color-sage`, `--color-paper`, `--color-ink`, `--color-night`, …) and
+utility classes. **Pastels carry surfaces and accents; the `-deep` variants
+(rose-deep, periwinkle-deep) carry text** — never set body text in a plain
+pastel. Dark mode swaps the same variables to the mark's dark-variant tones
+(salmon, periwinkle, pale lime) under `prefers-color-scheme: dark` and
+`[data-theme='dark']`. The hero/stats/CTA band colors live in the
+`--hero-*`/`--stat-*` custom properties, overridden in the same dark blocks.
+Fonts are self-hosted via Fontsource (Fraunces Variable + IBM Plex
+Sans/Mono) — no Google Fonts CDN.
 
 Beyond tokens, `brand.css` carries the shared section styles (`.hero`,
 `.stats`, `.feat-grid`, `.bench-*`, `.doc-table`, `.prose`, `.docs-layout`,

@@ -11,10 +11,10 @@ export const SITE = {
 } as const;
 
 export const VERSIONS = {
-  lib: '1.1.0',
-  libDate: '2026-08-22',
-  gem: '1.1.1',
-  gemDate: '2026-08-22',
+  lib: '1.1.2',
+  libDate: '2026-08-23',
+  gem: '1.1.2',
+  gemDate: '2026-08-23',
 } as const;
 
 export interface NavEntry {

@@ -16,14 +16,17 @@ import { SITE } from '~/data/site';
   >
     <h2>Setup</h2>
     <p>
-      <code>pyleptris</code> needs the <code>cffi</code> package and a
-      <code>libleptris</code> shared library on the host. Build the library
-      with the shared target (see
-      <a href="/docs/getting-started">getting started</a>), then either
-      install it system-wide or point <code>LEPTRIS_LIB_PATH</code> at it:
+      <code>pyleptris</code> publishes to PyPI, with releases built and
+      tested on Linux, macOS, and Windows:
     </p>
-    <CodeBlock lang="bash" code={`pip install cffi
-cmake -B build -S . -DLEPTRIS_BUILD_SHARED=ON
+    <CodeBlock lang="bash" code={`pip install pyleptris`} />
+    <p>
+      If the native <code>libleptris</code> shared library is not on the
+      loader path for your platform, build it from source (see
+      <a href="/docs/getting-started">getting started</a>) and point
+      <code>LEPTRIS_LIB_PATH</code> at it:
+    </p>
+    <CodeBlock lang="bash" code={`cmake -B build -S . -DLEPTRIS_BUILD_SHARED=ON
 cmake --build build --target leptris_shared
 export LEPTRIS_LIB_PATH=$PWD/build/src/libleptris.dylib`} />
 

@@ -71,8 +71,8 @@ const active = ref(0);
   color: var(--color-ink);
 }
 .show-tab.active {
-  color: var(--color-vermilion);
-  border-bottom-color: var(--color-vermilion);
+  color: var(--color-rose-deep);
+  border-bottom-color: var(--color-rose-deep);
 }
 .show-panel :deep(pre.astro-code) {
   margin: 0;
