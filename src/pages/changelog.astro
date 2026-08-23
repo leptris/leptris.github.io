@@ -21,8 +21,22 @@ import { SITE, VERSIONS } from '~/data/site';
 
   <section class="sec" style="padding-top:3rem">
     <div class="wrap prose" style="max-width:60rem">
+      <h2>libleptris <span class="pill">v1.3.0</span></h2>
+      <p><span class="pill periwinkle">2026-08-23</span> — the C core. Current release: the concurrency and EXSLT drop.</p>
+      <ul>
+        <li><strong>EXSLT extension pack</strong> — <code>leptris_exslt_enable(doc)</code> activates 15 native handlers: <code>str:</code>replace/tokenize/split/concat/padding, <code>set:</code>distinct/intersection/difference/leading/trailing, <code>math:</code>max/min/abs/sqrt/power.</li>
+        <li><strong>Thread-safe error reporting</strong> — <code>leptris_last_error()</code> is thread-local; parse failures record a message with byte offset; failing XPath evaluations snapshot into a per-document slot (<code>leptris_document_last_error</code>). Parse-error positions via <code>leptris_last_error_position</code> — XMLSyntaxError/Nokogiri parity.</li>
+        <li><strong>Threading contract documented</strong> — one-document-per-thread needs no locking, read-only sharing is safe; the XPath AST/bytecode cache is mutex-guarded and pin-counted (fixing a real use-after-free under concurrent first evaluation); <code>leptris_thread_cleanup()</code> drains per-thread caches. The full suite is ThreadSanitizer-clean.</li>
+        <li><strong>Batch FFI accessors</strong> — <code>leptris_xpath_result_get_nodes_ex</code> copies every mixed-nodeset entry with its kind; <code>leptris_element_children</code> bulk-fills child elements — closing the per-item dispatch gap to lxml/libxml2 in bindings.</li>
+        <li><strong>Export-surface gate</strong> — CI and ctest diff the shared library&rsquo;s exports against every <code>LEPTRIS_API</code> declaration (196 == 196); header/binary drift now fails the build.</li>
+        <li><strong>Namespace sets from pairs</strong> — <code>leptris_xpath_ns_set_new_from_pairs</code>: one FFI call for the whole prefix/URI array.</li>
+      </ul>
+      <p><a href={`${SITE.githubC}/blob/main/CHANGELOG.md`}>Full changelog in the repo →</a></p>
+
+      <hr class="asterism" />
+
       <h2>libleptris <span class="pill">v1.2.0</span></h2>
-      <p><span class="pill periwinkle">2026-08-23</span> — the C core. Current release.</p>
+      <p><span class="pill periwinkle">2026-08-23</span> — the C core.</p>
       <ul>
         <li><strong>Namespace-bound XPath</strong> — <code>LeptrisXPathNsSet</code> + <code>leptris_xpath_eval_ns</code>: prefixed name tests resolve by <em>namespace</em>, matching elements that carry it via any prefix or the default namespace. XPointer <code>xmlns(prefix=uri)</code> components now bind subsequent <code>xpointer()</code> bodies instead of being skipped.</li>
         <li><strong>Spec fix</strong> — <code>prefix:*</code> name tests were namespace-blind everywhere (<code>//t:*</code> matched every element in the document); now namespace-scoped.</li>
@@ -34,14 +48,24 @@ import { SITE, VERSIONS } from '~/data/site';
 
       <hr class="asterism" />
 
-      <h2>leptris gem <span class="pill">v{VERSIONS.gem}</span></h2>
-      <p><span class="pill periwinkle">{VERSIONS.gemDate}</span> — the Ruby binding, in lockstep with libleptris v1.2.0.</p>
+      <h2>leptris gem <span class="pill">v1.3.0</span></h2>
+      <p><span class="pill periwinkle">2026-08-23</span> — the Ruby binding, in lockstep with libleptris v1.3.0.</p>
+      <ul>
+        <li><strong>EXSLT in Ruby</strong> — <code>Document#exslt</code> enables the first-party <code>str:</code>/<code>set:</code>/<code>math:</code> function pack as native C handlers on that document.</li>
+        <li><strong><code>Document#last_error</code></strong> — per-document error retrieval, the thread-safe successor to the library-global string; <code>leptris_thread_cleanup</code> bound for worker-thread exit.</li>
+        <li><strong>One-call namespace bindings</strong> — namespace-bound XPath builds its set in a single FFI call via the pairs API; <code>NodeSet#each</code> fetches mixed-kind results through the batch accessor (the per-index fallback is gone).</li>
+      </ul>
+      <p><a href={`${SITE.githubRuby}/blob/main/CHANGELOG.md`}>Full changelog in leptris-ruby →</a></p>
+
+      <hr class="asterism" />
+
+      <h2>leptris gem <span class="pill">v1.2.0</span></h2>
+      <p><span class="pill periwinkle">2026-08-23</span> — the Ruby binding, in lockstep with libleptris v1.2.0.</p>
       <ul>
         <li><strong><code>Leptris::XML::Document.create</code></strong> — an empty document with its own memory pool; build from scratch, no sentinel parse.</li>
         <li><strong><code>Document#root=</code></strong> — attach a programmatic root (companion to the moxml Leptris adapter).</li>
         <li><strong><code>Attr#to_xml</code></strong> — serialized <code>name="value"</code> form with the five XML special characters escaped.</li>
         <li><strong>Fixes</strong> — <code>Node#text</code> dispatches to <code>#content</code> so subclass overrides are seen; <code>Element#namespace</code> carries the element&rsquo;s own prefix. Pins libleptris v1.2.0, whose fixes close leptris#477.</li>
-        <li><strong>Follow-up</strong> — the namespace-bound XPath face and error introspection are unbound in Ruby as of 1.2.0.</li>
       </ul>
       <p><a href={`${SITE.githubRuby}/blob/main/CHANGELOG.md`}>Full changelog in leptris-ruby →</a></p>
 
@@ -50,8 +74,11 @@ import { SITE, VERSIONS } from '~/data/site';
       <h2>leptris (Python) <span class="pill">v{VERSIONS.py}</span></h2>
       <p><span class="pill periwinkle">{VERSIONS.pyDate}</span> — the first Python release: an lxml-shaped API.</p>
       <ul>
-        <li><strong>v1.3.0 — breaking, by design.</strong> The API mirrors lxml (the Ruby binding mirrors Nokogiri, so the Python binding mirrors lxml): <code>fromstring</code> / <code>XML</code> / <code>parse</code> / <code>tostring</code> / <code>c14n</code>; <code>Element</code> with Clark-notation <code>tag</code>, <code>text</code>/<code>tail</code>, read-only <code>attrib</code>, <code>getparent</code>/<code>getnext</code>/<code>getprevious</code>, child indexing and slices, the <code>iter</code> family; <code>find</code>/<code>findall</code> accept <strong>full XPath 1.0</strong>; <code>xpath</code> takes <code>namespaces</code> and <code>variables</code> (a leptris extension). New: <code>leptris.sax</code> — one-shot and a constant-memory streaming push parser. The interim 1.2.0 API shipped to no adopters and is replaced outright, not deprecated; from 1.3.0 the package follows its own semver, pinning libleptris via <code>libleptris-version.txt</code>.</li>
-        <li><strong>v1.3.1 — tuned against the benchmark matrix.</strong> Nodeset materialization ~1.6× faster (<code>//book</code> 100 results: 47.9 → 30.4 µs), traversal −45% (element-level sibling chains skip text nodes, halving FFI calls per step; <code>__slots__</code> across the wrappers), <code>getnext</code>/<code>getprevious</code> in single FFI calls.</li>
+        <li><strong>v1.5.0 — adopts libleptris 1.3.0.</strong> <code>Element.sourceline</code> (lxml parity); child iteration via the bulk <code>leptris_element_children</code> fill from 4 children up (2× on wide elements); nodeset materialization via <code>ffi.unpack</code> (13–18% off the wrapper loop); XPath errors prefer the document-scoped <code>leptris_document_last_error</code>.</li>
+        <li><strong>v1.4.1 — engine-side subtree walks.</strong> <code>iter()</code>/<code>iterdescendants()</code> delegate to one C-speed <code>descendant</code> evaluation plus batch materialization: traversal 291 → 58 µs vs lxml&rsquo;s 21 (was 14× behind, now 2.7×).</li>
+        <li><strong>v1.4.0 — batch nodesets.</strong> <code>//book</code> (100 results) 30.4 → 16.4 µs, union 63.4 → 34.4 µs via <code>leptris_xpath_result_get_nodes</code>; <code>leptris.libleptris_version()</code> reports the loaded library at runtime.</li>
+        <li><strong>v1.3.0 — breaking, by design.</strong> The API mirrors lxml (the Ruby binding mirrors Nokogiri, so the Python binding mirrors lxml): <code>fromstring</code> / <code>XML</code> / <code>parse</code> / <code>tostring</code> / <code>c14n</code>; <code>Element</code> with Clark-notation <code>tag</code>, <code>text</code>/<code>tail</code>, read-only <code>attrib</code>, the <code>iter</code> family; <code>find</code>/<code>findall</code> accept <strong>full XPath 1.0</strong>; <code>xpath</code> takes <code>namespaces</code> and <code>variables</code>. New: <code>leptris.sax</code> — one-shot and a constant-memory streaming push parser. The interim 1.2.0 API shipped to no adopters and is replaced outright; the package follows its own semver.</li>
+        <li><strong>v1.3.1 — tuned against the benchmark matrix.</strong> Nodeset materialization ~1.6×, traversal −45% (element-level sibling chains, <code>__slots__</code>), single-FFI sibling accessors.</li>
       </ul>
       <p><a href={`${SITE.githubPy}/blob/main/CHANGELOG.md`}>Full changelog in leptris-py →</a></p>
 
