@@ -3,63 +3,124 @@ import BaseLayout from '~/components/BaseLayout.astro';
 import DocsShell from '~/components/DocsShell.astro';
 import CodeBlock from '~/components/CodeBlock.astro';
 import Callout from '~/components/Callout.astro';
-import { SITE } from '~/data/site';
+import { SITE, VERSIONS } from '~/data/site';
 ---
 
 <BaseLayout
   title="Python — leptris docs"
-  description="The leptris Python package: libleptris via cffi (ABI mode). Parse, navigate, query with XPath 1.0, and serialize."
+  description="The leptris Python package: libleptris behind an lxml-shaped API. fromstring, findall (full XPath 1.0), xpath with namespaces and variables, SAX streaming, C14N."
 >
   <DocsShell
     crumb="Python"
     title="Python — the leptris package"
-    lede="The Python binding wraps libleptris via cffi in ABI mode: a single cdef mirroring the public headers. Parse, navigate, query, serialize — same core, same bounds. It lives in its own repository, leptris-py (formerly the pyleptris binding)."
+    lede={`The Python binding wraps libleptris via cffi and mirrors lxml: parse, query, and serialize code written against lxml's read path ports with an import change. Version ${VERSIONS.py} is the first Python release — its own semver, pinning libleptris ${VERSIONS.lib} via libleptris-version.txt.`}
   >
     <h2>Setup</h2>
     <p>
-      The package publishes to PyPI as <code>leptris</code>, with releases
-      built and tested on Linux, macOS, and Windows:
+      The package publishes to PyPI as <code>leptris</code> (Python 3.9+),
+      built and tested on Linux, macOS, and Windows via trusted publishing:
     </p>
     <CodeBlock lang="bash" code={`pip install leptris`} />
     <p>
       If the native <code>libleptris</code> shared library is not on the
       loader path for your platform, build it from source (see
       <a href="/docs/getting-started">getting started</a>) and point
-      <code>LEPTRIS_LIB_PATH</code> at it:
+      <code>LEPTRIS_LIB_PATH</code> — which must name the library
+      <em>file</em> — at it:
     </p>
     <CodeBlock lang="bash" code={`cmake -B build -S . -DLEPTRIS_BUILD_SHARED=ON
 cmake --build build --target leptris_shared
 export LEPTRIS_LIB_PATH=$PWD/build/src/libleptris.dylib`} />
 
-    <h2>Quick start</h2>
-    <CodeBlock lang="python" code={`from leptris import Document
+    <h2>Quick start — the lxml shape</h2>
+    <CodeBlock lang="python" code={`from leptris import fromstring, tostring
 
-doc = Document.parse('<root><item id="1">hello</item></root>')
-root = doc.root
-print(root.name)                                  # => "root"
-print(root.first_child_element.attribute('id'))   # => "1"
-print(doc.xpath('count(//item)'))                 # => 1.0
-doc.close()`} />
+root = fromstring("<library><book id='1' lang='en'>Ulysses</book></library>")
+
+root.tag                    # "library"
+root[0].get("id")           # "1"
+root[0].attrib              # {"id": "1", "lang": "en"}
+root[0].text                # "Ulysses"
+
+root.xpath("count(//book)")             # 1.0
+[b.text for b in root.findall("book")]  # ["Ulysses"]
+
+tostring(root[0], encoding="unicode")   # "<book id='1' lang='en'>Ulysses</book>"`} />
 
     <h2>The surface</h2>
+    <table class="doc-table">
+      <tr><th>member</th><th>notes</th></tr>
+      <tr><td><code>fromstring</code> / <code>XML</code> / <code>parse</code> / <code>tostring</code> / <code>c14n</code></td><td class="note">module-level, lxml names; <code>parse</code> takes paths and file-likes (no URLs) and returns a <code>Document</code> context manager.</td></tr>
+      <tr><td><code>Element.tag</code> / <code>.text</code> / <code>.tail</code></td><td class="note">ElementTree model; <code>tag</code> uses <code>{'{uri}local'}</code> Clark notation; adjacent text and CDATA runs merge, as lxml&rsquo;s default parser does.</td></tr>
+      <tr><td><code>Element.attrib</code> / <code>.get</code> / <code>.keys</code> / <code>.items</code></td><td class="note"><code>attrib</code> is a read-only Mapping — the parser is read-only.</td></tr>
+      <tr><td><code>elem[i]</code>, <code>len(elem)</code>, iteration, slices</td><td class="note">child indexing, never attribute lookup.</td></tr>
+      <tr><td><code>getparent</code> / <code>getnext</code> / <code>getprevious</code></td><td class="note">navigation; sibling accessors are single FFI calls.</td></tr>
+      <tr><td><code>iter</code> / <code>iterdescendants</code> / <code>itertext</code></td><td class="note">lxml iteration protocol.</td></tr>
+      <tr><td><code>find</code> / <code>findall</code> / <code>findtext</code></td><td class="note">accepts <strong>full XPath 1.0</strong> — a superset of ElementPath — including <code>{'{uri}local'}</code> names.</td></tr>
+      <tr><td><code>xpath(expr, namespaces=…, variables=…)</code></td><td class="note">W3C XPath 1.0; pre-bound namespace prefixes, and <code>variables</code> — a leptris extension.</td></tr>
+      <tr><td><code>namespace</code> / <code>prefix</code></td><td class="note">the element&rsquo;s own namespace binding.</td></tr>
+      <tr><td><code>Document.getroot</code> / <code>write</code> / <code>parse_file</code> / <code>process_xinclude</code></td><td class="note">document lifecycle, file output, XInclude splice.</td></tr>
+      <tr><td><code>leptris.sax</code></td><td class="note">one-shot SAX parse and a streaming push parser — constant memory, events emitted as chunks arrive.</td></tr>
+    </table>
+
+    <h3>Namespaces, variables, canonical XML, SAX</h3>
+    <CodeBlock lang="python" code={`root.xpath("//x:item", namespaces={"x": "urn:ex"})
+root.xpath("//book[@id=$id]", variables={"id": "2"})
+c14n(root, exclusive=True)
+
+from leptris import sax
+sax.parse(xml, handler)                        # one-shot
+with sax.StreamingParser(handler) as parser:   # push, constant memory
+    parser.feed(chunk, final=last)`} />
+
+    <h2>Migrating from lxml</h2>
+    <p>
+      Most read-path code needs only the import change. What is
+      deliberately <strong>absent</strong>, and why:
+    </p>
     <ul>
-      <li><code>Document.parse(string)</code> — the entry point.</li>
-      <li><code>Document#root</code>, <code>Node#name</code> — navigation mirrors the C element surface.</li>
-      <li><code>Document#xpath(expr)</code> — typed XPath 1.0 results: nodesets, booleans, numbers, strings.</li>
-      <li><code>Document#close()</code> — releases the pool; the same document-owned memory contract as every binding.</li>
+      <li><strong>Tree building</strong> (<code>etree.Element</code>, <code>SubElement</code>, <code>append</code>, <code>set</code>) — libleptris is a read-only parser; build trees elsewhere.</li>
+      <li><strong><code>iterparse</code></strong> — use <code>leptris.sax.StreamingParser</code> (callback-based, constant memory).</li>
+      <li><strong>Smart strings</strong> — XPath string and attribute results are plain <code>str</code>.</li>
+      <li><strong><code>nsmap</code></strong> — use <code>namespace</code> / <code>prefix</code> and <code>xpath(namespaces=…)</code>.</li>
+      <li><strong>Compiled XPath objects, parser options, <code>sourceline</code></strong> — upstream asks: a compiled-expression C API, per-parse options, node positions.</li>
+      <li><strong>Undeclared XPath prefixes</strong> evaluate to an empty nodeset instead of raising.</li>
     </ul>
-    <Callout>
+
+    <h2>Memory model</h2>
+    <Callout kind="warn">
       <p>
-        <strong>One cdef, one seam.</strong> The binding&rsquo;s cdef is a
-        mirror of the public headers; CI&rsquo;s drift gate fails on phantom
-        symbols or arity drift between the mirror and the C surface.
+        <strong>The Document owns the tree and its pool.</strong> Accessor
+        strings are copied into Python <code>str</code> at the boundary, so
+        nothing you hold depends on document lifetime after a call returns.
+        Elements keep a reference to their Document, so the pool cannot be
+        freed while any wrapper is alive. Prefer explicit
+        <code>close()</code> or the context manager; using an element after
+        its document is closed raises <code>LeptrisError</code>.
       </p>
     </Callout>
 
+    <h2>Errors</h2>
+    <p>
+      <code>LeptrisError</code> is the base; <code>ParseError</code> and
+      <code>XPathError</code> subclass it, with messages sourced from
+      libleptris itself.
+    </p>
+
+    <h2>Benchmarks</h2>
+    <p>
+      The binding ships <code>benchmarks/matrix.py</code> — the Python twin
+      of the Ruby matrix, same fixtures and operations against lxml,
+      ElementTree, and minidom. Version 1.3.1 was itself tuned against it:
+      nodeset materialization ~1.6×, traversal −45%. Current numbers and
+      the honest losses: <a href="/benchmarks#python">the benchmarks page</a>.
+    </p>
+
     <h2>Where next</h2>
     <ul>
-      <li><a href={`${SITE.githubPy}`}>The binding in its own repo</a> — leptris-py, source and tests.</li>
-      <li><a href="/docs/internals">Internals &amp; FFI</a> — the ABI contract the mirror implements.</li>
+      <li><a href={`${SITE.githubPy}`}>leptris-py</a> — source, tests, and the benchmark matrix.</li>
+      <li><a href="/benchmarks">Benchmarks</a> — the per-language race.</li>
+      <li><a href="/docs/internals">Internals &amp; FFI</a> — the ABI contract the cdef mirrors.</li>
     </ul>
   </DocsShell>
 </BaseLayout>

@@ -866,7 +866,8 @@ section[data-ghost] > .wrap {
 }
 
 /* ————— tables ————— */
-.doc-table {
+.doc-table,
+.prose table {
   display: block;
   width: 100%;
   max-width: 100%;
@@ -876,7 +877,8 @@ section[data-ghost] > .wrap {
   font-size: 0.88rem;
   margin-top: 0.4rem;
 }
-.doc-table th {
+.doc-table th,
+.prose table th {
   text-align: left;
   font-family: var(--font-mono);
   font-weight: 500;
@@ -887,20 +889,24 @@ section[data-ghost] > .wrap {
   padding: 0.6rem 1rem 0.6rem 0;
   border-bottom: 2px solid var(--color-line);
 }
-.doc-table td {
+.doc-table td,
+.prose table td {
   padding: 0.65rem 1rem 0.65rem 0;
   border-bottom: 1px solid var(--color-line-soft);
   vertical-align: top;
 }
-.doc-table td:first-child {
+.doc-table td:first-child,
+.prose table td:first-child {
   color: var(--color-ink-muted);
 }
-.doc-table .bytes {
+.doc-table .bytes,
+.prose table .bytes {
   font-family: var(--font-mono);
   color: var(--color-rose-deep);
   font-weight: 600;
 }
-.doc-table .note {
+.doc-table .note,
+.prose table .note {
   color: var(--color-ink-faint);
   font-size: 0.78rem;
 }

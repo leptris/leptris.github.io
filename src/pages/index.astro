@@ -44,11 +44,10 @@ puts doc.to_xml(indent: 2)                 # 18 ms for 4.38 MB, parse+serialize`
   {
     label: 'Python',
     html: await hl(
-      `from leptris import Document
+      `from leptris import fromstring
 
-doc = Document.parse(open("records.xml", "rb").read())
-print(doc.xpath("count(//record)"))
-doc.close()`,
+root = fromstring(open("records.xml", "rb").read())
+print(root.xpath("count(//record)"))`,
       'python',
     ),
   },
@@ -365,10 +364,9 @@ doc.to_xml        # => "<greet>hello</greet>"`}</pre>
           <h4>Python</h4>
           <pre>{`pip install leptris
 
-from leptris import Document
-doc = Document.parse("<greet>hello</greet>")
-print(doc.root.name)   # => "greet"
-doc.close()`}</pre>
+from leptris import fromstring
+root = fromstring("<greet>hello</greet>")
+print(root.tag)    # => "greet"`}</pre>
         </div>
       </div>
 

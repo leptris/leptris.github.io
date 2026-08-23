@@ -47,6 +47,16 @@ import { SITE, VERSIONS } from '~/data/site';
 
       <hr class="asterism" />
 
+      <h2>leptris (Python) <span class="pill">v{VERSIONS.py}</span></h2>
+      <p><span class="pill periwinkle">{VERSIONS.pyDate}</span> — the first Python release: an lxml-shaped API.</p>
+      <ul>
+        <li><strong>v1.3.0 — breaking, by design.</strong> The API mirrors lxml (the Ruby binding mirrors Nokogiri, so the Python binding mirrors lxml): <code>fromstring</code> / <code>XML</code> / <code>parse</code> / <code>tostring</code> / <code>c14n</code>; <code>Element</code> with Clark-notation <code>tag</code>, <code>text</code>/<code>tail</code>, read-only <code>attrib</code>, <code>getparent</code>/<code>getnext</code>/<code>getprevious</code>, child indexing and slices, the <code>iter</code> family; <code>find</code>/<code>findall</code> accept <strong>full XPath 1.0</strong>; <code>xpath</code> takes <code>namespaces</code> and <code>variables</code> (a leptris extension). New: <code>leptris.sax</code> — one-shot and a constant-memory streaming push parser. The interim 1.2.0 API shipped to no adopters and is replaced outright, not deprecated; from 1.3.0 the package follows its own semver, pinning libleptris via <code>libleptris-version.txt</code>.</li>
+        <li><strong>v1.3.1 — tuned against the benchmark matrix.</strong> Nodeset materialization ~1.6× faster (<code>//book</code> 100 results: 47.9 → 30.4 µs), traversal −45% (element-level sibling chains skip text nodes, halving FFI calls per step; <code>__slots__</code> across the wrappers), <code>getnext</code>/<code>getprevious</code> in single FFI calls.</li>
+      </ul>
+      <p><a href={`${SITE.githubPy}/blob/main/CHANGELOG.md`}>Full changelog in leptris-py →</a></p>
+
+      <hr class="asterism" />
+
       <h2>libleptris <span class="pill">v1.1.2</span></h2>
       <p><span class="pill periwinkle">2026-08-23</span> — the C core.</p>
       <ul>

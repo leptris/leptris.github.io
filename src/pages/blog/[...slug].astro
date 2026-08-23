@@ -1,0 +1,61 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '~/components/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const dateStr = post.data.pubDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout
+  title={`${post.data.title} — leptris blog`}
+  description={post.data.description}
+>
+  <section class="page-head">
+    <div class="wrap">
+      <nav class="crumb" aria-label="Breadcrumb">
+        <a href="/blog">Blog</a>
+        <span>/</span>
+        <span aria-current="page">{dateStr}</span>
+      </nav>
+      <h1 class="sec-title">{post.data.title}</h1>
+      <p class="sec-lede">{post.data.description}</p>
+      <p class="byline">
+        {post.data.author} · {dateStr}
+      </p>
+    </div>
+  </section>
+
+  <div class="prose">
+    <Content />
+    <hr class="asterism" />
+    <p>
+      <a href="/blog">← More from the blog</a> ·
+      <a href="/benchmarks">The benchmarks</a> ·
+      <a href="/changelog">The changelog</a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .byline {
+    margin-top: 1.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+</style>
