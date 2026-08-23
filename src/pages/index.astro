@@ -44,7 +44,7 @@ puts doc.to_xml(indent: 2)                 # 18 ms for 4.38 MB, parse+serialize`
   {
     label: 'Python',
     html: await hl(
-      `from pyleptris import Document
+      `from leptris import Document
 
 doc = Document.parse(open("records.xml", "rb").read())
 print(doc.xpath("count(//record)"))
@@ -236,7 +236,7 @@ const benchBlocks = [
         <div class="feat feat-bindings periwinkle reveal" data-d="1">
           <h3>Four bindings, one core</h3>
           <p>
-            <code>gem leptris</code>, <code>pip pyleptris</code> and the
+            <code>gem leptris</code>, <code>pip leptris</code> and the
             <code>leptris</code> Rust crate wrap the C surface — GC-safe
             handles in Ruby, Drop-safe wrappers in Rust. The 4.38 MB
             real-world document: <strong>18 ms</strong> parse+serialize
@@ -363,9 +363,9 @@ doc.to_xml        # => "<greet>hello</greet>"`}</pre>
         </div>
         <div class="install-card reveal" data-d="2">
           <h4>Python</h4>
-          <pre>{`pip install pyleptris
+          <pre>{`pip install leptris
 
-from pyleptris import Document
+from leptris import Document
 doc = Document.parse("<greet>hello</greet>")
 print(doc.root.name)   # => "greet"
 doc.close()`}</pre>

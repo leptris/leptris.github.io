@@ -7,13 +7,14 @@ export const SITE = {
   githubOrg: 'https://github.com/leptris',
   githubC: 'https://github.com/leptris/leptris',
   githubRuby: 'https://github.com/leptris/leptris-ruby',
+  githubPy: 'https://github.com/leptris/leptris-py',
   rubygems: 'https://rubygems.org/gems/leptris',
 } as const;
 
 export const VERSIONS = {
-  lib: '1.1.2',
+  lib: '1.2.0',
   libDate: '2026-08-23',
-  gem: '1.1.2',
+  gem: '1.2.0',
   gemDate: '2026-08-23',
 } as const;
 
@@ -49,7 +50,7 @@ export const DOCS_NAV: DocsEntry[] = [
   {
     href: '/docs/python',
     label: 'Python',
-    blurb: 'pyleptris via cffi — parse, navigate, query, serialize.',
+    blurb: 'The leptris package via cffi — parse, navigate, query, serialize.',
   },
   {
     href: '/docs/cli',

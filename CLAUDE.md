@@ -11,8 +11,9 @@ parser / XPath 1.0 engine / SAX feed with hard memory bounds, plus the
 
 This repo contains **only the website**. The product lives in:
 
-- C core: `~/src/lutaml/taurus` → `github.com/leptris/leptris`
-- Ruby gem: `~/src/lutaml/taurus-ruby` → `github.com/leptris/leptris-ruby`
+- C core: `~/src/leptris/leptris` → `github.com/leptris/leptris`
+- Ruby gem: `~/src/leptris/leptris-ruby` → `github.com/leptris/leptris-ruby`
+- Python package: `~/src/leptris/leptris-py` → `github.com/leptris/leptris-py` (PyPI package `leptris`, formerly pyleptris)
 
 The site is a **curated** view of those repos' documentation. The repos are
 canonical: every docs page links back to the source file, and content facts

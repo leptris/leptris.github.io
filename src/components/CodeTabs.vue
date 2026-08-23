@@ -74,7 +74,7 @@ const active = ref(0);
   color: var(--color-rose-deep);
   border-bottom-color: var(--color-rose-deep);
 }
-.show-panel :deep(pre.astro-code) {
+.show-panel :deep(pre) {
   margin: 0;
   border-radius: 0;
 }

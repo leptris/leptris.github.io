@@ -52,6 +52,7 @@ text-safe variants for links and labels.
 This site is a **curated guide**; the repositories are canonical:
 
 - C core: `github.com/leptris/leptris` (README.adoc, docs/guide, docs/FFI.md, VALIDATION.md)
+- Python package: `github.com/leptris/leptris-py` (package `leptris` on PyPI, formerly pyleptris)
 - Ruby gem: `github.com/leptris/leptris-ruby` (README.adoc, docs/man, docs/completion)
 
 When this site and a repo disagree, the repo wins. Update

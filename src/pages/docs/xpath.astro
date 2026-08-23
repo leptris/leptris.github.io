@@ -76,6 +76,19 @@ import { SITE } from '~/data/site';
       through the result-scoped kind quartet, never through raw node tags.
     </p>
 
+    <h2>Namespace-bound evaluation</h2>
+    <p>
+      Since v1.2.0, expressions can carry <strong>external namespace
+      bindings</strong>: <code>leptris_xpath_eval_ns</code> with a
+      <code>LeptrisXPathNsSet</code> resolves prefixed name tests by
+      <em>namespace</em> — an element matches when it carries the bound
+      namespace via any prefix or the default namespace, and
+      <code>//t:*</code> selects only elements in <code>t</code>&rsquo;s
+      namespace (previously prefix wildcards were namespace-blind). XPointer
+      <code>xmlns(prefix=uri)</code> components bind subsequent
+      <code>xpointer()</code> bodies too.
+    </p>
+
     <h2>Measured — vs libxml2</h2>
     <p>
       From <code>benchmarks/xpath/bench_diagnostic</code> on a ~5 KB catalog
