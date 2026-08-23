@@ -5,7 +5,7 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fbf8f1",
-  "theme_color": "#243b64",
+  "theme_color": "#1f26bd",
   "icons": [
     {
       "src": "/web-app-manifest-light-192x192.png",
