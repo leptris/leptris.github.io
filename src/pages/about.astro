@@ -93,11 +93,25 @@ import Logo from '~/components/Logo.astro';
     <p>
       The leptris mark comes in two forms, and each has one job:
     </p>
-    <table class="name-table">
-      <tr><th>form</th><th>use</th></tr>
-      <tr><td class="morph">icon</td><td>The everyday mark — the three hares in their ring. Mastheads, favicons, footers, cargo pockets. This is the one you see everywhere.</td></tr>
-      <tr><td class="morph">full</td><td>The complete artwork, shown where the motif itself is the subject — this page. It carries the whole design at once, so it is reserved for the story.</td></tr>
-    </table>
+    <div class="specimens">
+      <figure class="specimen">
+        <Logo size={110} alt="the leptris icon mark" />
+        <figcaption>
+          <strong>icon</strong>
+          The everyday mark — the three hares in their ring. Mastheads,
+          favicons, footers. This is the one you see everywhere.
+        </figcaption>
+      </figure>
+      <figure class="specimen">
+        <Logo variant="full" size={110} alt="the full leptris artwork" />
+        <figcaption>
+          <strong>full</strong>
+          The complete artwork — shown only where the motif itself is the
+          subject. It carries the whole design at once, so it is reserved
+          for the story.
+        </figcaption>
+      </figure>
+    </div>
     <p>
       Both forms ship in a light and a dark palette, tuned to their
       background. This site follows your color scheme — and the mark follows

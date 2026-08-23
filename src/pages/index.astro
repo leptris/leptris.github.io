@@ -122,7 +122,9 @@ const benchBlocks = [
         </ul>
       </div>
       <div class="hero-mark">
-        <Logo size={300} alt="leptris — three hares rotor" />
+        <div class="orbit">
+          <Logo size={300} alt="leptris — three hares rotor" />
+        </div>
         <p class="medallion-caption">speed in the chase — containment in the circle</p>
       </div>
     </div>
@@ -142,11 +144,13 @@ const benchBlocks = [
   <section class="sec" id="name">
     <div class="wrap motif">
       <div class="reveal">
-        <Logo variant="full" size={300} class="medallion" alt="the three-hares medallion" />
+        <div class="orbit">
+          <Logo variant="full" size={300} class="medallion" alt="the three-hares medallion" />
+        </div>
         <p class="medallion-caption">each hare two ears — three among them</p>
       </div>
       <div class="motif-text">
-        <p class="sec-label reveal">The name</p>
+        <p class="sec-label reveal" data-num="01">The name</p>
         <h2 class="sec-title reveal">Three hares, <em>three ears</em></h2>
         <p class="reveal" data-d="1">
           On the ceilings of the Dunhuang caves, and centuries later on carved
@@ -167,9 +171,9 @@ const benchBlocks = [
   </section>
 
   <!-- ————— features ————— -->
-  <section class="sec-alt" id="features">
+  <section class="sec-alt sec-tint-periwinkle" id="features">
     <div class="wrap">
-      <p class="sec-label reveal">What it is</p>
+      <p class="sec-label reveal" data-num="02">What it is</p>
       <h2 class="sec-title reveal">A parser built like a <em>system</em>, not a script</h2>
       <p class="sec-lede reveal" data-d="1">
         Every design choice optimizes for the same pair: throughput you can
@@ -200,6 +204,7 @@ const benchBlocks = [
           </p>
         </div>
         <div class="feat feat-conform reveal">
+          <span class="big">586<small> tests pin the semantics</small></span>
           <h3>Conformant where it counts</h3>
           <p>
             XPath 1.0: <strong>438/438</strong> on the W3C suite. XML 1.0
@@ -218,6 +223,7 @@ const benchBlocks = [
           </p>
         </div>
         <div class="feat feat-sax sage reveal" data-d="2">
+          <span class="big">11<small> SAX events, one scanner</small></span>
           <h3>DOM and SAX, one core</h3>
           <p>
             Streaming SAX with all eleven events beats libxml2&rsquo;s SAX on
@@ -235,6 +241,7 @@ const benchBlocks = [
           </p>
         </div>
         <div class="feat feat-cli reveal" data-d="2">
+          <span class="big">4<small> verbs — files or stdin</small></span>
           <h3>A CLI that respects your pipe</h3>
           <p>
             <code>leptris parse | xpath | format</code> — MECE output modes
@@ -249,7 +256,7 @@ const benchBlocks = [
   <!-- ————— benchmarks ————— -->
   <section class="sec" id="speed">
     <div class="wrap">
-      <p class="sec-label reveal">The race</p>
+      <p class="sec-label reveal" data-num="03">The race</p>
       <h2 class="sec-title reveal">Numbers from the <em>open harness</em></h2>
       <p class="sec-lede reveal" data-d="1">
         Every figure below reproduces from <code>benchmarks/matrix</code> in
@@ -271,9 +278,9 @@ const benchBlocks = [
   </section>
 
   <!-- ————— bounds ————— -->
-  <section class="sec-alt" id="bound">
+  <section class="sec-alt sec-tint-sage" id="bound">
     <div class="wrap">
-      <p class="sec-label reveal">The circle</p>
+      <p class="sec-label reveal" data-num="04">The circle</p>
       <h2 class="sec-title reveal">Memory you can <em>promise</em></h2>
       <p class="sec-lede reveal" data-d="1">
         The arena is sized from the document before the first node is carved;
@@ -296,7 +303,7 @@ const benchBlocks = [
   <!-- ————— code showcase ————— -->
   <section class="sec" id="code">
     <div class="wrap">
-      <p class="sec-label reveal">The surface</p>
+      <p class="sec-label reveal" data-num="05">The surface</p>
       <h2 class="sec-title reveal">Small API, <em>everywhere</em></h2>
       <p class="sec-lede reveal" data-d="1">
         One C99 core; the same handles and the same bounds from C, Ruby,
@@ -310,9 +317,9 @@ const benchBlocks = [
   </section>
 
   <!-- ————— install ————— -->
-  <section class="sec-alt" id="install">
+  <section class="sec-alt sec-tint-rose" id="install">
     <div class="wrap">
-      <p class="sec-label reveal">The chase begins</p>
+      <p class="sec-label reveal" data-num="06">The chase begins</p>
       <h2 class="sec-title reveal">Install, <em>four ways</em></h2>
       <p class="sec-lede reveal" data-d="1">
         C99 — builds anywhere CMake does. Optional utf8proc and iconv; neither

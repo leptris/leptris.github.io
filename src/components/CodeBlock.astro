@@ -12,7 +12,7 @@ const html = await codeToHtml(code.replace(/\n$/, ''), { lang, theme: 'github-da
 ---
 
 <div class="code-frame">
-  {title && <div class="code-title">{title}</div>}
+  <div class="code-title">{title ?? lang}</div>
   <div class="code-body" set:html={html} />
 </div>
 

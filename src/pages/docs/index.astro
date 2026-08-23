@@ -22,21 +22,21 @@ import { DOCS_NAV, SITE, VERSIONS } from '~/data/site';
   <section class="sec" style="padding-top:3rem">
     <div class="wrap">
       <div class="card-grid">
-        {DOCS_NAV.map((entry) => (
+        {DOCS_NAV.map((entry, i) => (
           <a class="card" href={entry.href}>
             <span class="card-tag">guide</span>
-            <h3>{entry.label} <span class="arrow">→</span></h3>
+            <h3><span class="num">{String(i + 1).padStart(2, '0')}</span>{entry.label} <span class="arrow">→</span></h3>
             <p>{entry.blurb}</p>
           </a>
         ))}
         <a class="card" href="/changelog">
           <span class="card-tag">reference</span>
-          <h3>Changelog <span class="arrow">→</span></h3>
+          <h3><span class="num">07</span>Changelog <span class="arrow">→</span></h3>
           <p>Releases of the C library and the Ruby gem, with canonical links.</p>
         </a>
         <a class="card" href={`${SITE.githubC}/tree/main/docs`}>
           <span class="card-tag">canonical</span>
-          <h3>Repo docs <span class="arrow">→</span></h3>
+          <h3><span class="num">08</span>Repo docs <span class="arrow">→</span></h3>
           <p>README, guides, FFI design, validation notes — in the source tree.</p>
         </a>
       </div>

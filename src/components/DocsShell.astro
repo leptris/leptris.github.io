@@ -4,15 +4,20 @@ import { DOCS_NAV } from '~/data/site';
 interface Props {
   title: string;
   lede: string;
+  crumb: string;
 }
 
-const { title, lede } = Astro.props;
+const { title, lede, crumb } = Astro.props;
 const current = Astro.url.pathname;
 ---
 
 <section class="page-head">
   <div class="wrap">
-    <p class="sec-label">Documentation</p>
+    <nav class="crumb" aria-label="Breadcrumb">
+      <a href="/docs">Docs</a>
+      <span>/</span>
+      <span aria-current="page">{crumb}</span>
+    </nav>
     <h1 class="sec-title">{title}</h1>
     <p class="sec-lede">{lede}</p>
   </div>
