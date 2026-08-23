@@ -12,11 +12,11 @@ export const SITE = {
 } as const;
 
 export const VERSIONS = {
-  lib: '1.3.0',
+  lib: '1.4.0',
   libDate: '2026-08-23',
-  gem: '1.3.0',
+  gem: '1.4.0',
   gemDate: '2026-08-23',
-  py: '1.5.0',
+  py: '1.6.1',
   pyDate: '2026-08-23',
 } as const;
 

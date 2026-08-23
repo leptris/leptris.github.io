@@ -13,17 +13,20 @@ import { SITE, VERSIONS } from '~/data/site';
   <DocsShell
     crumb="Python"
     title="Python — the leptris package"
-    lede={`The Python binding wraps libleptris via cffi and mirrors lxml: parse, query, and serialize code written against lxml's read path ports with an import change. Version ${VERSIONS.py} is the first Python release — its own semver, pinning libleptris ${VERSIONS.lib} via libleptris-version.txt.`}
+    lede={`The Python binding wraps libleptris and mirrors lxml: parse, query, and serialize code written against lxml's read path ports with an import change. Version ${VERSIONS.py} beats lxml on every operation in the matrix — five cp39-abi3 wheels on PyPI make pip install the whole setup.`}
   >
     <h2>Setup</h2>
     <p>
-      The package publishes to PyPI as <code>leptris</code> (Python 3.9+),
-      built and tested on Linux, macOS, and Windows via trusted publishing:
+      The package publishes to PyPI as <code>leptris</code> (Python 3.9+):
+      five cp39-abi3 wheels — macOS arm64/x86_64, manylinux x86_64/aarch64,
+      Windows — plus the sdist. Wheels ship the C accelerator compiled;
+      without a toolchain the package degrades to the tested pure-Python
+      class (<code>LEPTRIS_PURE=1</code> forces it):
     </p>
     <CodeBlock lang="bash" code={`pip install leptris`} />
     <p>
-      If the native <code>libleptris</code> shared library is not on the
-      loader path for your platform, build it from source (see
+      The pinned <code>libleptris</code> shared library must be on the
+      loader path — if it is not, build it from source (see
       <a href="/docs/getting-started">getting started</a>) and point
       <code>LEPTRIS_LIB_PATH</code> — which must name the library
       <em>file</em> — at it:
@@ -80,10 +83,10 @@ with sax.StreamingParser(handler) as parser:   # push, constant memory
     </p>
     <ul>
       <li><strong>Tree building</strong> (<code>etree.Element</code>, <code>SubElement</code>, <code>append</code>, <code>set</code>) — this binding is read-only today (the core has partial mutation upstream — content setters, <code>set_root</code>, <code>append_child</code> — not surfaced yet); build trees elsewhere.</li>
-      <li><strong><code>iterparse</code></strong> — use <code>leptris.sax.StreamingParser</code> (callback-based, constant memory).</li>
+      <li><strong><code>iterparse</code></strong> — use <code>leptris.sax.StreamingParser</code> (callback-based, constant memory) for now; libleptris 1.4.0 landed a bounded-memory iterparse C API, and binding surfacing follows.</li>
       <li><strong>Smart strings</strong> — XPath string and attribute results are plain <code>str</code>.</li>
       <li><strong><code>nsmap</code></strong> — use <code>namespace</code> / <code>prefix</code> and <code>xpath(namespaces=…)</code>.</li>
-      <li><strong>Compiled XPath objects, parser options</strong> — upstream asks: a compiled-expression C API, per-parse options.</li>
+      <li><strong>Compiled XPath objects, parser options</strong> — both landed in libleptris 1.4.0 (thread-safe compiled handles, scoped per-parse options); binding surfacing follows.</li>
       <li><strong>Undeclared XPath prefixes</strong> evaluate to an empty nodeset instead of raising.</li>
     </ul>
 
@@ -112,12 +115,11 @@ with sax.StreamingParser(handler) as parser:   # push, constant memory
 
     <h2>Benchmarks</h2>
     <p>
-      The binding ships <code>benchmarks/matrix.py</code> — the Python twin
-      of the Ruby matrix, same fixtures and operations against lxml,
-      ElementTree, and minidom — and it runs in CI. The 1.4/1.5 line was
-      tuned against it: engine-side subtree walks took traversal from 14×
-      behind lxml to 2.6×, and batch nodesets halved plain queries. Current
-      numbers and the honest losses:
+      Since 1.6.1, leptris <strong>beats lxml on every operation</strong> in
+      the matrix (parse 8×, ID predicates 10×, serialize 3.7×, and the
+      three former losses — plain nodesets, unions, traversal — all won).
+      The matrix ships in <code>benchmarks/matrix.py</code> and runs in CI;
+      the accelerator story and the full scoreboard:
       <a href="/benchmarks#python">the benchmarks page</a>.
     </p>
 

@@ -74,7 +74,11 @@ engine-side subtree walks cut traversal 299 → 51 µs. Current numbers
 
 Six of nine, including a 26× serialize gap over the stdlib — and the
 three losses are now within striking distance, each of them cut by
-half or better since the first measurement.
+half or better since the first measurement. *(Update: as of leptris
+1.6.1, those three fell too —
+[beating lxml at everything][accel-post].)*
+
+[accel-post]: /blog/beating-lxml-at-everything/
 
 ## The ledger of losses
 
