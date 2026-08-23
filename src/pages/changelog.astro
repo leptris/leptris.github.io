@@ -12,36 +12,57 @@ import { SITE, VERSIONS } from '~/data/site';
       <p class="sec-label">Changelog</p>
       <h1 class="sec-title">Two components, <em>one core</em></h1>
       <p class="sec-lede">
-        The C library and the Ruby gem release on their own cadence. This page
-        carries the headlines; the repositories carry the full history.
+        The C library and the Ruby gem release on their own cadence, in
+        lockstep when the gem rides a core release. This page carries the
+        headlines; the repositories carry the full history.
       </p>
     </div>
   </section>
 
   <section class="sec" style="padding-top:3rem">
     <div class="wrap prose" style="max-width:60rem">
-      <h2>libleptris <span class="pill">v{VERSIONS.lib}</span></h2>
-      <p><span class="pill gold">{VERSIONS.libDate}</span> — the C core.</p>
+      <h2>libleptris <span class="pill">v1.1.2</span></h2>
+      <p><span class="pill periwinkle">2026-08-23</span> — the C core. Current release.</p>
       <ul>
-        <li><strong>Attribute handle iteration</strong> — <code>leptris_element_first_attribute</code>, <code>leptris_attribute_next</code>, <code>get_name</code>, <code>get_value</code>: O(n) enumeration where index accessors re-walk per call (O(n²)).</li>
-        <li><strong>Mixed XPath nodesets, consumable publicly</strong> — <code>//a/@x</code> results no longer require internals.</li>
-        <li><strong>Element prefixes</strong> — <code>leptris_element_prefix</code>.</li>
-        <li><strong>External DTD subsets</strong> — <code>leptris_document_get_dtd</code> + <code>leptris_dtd_parse_external_subset</code>, with application-owned I/O; parameter entities and conditional sections work in them.</li>
-        <li><strong>Public node-kind enum</strong> (<code>LeptrisNodeKind</code>) — bindings stop hard-coding numeric node types.</li>
-        <li><strong>CI</strong> — a Windows DLL export check, and the FFI mirror drift gate.</li>
-        <li><strong>Tooling</strong> — <code>scripts/gen-api-docs.sh</code> regenerates the Doxygen reference.</li>
+        <li><strong>XPath union dedup O(n²) → O(n)</strong> — <code>//name | //item</code> on a 20k-element document: 229 ms → 1.6 ms (~140× faster); multi-context steps dedup at any size.</li>
+        <li><strong>Element-index build hashed</strong> — documents with many distinct values (20k unique ids) paid a one-time 300 ms spike on the second query; all three bucket lookups are hashed now (~75×).</li>
+        <li><strong>Spec fix</strong> — <code>//node()</code> now selects the root element per XPath 1.0.</li>
+        <li><strong><code>leptris_error_message</code> / <code>leptris_last_error</code></strong> — declared since the first release but never implemented (phantom symbols); both are implemented and exported now.</li>
+        <li><strong>Rust bindings</strong> (crate <code>leptris</code>) — safe Document/Element wrappers with <code>Drop</code>, status→<code>Result</code> mapping, mixed-nodeset XPath accessors, SAX with closures; CI on ubuntu/macos/windows. The roadmap board is now empty.</li>
+        <li><strong>pyleptris releases</strong> — the PyPI publish trigger now fires from the release flow; the Python binding&rsquo;s tests run on all three platforms per PR.</li>
       </ul>
       <p><a href={`${SITE.githubC}/blob/main/CHANGELOG.md`}>Full changelog in the repo →</a></p>
 
       <hr class="asterism" />
 
-      <h2>leptris gem <span class="pill">v{VERSIONS.gem}</span></h2>
-      <p><span class="pill gold">{VERSIONS.gemDate}</span> — the Ruby binding.</p>
+      <h2>libleptris <span class="pill">v1.1.1</span></h2>
+      <p><span class="pill periwinkle">2026-08-23</span> — the conformance sprint.</p>
       <ul>
-        <li><strong>Precompiled platform gems</strong> (emf2svg-ruby model): <code>rake compile</code> vendors libleptris; <code>rake gem:native:&lt;platform&gt;</code> builds binary gems for x86_64/aarch64-linux (incl. musl, via Alpine containers), x64-mingw32/ucrt + aarch64-mingw-ucrt, and x86_64/arm64-darwin. <code>gem install leptris</code> works with no system libleptris and no env vars — the FFI search order prefers the vendored library. The pure-Ruby gem remains the fallback.</li>
-        <li><strong><code>Element#prefix</code></strong> — the element&rsquo;s own namespace prefix (nil-safe).</li>
+        <li><strong>One unified tag space</strong> for mixed XPath nodesets (#477) — <code>node_kind</code>/<code>node_name</code>/<code>node_value</code> agree on every entry; synthetic attribute/namespace/text tags no longer collide with DOM node kinds.</li>
+        <li><strong>True document order</strong> for nodeset results (#485); reverse axes (ancestor/preceding families) return reverse document order per the spec; <code>//text()</code> ~7× faster via single-pass pre-order walks.</li>
+        <li><strong>Predicate semantics</strong> — bare <code>text()</code>/<code>node()</code> in expression position fixed (<code>a[text()='x']</code> now matches); string-values for text/CDATA/comment/PI nodes.</li>
+        <li><strong>aarch64</strong> — NEON text scan compiles on GCC (glibc and Alpine musl) and MSVC ARM64 (#487).</li>
+      </ul>
+
+      <hr class="asterism" />
+
+      <h2>leptris gem <span class="pill">v{VERSIONS.gem}</span></h2>
+      <p><span class="pill periwinkle">{VERSIONS.gemDate}</span> — the Ruby binding, in lockstep with libleptris v1.1.2.</p>
+      <ul>
+        <li><strong>v1.1.2</strong> — bindings for the full v1.1.0+ public surface: attribute iteration, the mixed-nodeset API, element prefixes; NodeSets fetch via <code>get_node</code> for all node kinds.</li>
+        <li><strong>Since 1.1.1</strong> — <code>Element#each_attribute</code> (O(n) vs the O(n²) index re-walk), <code>Element#prefix</code>, and <strong>precompiled platform gems</strong>: <code>gem install leptris</code> works on x86_64/aarch64-linux (incl. musl), mingw/ucrt Windows, and x86_64/arm64 macOS — no system library, no env vars.</li>
+        <li><strong>Releases</strong> — a fully automated pipeline builds the 8-platform matrix (plus musl containers) and publishes via OIDC trusted publishing.</li>
       </ul>
       <p><a href={`${SITE.githubRuby}/blob/main/CHANGELOG.md`}>Full changelog in leptris-ruby →</a></p>
+
+      <hr class="asterism" />
+
+      <p>
+        Earlier releases — libleptris v1.1.0 and older, gem v1.1.0 and
+        older — are in the canonical changelogs:
+        <a href={`${SITE.githubC}/blob/main/CHANGELOG.md`}>libleptris</a> ·
+        <a href={`${SITE.githubRuby}/blob/main/CHANGELOG.md`}>leptris gem</a>.
+      </p>
     </div>
   </section>
 </BaseLayout>

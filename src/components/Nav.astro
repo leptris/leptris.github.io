@@ -14,11 +14,15 @@ const isActive = (href: string) =>
     <a class="wordmark" href="/">LEPTRIS</a>
     <nav>
       {NAV.map((item) => (
-        <a href={item.href} class={item.href === '/changelog' ? 'nav-extra' : ''} aria-current={isActive(item.href) ? 'page' : undefined}>
+        <a
+          href={item.href}
+          class={item.href === '/' || item.href === '/changelog' ? 'nav-extra' : ''}
+          aria-current={isActive(item.href) ? 'page' : undefined}
+        >
           {item.label}
         </a>
       ))}
-      <a href={SITE.githubC}>GitHub</a>
+      <a href={SITE.githubC} class="nav-gh">GitHub</a>
       <ThemeToggle />
     </nav>
   </div>
