@@ -12,6 +12,7 @@ export interface BarRow {
 export interface BarBlock {
   title: string;
   sub?: string;
+  chip?: string;
   rows: BarRow[];
 }
 
@@ -42,7 +43,10 @@ onBeforeUnmount(() => io?.disconnect());
 <template>
   <div ref="root" class="bench-vue">
     <div v-for="block in props.blocks" :key="block.title" class="bench-block">
-      <h3>{{ block.title }}</h3>
+      <h3>
+        {{ block.title }}
+        <span v-if="block.chip" class="chip">{{ block.chip }}</span>
+      </h3>
       <p v-if="block.sub" class="sub">{{ block.sub }}</p>
       <div
         v-for="(row, i) in block.rows"
@@ -81,6 +85,21 @@ onBeforeUnmount(() => io?.disconnect());
   font-weight: 640;
   font-size: 1.12rem;
   margin-bottom: 0.25rem;
+}
+.bench-vue :deep(.bench-block h3 .chip) {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-rose-deep);
+  background: color-mix(in srgb, var(--color-rose) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-rose) 55%, transparent);
+  border-radius: 999px;
+  padding: 0.14rem 0.6rem;
+  margin-left: 0.6rem;
+  vertical-align: 0.15em;
+  white-space: nowrap;
 }
 .bench-vue :deep(.bench-block .sub) {
   color: var(--color-ink-faint);
