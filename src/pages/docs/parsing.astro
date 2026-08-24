@@ -1,0 +1,79 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+---
+
+<BaseLayout
+  title="Parsing models — leptris docs"
+  description="One engine, four consumption models: DOM (tree), SAX (push), StAX-style pull, and incremental iterparse — memory bounds, who drives, and when to pick each."
+>
+  <DocsShell
+    crumb="Parsing models"
+    title="One engine, four ways to consume XML"
+    lede="DOM for random access, SAX for the cheapest push events, pull (StAX-style) for binding-friendly streaming, iterparse for tree-shaped processing of huge files."
+  >
+    <h2>The decision table</h2>
+    <table class="doc-table">
+      <tr><th>model</th><th>API</th><th>memory</th><th>use when</th></tr>
+      <tr>
+        <td><strong>DOM</strong> (tree)</td>
+        <td class="bytes"><code>leptris_parse_string</code></td>
+        <td class="note">whole document</td>
+        <td class="note">Random access, XPath, mutation, serialization. The default — everything else is an optimization.</td>
+      </tr>
+      <tr>
+        <td><strong>SAX</strong> (push)</td>
+        <td class="bytes"><code>leptris_sax_parse</code> / feed</td>
+        <td class="note">bounded by depth</td>
+        <td class="note">The engine calls <em>you</em> as it parses. Cheapest per event — but every callback crosses the FFI boundary (~1 µs each through bindings).</td>
+      </tr>
+      <tr>
+        <td><strong>Pull</strong> (StAX-style)</td>
+        <td class="bytes"><code>leptris_pull_new</code> / <code>_new_file</code></td>
+        <td class="note">bounded by the input slice</td>
+        <td class="note"><em>You</em> call the engine: <code>leptris_pull_next()</code> returns events on demand. Same streaming guarantees as SAX, zero C&rarr;host callbacks — the binding-friendly form of streaming.</td>
+      </tr>
+      <tr>
+        <td><strong>Iterparse</strong> (incremental)</td>
+        <td class="bytes"><code>leptris_iterparse_new</code> / <code>_new_file</code></td>
+        <td class="note">bounded by the largest subtree</td>
+        <td class="note">You want a <em>tree</em> but not the whole document at once: each top-level child materializes in its own pool and is released when you move on.</td>
+      </tr>
+    </table>
+
+    <Callout>
+      <p><strong>One streaming core.</strong>
+      SAX and pull share the same streaming state machine
+      (<code>leptris_sax_parser_set_streaming(1)</code>); iterparse
+      rides the pull API. The file variants
+      (<code>leptris_pull_new_file</code> /
+      <code>leptris_iterparse_new_file</code>) stream from disk in
+      bounded 256-byte slices — no whole-document buffer, ever.</p>
+    </Callout>
+
+    <h2>Pull (StAX-style)</h2>
+    <CodeBlock lang="c" code={`LeptrisPullParser p = leptris_pull_new(xml, len);
+const LeptrisPullEvent* ev;
+while ((ev = leptris_pull_next(p)) != NULL) {
+    if (ev->type == LEPTRIS_PULL_START_ELEMENT)
+        handle(leptris_pull_attr_count(p), ev->name);
+    if (ev->type == LEPTRIS_PULL_ERROR) break;
+}
+leptris_pull_free(p);`} />
+
+    <h2>Iterparse</h2>
+    <CodeBlock lang="c" code={`LeptrisIterparse it = leptris_iterparse_new_file("huge.xml");
+LeptrisElement e;
+while ((e = leptris_iterparse_next(it)) != NULL)
+    process(e);   /* valid until the next call */
+leptris_iterparse_free(it);`} />
+
+    <p>
+      Iterparse v1 note: element names are the QNames as written;
+      namespace prefixes are not re-resolved — use the DOM path when
+      namespace URIs matter.
+    </p>
+  </DocsShell>
+</BaseLayout>

@@ -71,4 +71,10 @@ export const DOCS_NAV: DocsEntry[] = [
     label: 'Internals & FFI',
     blurb: 'Memory model, ABI stability, the binding contract.',
   },
+
+  {
+    href: '/docs/parsing',
+    label: 'Parsing models',
+    blurb: 'DOM, SAX, StAX-style pull, iterparse — when to pick each.',
+  },
 ];
