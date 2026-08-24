@@ -106,6 +106,16 @@ stripped; regenerate by copying from branding and removing the
 - `/changelog` — headlines per component, canonical links
 - `/404` — the hares ran off with it
 
+### Blog
+
+Posts live in `src/content/blog/` as markdown or MDX with the filename
+pattern **`{YYYY-MM-DD}-{slug}.md`** (or `.mdx`) — e.g.
+`2026-08-24-beating-lxml-at-everything.md`. The date prefix is stripped
+from the URL (`/blog/{slug}/`), so links stay stable; frontmatter
+(`title`, `description`, `pubDate`, `author`, `tags`) is validated by
+the zod schema in `src/content.config.ts`, and `test/site.spec.ts`
+enforces the filename pattern — keep both green when adding posts.
+
 Code blocks are Shiki-highlighted (single `github-dark` theme — panels are
 lapis in both modes): `<CodeBlock lang code title />` wraps Astro's `Code`
 component; `CodeTabs.vue` receives pre-rendered Shiki HTML as props (built
