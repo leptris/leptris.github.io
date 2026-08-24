@@ -111,8 +111,7 @@ stripped; regenerate by copying from branding and removing the
 Posts live in `src/content/blog/` as markdown or MDX with the filename
 pattern **`{YYYY-MM-DD}-{slug}.md`** (or `.mdx`) — e.g.
 `2026-08-24-beating-lxml-at-everything.md`. The URL carries the date too
-(`/blog/{YYYY-MM-DD}-{slug}/`); when a post's slug changes, add an
-Astro redirect for the old path. Frontmatter (`title`, `description`,
+(`/blog/{YYYY-MM-DD}-{slug}/`). Frontmatter (`title`, `description`,
 `pubDate`, `author`, `tags`) is validated by the zod schema in
 `src/content.config.ts`, and `test/site.spec.ts` enforces the filename
 pattern — keep both green when adding posts.
