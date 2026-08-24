@@ -21,6 +21,12 @@ import { SITE, VERSIONS } from '~/data/site';
 
   <section class="sec" style="padding-top:3rem">
     <div class="wrap prose" style="max-width:60rem">
+      <h2>libleptris <span class="pill">v1.6.0</span></h2>
+      <p><span class="pill periwinkle">2026-08-24</span> — all six user-filed issues fixed; the issue queue is empty. Same-parent node moves no longer corrupt the sibling chain (the moxml-adapter hang, #518); union nodesets keep attribute identity instead of dangling pointers (#514); detached PI/comment/CDATA mutations work on rootless documents (#519); document-level processing instructions gained a public API (#526).</p>
+
+      <h2>libleptris <span class="pill">v1.5.1</span></h2>
+      <p><span class="pill periwinkle">2026-08-24</span> — two correctness fixes: element serialization emitted every following sibling (52× faster single-element serialize, and correct output for the first time, #523), and unprefixed XPath name tests no longer match namespaced elements — XPath 1.0 §2.3 parity with libxml2/Nokogiri/REXML (#525).</p>
+
       <h2>libleptris <span class="pill">v1.5.0</span></h2>
       <p><span class="pill periwinkle">2026-08-24</span> — the TODO.engine board. File-backed streaming: <code>leptris_pull_new_file</code> / <code>leptris_iterparse_new_file</code> stream documents off disk in bounded slices — huge files parse end to end with no whole-document buffer. Compiled XPath grew its context variants (<code>leptris_xpath_compiled_eval_ns</code> / <code>_eval_vars</code>), so compiled handles work everywhere the namespace- and variable-bound evaluators did. The Rust crate gained a publish workflow and rides engine lockstep.</p>
 
