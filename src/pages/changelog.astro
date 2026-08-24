@@ -21,6 +21,9 @@ import { SITE, VERSIONS } from '~/data/site';
 
   <section class="sec" style="padding-top:3rem">
     <div class="wrap prose" style="max-width:60rem">
+      <h2>libleptris <span class="pill">v1.9.0</span></h2>
+      <p><span class="pill periwinkle">2026-08-24</span> — <code>LeptrisParseOptions.recover</code> (#547): parse failures return an empty document with the error recorded. Rootless documents with PIs serialize correctly instead of returning "" (#546). <code>serialize_into</code> takes options and caches: size-query + into-call reuse one serialization (#541).</p>
+
       <h2>libleptris <span class="pill">v1.7.0</span></h2>
       <p><span class="pill periwinkle">2026-08-24</span> — the two FFI-ergonomics APIs from the Ox-vs-leptris audit (#535): <code>leptris_node_children</code> copies every child kind in one call (out=NULL counts all kinds), and the <code>_serialize_into</code> pair writes into caller buffers — one call, zero library-side allocations.</p>
 
