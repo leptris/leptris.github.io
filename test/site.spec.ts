@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DOCS_NAV, NAV, SITE, VERSIONS } from '../src/data/site';
@@ -36,6 +36,17 @@ describe('navigation resolves to pages', () => {
   it('every docs entry has a blurb', () => {
     for (const entry of DOCS_NAV) {
       expect(entry.blurb.length).toBeGreaterThan(10);
+    }
+  });
+});
+
+describe('blog posts', () => {
+  const blogDir = join(root, 'src/content/blog');
+  const DATE_PREFIX = /^\d{4}-\d{2}-\d{2}-[\w-]+\.(md|mdx)$/;
+
+  it('filenames follow the {date}-{slug}.md(x) pattern', () => {
+    for (const file of readdirSync(blogDir)) {
+      expect(DATE_PREFIX.test(file), `${file} should match ${'{date}-{slug}.md(x)'}`).toBe(true);
     }
   });
 });
