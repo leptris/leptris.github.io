@@ -21,6 +21,12 @@ import { SITE, VERSIONS } from '~/data/site';
 
   <section class="sec" style="padding-top:3rem">
     <div class="wrap prose" style="max-width:60rem">
+      <h2>libleptris <span class="pill">v1.7.0</span></h2>
+      <p><span class="pill periwinkle">2026-08-24</span> — the two FFI-ergonomics APIs from the Ox-vs-leptris audit (#535): <code>leptris_node_children</code> copies every child kind in one call (out=NULL counts all kinds), and the <code>_serialize_into</code> pair writes into caller buffers — one call, zero library-side allocations.</p>
+
+      <h2>libleptris <span class="pill">v1.6.2</span></h2>
+      <p><span class="pill periwinkle">2026-08-24</span> — pretty-printing no longer inserts whitespace inside mixed-content elements (#534); pretty round-trips are byte-stable.</p>
+
       <h2>libleptris <span class="pill">v1.6.0</span></h2>
       <p><span class="pill periwinkle">2026-08-24</span> — all six user-filed issues fixed; the issue queue is empty. Same-parent node moves no longer corrupt the sibling chain (the moxml-adapter hang, #518); union nodesets keep attribute identity instead of dangling pointers (#514); detached PI/comment/CDATA mutations work on rootless documents (#519); document-level processing instructions gained a public API (#526).</p>
 
