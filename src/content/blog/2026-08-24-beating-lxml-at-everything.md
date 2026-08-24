@@ -62,6 +62,6 @@ and when. If you want to see exactly how, the harness is in the tree:
 `benchmarks/matrix.py` in [leptris-py][py], same fixtures as the Ruby
 matrix. Run it yourself.
 
-[race]: /blog/leptris-1-2-0-the-race-per-language/
+[race]: /blog/2026-08-23-leptris-1-2-0-the-race-per-language/
 [ledger]: /benchmarks#ledger
 [py]: https://github.com/leptris/leptris-py

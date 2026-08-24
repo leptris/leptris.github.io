@@ -78,7 +78,7 @@ half or better since the first measurement. *(Update: as of leptris
 1.6.1, those three fell too —
 [beating lxml at everything][accel-post].)*
 
-[accel-post]: /blog/beating-lxml-at-everything/
+[accel-post]: /blog/2026-08-24-beating-lxml-at-everything/
 
 ## The ledger of losses
 
