@@ -20,8 +20,9 @@ import { SITE, VERSIONS } from '~/data/site';
       The package publishes to PyPI as <code>leptris</code> (Python 3.9+):
       five cp39-abi3 wheels — macOS arm64/x86_64, manylinux x86_64/aarch64,
       Windows — plus the sdist. Wheels ship the C accelerator compiled;
-      without a toolchain the package degrades to the tested pure-Python
-      class (<code>LEPTRIS_PURE=1</code> forces it):
+      the accelerator is a required component — sdist installs without a
+      toolchain fail loudly instead of degrading (the pure-Python
+      fallback was removed in 1.9.0):
     </p>
     <CodeBlock lang="bash" code={`pip install leptris`} />
     <p>
@@ -83,7 +84,7 @@ with sax.StreamingParser(handler) as parser:   # push, constant memory
     </p>
     <ul>
       <li><strong>Tree building</strong> (<code>etree.Element</code>, <code>SubElement</code>, <code>append</code>, <code>set</code>) — this binding is read-only today (the core has partial mutation upstream — content setters, <code>set_root</code>, <code>append_child</code> — not surfaced yet); build trees elsewhere.</li>
-      <li><strong><code>iterparse</code></strong> — use <code>leptris.sax.StreamingParser</code> (callback-based, constant memory) for now; libleptris 1.4.0 landed a bounded-memory iterparse C API, and binding surfacing follows.</li>
+      <li><strong><code>iterparse</code></strong> — shipped: <code>leptris.iterparse(source)</code> yields <code>("end", element)</code> for each completed top-level child, memory bounded by the largest subtree. Two engine limitations are tracked upstream (leptris/leptris#563): it currently runs ~2× slower than lxml&rsquo;s, and truncated input ends iteration silently instead of raising. <code>leptris.sax.StreamingParser</code> remains for callback-style streaming.</li>
       <li><strong>Smart strings</strong> — XPath string and attribute results are plain <code>str</code>.</li>
       <li><strong><code>nsmap</code></strong> — use <code>namespace</code> / <code>prefix</code> and <code>xpath(namespaces=…)</code>.</li>
       <li><strong>Compiled XPath objects, parser options</strong> — both landed in libleptris 1.4.0 (thread-safe compiled handles, scoped per-parse options); binding surfacing follows.</li>
@@ -115,7 +116,8 @@ with sax.StreamingParser(handler) as parser:   # push, constant memory
 
     <h2>Benchmarks</h2>
     <p>
-      Since 1.6.1, leptris <strong>beats lxml on every operation</strong> in
+      Since 1.6.1 — and through 1.14.3, with wider margins — leptris
+      <strong>beats lxml on every operation</strong> in
       the matrix (parse 8×, ID predicates 10×, serialize 3.7×, and the
       three former losses — plain nodesets, unions, traversal — all won).
       The matrix ships in <code>benchmarks/matrix.py</code> and runs in CI;
