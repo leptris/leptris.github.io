@@ -24,6 +24,9 @@ import { SITE, VERSIONS } from '~/data/site';
       <h2>libleptris <span class="pill">v1.9.0</span></h2>
       <p><span class="pill periwinkle">2026-08-24</span> — <code>LeptrisParseOptions.recover</code> (#547): parse failures return an empty document with the error recorded. Rootless documents with PIs serialize correctly instead of returning "" (#546). <code>serialize_into</code> takes options and caches: size-query + into-call reuse one serialization (#541).</p>
 
+      <h2>leptris gem <span class="pill">v1.9.x</span> — both worlds memoize</h2>
+      <p><span class="pill rose">2026-08-27</span> — the 1.9 line adopts the engine&rsquo;s 1.7–1.9 surface (expanded-name attribute access, per-attribute namespaces, recover parsing, caller-buffer serialization) and lands the performance arc: <strong>writable documents memoize</strong> through a mutation-version cache (namespace inspection 29×, children 11× — readonly parity), readonly loops 13–36× over 1.9.2, single-node queries (<code>at_xpath</code>/<code>at_css</code>) on a container-free seam (up to 3.6×), batch materialization type-hinted, SAX strings UTF-8, fragments searchable with receiver-relative CSS, and a lifetime contract (<code>UseAfterFreeError</code>) enforced on every borrowed handle. Lockstep audit CI-gated; <code>rake audit:symbols</code> ships in the gem.</p>
+
       <h2>libleptris <span class="pill">v1.7.0</span></h2>
       <p><span class="pill periwinkle">2026-08-24</span> — the two FFI-ergonomics APIs from the Ox-vs-leptris audit (#535): <code>leptris_node_children</code> copies every child kind in one call (out=NULL counts all kinds), and the <code>_serialize_into</code> pair writes into caller buffers — one call, zero library-side allocations.</p>
 
@@ -49,6 +52,19 @@ import { SITE, VERSIONS } from '~/data/site';
         <li>Plus truthful serialization encoding declarations. Binding-side adoption of the new APIs follows.</li>
       </ul>
       <p><a href={`${SITE.githubC}/blob/main/CHANGELOG.md`}>Full changelog in the repo →</a></p>
+
+      <hr class="asterism" />
+
+      <h2>leptris (Python) <span class="pill">v1.14.3</span> — the engine room, and the walls bracketed</h2>
+      <p><span class="pill periwinkle">2026-08-27</span> — ten releases in four days; the binding grew an engine room.</p>
+      <ul>
+        <li><strong>v1.9.0 — iterparse + compiled XPath, and single-mode.</strong> <code>leptris.iterparse(source)</code> streams top-level children with memory bounded by the largest subtree; <code>leptris.XPath(expr)</code> compiles once and evaluates many times (contexts, namespaces); <code>Document.parse(recover=True)</code> yields a rootless document instead of raising; <code>Element.get(&#123;"{'{uri}local'}"&#125;)</code> resolves Clark-notation attributes. The pure-Python fallback is gone — the accelerator is required.</li>
+        <li><strong>v1.12.0 — subtree walks in C.</strong> <code>iter()</code>/<code>iterdescendants()</code> became a C cursor stepping first-child/next-sibling/parent directly — no expression built, no engine evaluation, bounded memory. The XPath engine now serves queries only; child iteration is one C call returning a presized list.</li>
+        <li><strong>v1.13.x — the Document joins the raw-address pattern.</strong> Parse + root-promote + registry creation collapsed into one C call; serialization and <code>find()</code> gained C fast paths (multi-step <code>find("a/b")</code> is a first-match DFS — 6.5× faster than the list-materializing path it replaced); the seventeen Python accessors the C type shadowed were deleted — every accessor has exactly one home.</li>
+        <li><strong>v1.14.x — compiled XPath rejoins the fast path; libleptris 1.9.2.</strong> The compiled class had kept the old Python conversion path (34.8 µs vs lxml&rsquo;s 8.3 for a namespaced query) — one C call through the shared converter brings it to parity with the plain path. Adopts libleptris 1.9.2 (the options-struct ABI fix; 1.9.1 is warned off). Three correctness fixes along the way: SAX handler reuse raised stale errors, <code>Node.as_element()</code> bypassed the poisoning registry (a use-after-free after <code>close()</code>), and <code>find()</code> disagreed with <code>findall()</code> on namespaced documents.</li>
+        <li><strong>The walls, bracketed.</strong> Every measured operation shape (18 of them, plus memory, nesting depth, and import time) is at parity or ahead of lxml. The three remaining losses are engine-side, measured and filed: iterparse&rsquo;s fixed per-call cost (leptris/leptris#563), namespaced XPath evaluation at ~18× the un-namespaced path (leptris/leptris#564), and variable-bound evaluation at ~79× the literal equivalent (leptris/leptris#565). Peak RSS runs ~35% below lxml&rsquo;s.</li>
+      </ul>
+      <p><a href={`${SITE.githubPy}/blob/main/CHANGELOG.md`}>Full changelog in leptris-py →</a></p>
 
       <hr class="asterism" />
 
