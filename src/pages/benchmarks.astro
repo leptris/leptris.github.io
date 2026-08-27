@@ -191,6 +191,35 @@ const pyBlocks = [
         Nokogiri&rsquo;s native iterator; closing it is on the ledger.
       </p>
 
+      <h3>The memoization arc <span class="pill">gem 1.9.2 → 1.9.17, committed harness</span></h3>
+      <p>
+        Gem-internal before/after on the read paths — same machine, same
+        loops, the <a href={`${SITE.githubRuby}/blob/main/benchmark/read_paths.rb`}>committed harness</a>:
+        every number below is a published-gem A/B, not a dev-tree run.
+      </p>
+      <table class="doc-table">
+        <tr><th>loop (300-element readonly doc)</th><th>gem 1.9.2</th><th>gem 1.9.17</th><th>verdict</th></tr>
+        <tr><td>namespace inspection</td><td class="bytes">0.62 s</td><td class="bytes">0.017 s</td><td class="note">36× faster</td></tr>
+        <tr><td>attribute reads</td><td class="bytes">0.63 s</td><td class="bytes">0.048 s</td><td class="note">13× faster</td></tr>
+        <tr><td>text content reads</td><td class="bytes">0.19 s</td><td class="bytes">0.035 s</td><td class="note">5× faster</td></tr>
+      </table>
+      <table class="doc-table">
+        <tr><th>loop (writable document — the DOM-editing shape)</th><th>gem 1.9.13</th><th>gem 1.9.14</th><th>verdict</th></tr>
+        <tr><td>namespace inspection</td><td class="bytes">0.37 s</td><td class="bytes">0.013 s</td><td class="note">29× faster — readonly parity, via the mutation-version cache</td></tr>
+        <tr><td>children iteration</td><td class="bytes">0.15 s</td><td class="bytes">0.014 s</td><td class="note">11× faster — readonly parity</td></tr>
+      </table>
+      <table class="doc-table">
+        <tr><th>single-node query loop</th><th>before</th><th>after</th><th>verdict</th></tr>
+        <tr><td><code>at_xpath</code> (2000 iterations)</td><td class="bytes">0.011 s</td><td class="bytes">0.0045 s</td><td class="note">2.5× — container-free seam</td></tr>
+        <tr><td><code>at_css</code></td><td class="bytes">0.036 s</td><td class="bytes">0.020 s</td><td class="note">1.8×</td></tr>
+      </table>
+      <p>
+        The design notes live in the repo&rsquo;s
+        <a href={`${SITE.githubRuby}/blob/main/docs/adr/`}>ADR set</a> —
+        the versioned cache (0003) records the rejected shared-stamp
+        variant alongside the shipped per-field stamps.
+      </p>
+
       <h3>The wider field <span class="pill">documented at gem v1.0.0</span></h3>
       <p>
         Historical context for the tier below Nokogiri — measured when the

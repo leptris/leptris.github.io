@@ -63,6 +63,15 @@ doc.root.children.size   # => 5 (2 element children + 3 whitespace text nodes)
 
 doc = Leptris::XML.parse_file("books.xml")`} />
 
+    <h3>Recover mode</h3>
+    <p>
+      Malformed input raises <code>Leptris::XML::ParseError</code>. Parse
+      with <code>recover: true</code> for libxml2&rsquo;s
+      <code>XML_PARSE_RECOVER</code> semantics instead: an empty document
+      back, the failure recorded on the thread-global last error, and
+      <code>Document#last_error_position</code> answering
+      <code>[line, column]</code>.
+    </p>
     <h2>Reading nodes</h2>
     <table class="doc-table">
       <tr><th>method</th><th>returns</th></tr>
@@ -103,7 +112,8 @@ end`} />
 
     <h2>Searching — XPath and CSS</h2>
     <p>
-      <code>Document</code> and <code>Element</code> both support
+      <code>Document</code>, <code>Element</code>, and
+      <code>DocumentFragment</code> support
       (<code>via Leptris::XML::Searchable</code>):
       <code>#xpath</code>, <code>#at_xpath</code>, <code>#css</code>,
       <code>#at_css</code>, <code>#search</code> (dispatches on syntax), and
@@ -134,7 +144,7 @@ doc.css("book:first-child")               # first <book>`} />
       <li>Combinators: descendant (space), child (<code>&gt;</code>), comma (multi-selector)</li>
       <li>Pseudo-classes: <code>:first-child</code>, <code>:last-child</code>, <code>:only-child</code>, <code>:empty</code>, <code>:root</code>, <code>:not(...)</code></li>
     </ul>
-    <p>For anything more sophisticated, drop down to <code>xpath</code>.</p>
+    <p>For anything more sophisticated, drop down to <code>xpath</code>. CSS is receiver-relative (Nokogiri semantics): <code>element.css(...)</code> and <code>fragment.css(...)</code> scope to the receiver; <code>Document#css</code> is document-wide.</p>
 
     <h3>EXSLT extensions</h3>
     <p>
@@ -208,6 +218,8 @@ doc.xpath("//t:title")`} />
       <tr><td><code>Element#add_namespace_definition</code> <span class="pill">alias: add_namespace</span></td><td class="note">declare <code>xmlns:prefix="href"</code>.</td></tr>
       <tr><td><code>Element#default_namespace=</code></td><td class="note">declare/replace <code>xmlns="href"</code>.</td></tr>
       <tr><td><code>Element#remove_namespace_definition</code></td><td class="note">drop a declaration.</td></tr>
+      <tr><td><code>Element#attribute_ns(uri, local)</code> / <code>#has_attribute_ns?</code></td><td class="note">expanded-name lookup (URI + local) with XML Namespaces 1.0 semantics — cross-prefix match, nil URI = no-namespace only, xmlns invisible.</td></tr>
+      <tr><td><code>Attr#prefix</code> / <code>Attr#namespace_uri</code></td><td class="note">per-attribute prefix (as written) and URI (resolved through the owning element&rsquo;s declarations at read time; <code>xml</code> prebound).</td></tr>
     </table>
 
     <h2>Serialization and canonicalization</h2>
@@ -228,6 +240,28 @@ doc.canonicalize(exclusive: true, inclusive_namespaces: ["ds"])  # InclusiveName
       <code>Attr#to_xml</code> returns the serialized
       <code>name="value"</code> form with the five XML special characters
       escaped.
+    </p>
+
+    <h2>Read performance: readonly and the versioned cache</h2>
+    <p>
+      Every read path memoizes. Under <code>readonly: true</code> the
+      document is frozen for reading (mutations raise
+      <code>ReadOnlyError</code>) and reads can never go stale — they
+      memoize unconditionally. Writable documents memoize too, through a
+      per-document <strong>mutation version</strong>: any mutation
+      (<code>#[]=</code>, <code>#&lt;&lt;</code>, <code>#name=</code>,
+      structural changes, namespace edits) advances the version, and every
+      memoized read recomputes after it. The DOM-editing workload — parse,
+      query repeatedly, mutate occasionally — performs like the readonly
+      one between mutations.
+    </p>
+    <p>
+      Single-node queries (<code>#at_xpath</code> / <code>#at_css</code>)
+      take a dedicated seam — no NodeSet container, no result handle, one
+      fewer dispatch than <code>xpath().first</code>. Bare-name
+      <code>#[]</code> reads serve from a versioned attributes hash. All
+      strings crossing the C boundary arrive UTF-8, on returns and SAX
+      callbacks alike.
     </p>
 
     <h2>SAX — streaming for very large documents</h2>
