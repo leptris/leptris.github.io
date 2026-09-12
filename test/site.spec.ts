@@ -7,9 +7,10 @@ import { DOCS_NAV, NAV, SITE, VERSIONS } from '../src/data/site';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 describe('site data', () => {
-  it('versions are semver', () => {
-    expect(VERSIONS.lib).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(VERSIONS.gem).toMatch(/^\d+\.\d+\.\d+$/);
+  it('versions are semver (4-part allowed for lockstep releases)', () => {
+    expect(VERSIONS.lib).toMatch(/^\d+(\.\d+){2,3}$/);
+    expect(VERSIONS.gem).toMatch(/^\d+(\.\d+){2,3}$/);
+    expect(VERSIONS.py).toMatch(/^\d+(\.\d+){2,3}$/);
   });
 
   it('github links point at the leptris org', () => {

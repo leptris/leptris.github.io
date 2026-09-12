@@ -116,11 +116,12 @@ with sax.StreamingParser(handler) as parser:   # push, constant memory
 
     <h2>Benchmarks</h2>
     <p>
-      Since 1.6.1 — and through 1.14.3, with wider margins — leptris
-      <strong>beats lxml on every operation</strong> in
-      the matrix (parse 8×, ID predicates 10×, serialize 3.7×, and the
-      three former losses — plain nodesets, unions, traversal — all won).
-      The matrix ships in <code>benchmarks/matrix.py</code> and runs in CI;
+      Since 1.6.1 — and through 1.9.121.0, with wider margins — leptris
+      <strong>beats lxml on every operation</strong> in the matrix
+      (parse 4.6×, ID predicates 19×, serialize 2.3×; traversal, the last
+      holdout, is now 2× ahead of lxml — the stdlib&rsquo;s
+      ElementTree keeps the single traversal crown). The matrix ships in
+      <code>benchmarks/matrix.py</code> and runs in CI;
       the accelerator story and the full scoreboard:
       <a href="/benchmarks#python">the benchmarks page</a>.
     </p>

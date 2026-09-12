@@ -13,12 +13,12 @@ export const SITE = {
 } as const;
 
 export const VERSIONS = {
-  lib: '1.9.142',
+  lib: '1.9.144',
   libDate: '2026-09-12',
-  gem: '1.9.17',
-  gemDate: '2026-08-27',
-  py: '1.14.3',
-  pyDate: '2026-08-27',
+  gem: '1.9.121.0',
+  gemDate: '2026-09-09',
+  py: '1.9.121.0',
+  pyDate: '2026-09-09',
 } as const;
 
 export interface NavEntry {
