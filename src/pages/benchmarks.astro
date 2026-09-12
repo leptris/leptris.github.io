@@ -1,457 +1,189 @@
 ---
 import BaseLayout from '~/components/BaseLayout.astro';
-import BenchBars from '~/components/BenchBars.vue';
-import Callout from '~/components/Callout.astro';
-import Matrix from '~/components/bench/Matrix.astro';
-import Provenance from '~/components/bench/Provenance.astro';
-import ResultsTable from '~/components/bench/ResultsTable.astro';
 import { SITE } from '~/data/site';
-import {
-  CAMPAIGNS,
-  frontier,
-  type Campaign,
-} from '~/data/benchmarks';
 
-const campaign = (id: string): Campaign => {
-  const found = CAMPAIGNS.find((c) => c.id === id);
-  if (!found) throw new Error(`unknown campaign ${id}`);
-  return found;
-};
-
-const xmlCMatrix = campaign('xml-c-matrix-2026-09-12');
-const xmlCLanes = campaign('xml-c-lanes-2026-09-12');
-const xsltC = campaign('xslt-c-2026-09-12');
-const htmlC = campaign('html-c-2026-09-12');
-const yamlC = campaign('yaml-c-2026-09-12');
-const xmlRuby = campaign('xml-ruby-2026-09-12');
-const xmlRubyFrontier = campaign('xml-ruby-frontier-2026-09-12');
-const xmlRubySerialbench = campaign('xml-ruby-serialbench-2026-09');
-const xmlPython = campaign('xml-python-2026-09-12');
-
-const frontierRows = frontier();
-
-const cParseBlocks = [
+const formats = [
   {
-    title: '2 MB text-heavy DOM parse — vs pugixml, C harness',
-    sub: 'min of 20, identical Release + LTO builds, same machine',
-    chip: '3.4× vs pugixml',
-    rows: [
-      { who: 'leptris', val: '191 µs', w: 29.8 },
-      { who: 'pugixml', val: '642 µs', w: 100, them: true },
-    ],
+    href: '/benchmarks/xml/',
+    label: 'XML parsing and DOM',
+    lede: 'libleptris against libxml2 and pugixml in C, the leptris gem against Nokogiri and Ox in Ruby, and the leptris package against lxml, ElementTree and minidom in Python.',
   },
-];
-
-const rubyBlocks = [
   {
-    title: 'Parse + serialize a 12 KB document, through Ruby',
-    sub: 'same fixtures, same iteration counts — the committed matrix harness',
-    chip: '9.2× / 3.1× vs nokogiri',
-    rows: [
-      { who: 'leptris', ver: 'gem 1.9.121.0', val: '20.4 µs', w: 10.9 },
-      { who: 'Nokogiri', ver: '1.19.4', val: '187.2 µs', w: 100, them: true },
-    ],
+    href: '/benchmarks/xpath/',
+    label: 'XPath 1.0',
+    lede: 'Query evaluation against libxml2 in C and through the Ruby and Python bindings, across simple paths, predicates, aggregates, unions and variable-bound expressions.',
   },
-];
-
-const pyBlocks = [
   {
-    title: 'Parse — 12 KB medium document, through Python',
-    sub: 'mean per iteration, warm caches, gc-quiet loops',
-    chip: '4.6× vs lxml',
-    rows: [
-      { who: 'leptris', ver: '1.9.121.0', val: '22.6 µs', w: 21.6 },
-      { who: 'lxml', ver: '6.0.2', val: '104.9 µs', w: 100, them: true },
-      { who: 'ElementTree', ver: 'stdlib', val: '158.3 µs', w: 100, them: true },
-    ],
+    href: '/benchmarks/xslt/',
+    label: 'XSLT',
+    lede: 'The transform engine measured fixture by fixture against in-process libxslt, alongside the 205-test byte-identical conformance gate.',
+  },
+  {
+    href: '/benchmarks/html/',
+    label: 'HTML (WHATWG)',
+    lede: 'The conformant WHATWG tree-construction engine measured against Nokogiri’s libxml2 HTML parser through Ruby and through the Python binding.',
+  },
+  {
+    href: '/benchmarks/yaml/',
+    label: 'YAML',
+    lede: 'yeptris against libyaml and rapidyaml across eight document shapes, three consumption models and emission, in C.',
   },
 ];
 ---
 
 <BaseLayout
   title="Benchmarks — leptris"
-  description="One comparison surface for the leptris ecosystem: libleptris and yeptris vs libxml2, pugixml, libxslt, Nokogiri, Ox, lxml, libyaml and rapidyaml — across C, Ruby and Python, with every number traced to a published harness and the losses kept in view."
+  description="Benchmark results for the leptris ecosystem, organized by technology: XML parsing, XPath, XSLT and HTML for libleptris and its Ruby and Python bindings, and YAML for yeptris. Every number traces to a published harness."
 >
   <section class="page-head">
     <div class="wrap">
       <p class="sec-label">Benchmarks</p>
-      <h1 class="sec-title">The whole field, <em>one surface</em></h1>
+      <h1 class="sec-title">Results, <em>by technology</em></h1>
       <p class="sec-lede">
-        Two engines — <strong>libleptris</strong> for XML/XPath/XSLT/HTML and
-        <strong>yeptris</strong> for YAML — against every incumbent we ship
-        against, in every language we ship. The matrix below is generated from
-        versioned result data: each cell is the <em>weakest</em> measured ratio
-        for that pairing, so a race only reads green when nothing in it loses.
-        Wins and losses alike trace to a published harness — see the
-        <a href="/benchmarks/methodology">methodology</a>.
+        The leptris ecosystem ships two engines — libleptris for XML,
+        XPath, XSLT and HTML, and yeptris for YAML — with bindings for
+        Ruby and Python. Results are organized by technology, and within
+        each technology page by language, so you can read only the race
+        that concerns your stack. Every number is generated from versioned
+        result files that record the exact versions measured, the machine,
+        the date, the reported statistic and the harness the measurement
+        reproduces from. The measurement rules are documented on the
+        <a href="/benchmarks/methodology/">methodology page</a>.
       </p>
     </div>
   </section>
 
-  <div class="wrap">
-    <div class="callout" style="margin-top:2.4rem">
-      <p>
-        <strong>Reading the matrix.</strong> A cell shows how many times faster
-        the leptris side is on its weakest measured operation against that
-        competitor — <span class="pill-win">green</span> is a clean sweep,
-        <span class="pill-loss">rose</span> is a race with an open deficit, and
-        <code>†</code> marks artifact numbers carried from a published ledger
-        rather than a fresh run. The <a href="#frontier">frontier</a> section
-        names every open deficit and its lever.
-      </p>
-    </div>
-  </div>
-
-  <!-- ————— matrix ————— -->
-  <section class="sec" id="matrix" style="padding-top:2rem;padding-bottom:1rem">
+  <section class="sec" style="padding-top:1.6rem">
     <div class="wrap">
-      <h2 class="sec-title">The matrix — <em>leptris vs everything</em></h2>
-      <p class="sec-lede">
-        One standing row per competitor per language. Cells carry the weakest
-        ratio from the campaigns below; drill into a technology to see every
-        operation behind the number.
-      </p>
-
-      <h3>Compiled — C and C++</h3>
-      <Matrix languages={['c']} />
-
-      <h3>Interpreted — Ruby</h3>
-      <Matrix languages={['ruby']} />
-
-      <h3>Interpreted — Python</h3>
-      <Matrix languages={['python']} />
-    </div>
-  </section>
-
-  <!-- ————— 01 XML + XPath ————— -->
-  <section class="sec sec-tint-periwinkle" data-ghost="01" id="xml" style="padding-bottom:4rem">
-    <div class="wrap">
-      <p class="sec-label" data-num="01">XML and XPath</p>
-      <h2 class="sec-title">The embedder&rsquo;s race: <em>libxml2 and pugixml</em></h2>
-      <p class="sec-lede">
-        <strong>libxml2</strong> is the de facto standard — C, everywhere, and
-        the engine under Chrome, Firefox, Python&rsquo;s lxml and Ruby&rsquo;s
-        Nokogiri. <strong>pugixml</strong> is C++ and the acknowledged speed
-        king of zero-copy DOM parsing. Those are the two we gate against.
-      </p>
-
-      <div class="reveal" style="margin:2.6rem 0">
-        <BenchBars client:visible blocks={cParseBlocks} />
+      <div class="fmt-grid">
+        {
+          formats.map((f) => (
+            <a class="fmt-card" href={f.href}>
+              <h2>{f.label}</h2>
+              <p>{f.lede}</p>
+              <span class="go">View the results →</span>
+            </a>
+          ))
+        }
       </div>
 
-      <h3>Parse, SAX, serialize, mutate — same-binary matrix</h3>
-      <ResultsTable
-        rows={xmlCMatrix.results.map((result) => ({ result, campaign: xmlCMatrix }))}
-        competitorHead="competitor (same run)"
-      />
-      <Provenance campaign={xmlCMatrix} />
+      <p class="by-lang">
+        Prefer to start from your language? Each technology page has one
+        section per language:
+        <a href="/benchmarks/xml/#ruby">XML in Ruby</a>,
+        <a href="/benchmarks/xml/#python">XML in Python</a>,
+        <a href="/benchmarks/xml/#c">XML in C</a>,
+        <a href="/benchmarks/xpath/#ruby">XPath in Ruby</a>,
+        <a href="/benchmarks/xslt/">XSLT in C</a>,
+        <a href="/benchmarks/yaml/">YAML in C</a>.
+      </p>
 
-      <h3>DOM reads and XPath eval — lane benches</h3>
-      <ResultsTable
-        rows={xmlCLanes.results.map((result) => ({ result, campaign: xmlCLanes }))}
-        competitorHead="libxml2 2.15.3"
-      />
-      <Provenance campaign={xmlCLanes} />
-
-      <Callout>
+      <div class="callout" style="margin-top:2.6rem">
         <p>
-          <strong>Apples-to-apples on whitespace.</strong> leptris keeps
-          whitespace-only text nodes by default (libxml2/Nokogiri behavior);
-          pugixml discards them. The pretty-printed parse row above is that
-          semantic difference — for a like-for-like race use
-          <code>LEPTRIS_PARSE_DROP_WS_TEXT</code>.
+          <strong>How to read the matrices.</strong> Each matrix cell
+          summarizes one race against one competitor in one language. When
+          every measured operation is ahead, the cell shows the smallest
+          margin across those operations. When a race contains measured
+          deficits, the cell shows the weakest and the strongest result
+          together, and hovering over the cell lists the operations that
+          remain behind. The tables beneath each matrix list every measured
+          operation, including the ones that lose. Numbers marked with a
+          dagger (†) are carried from published artifacts or ledgers
+          rather than from a fresh run.
         </p>
-      </Callout>
-
-      <p class="docs-canonical" style="margin-top:2rem">
-        Reproduce: <code>cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DLEPTRIS_BUILD_BENCHMARKS=ON</code>,
-        then the binaries under <code>build/benchmarks/</code>.
-        <a href={`${SITE.githubC}/tree/main/benchmarks`}>The harness, in the tree</a>.
-      </p>
-    </div>
-  </section>
-
-  <!-- ————— 02 XSLT ————— -->
-  <section class="sec sec-tint-rose" data-ghost="02" id="xslt" style="padding-bottom:4rem">
-    <div class="wrap">
-      <p class="sec-label" data-num="02">XSLT</p>
-      <h2 class="sec-title">Transforms: <em>libxslt, in-process</em></h2>
-      <p class="sec-lede">
-        The engine is gated at <strong>205/205 byte-identical</strong> against
-        the libxslt general suite (closed at v1.9.19, regression-gated since).
-        Speed is measured against in-process libxslt — not
-        <code>xsltproc</code> wall time — on byte-identical fixtures, both
-        sides compiled once and timed on the apply only.
-      </p>
-
-      <ResultsTable
-        rows={xsltC.results.map((result) => ({ result, campaign: xsltC }))}
-        competitorHead="libxslt 1.1.43"
-      />
-      <Provenance campaign={xsltC} />
-
-      <p>
-        The eval-environment arc (AVT compile cache, dispatch name keys and
-        mode buckets, streaming result emission) is what moved these rows; the
-        remaining dispatch-shape gap carries a published ceiling analysis —
-        the honest verdict is that <strong>2×</strong> against a 20-year-tuned
-        engine on its core dispatch shape is not reachable by optimization
-        alone, while the predicate-dispatch and subtree-copy shapes hold the
-        wins and value-of sits at parity. The analysis lives with the perf
-        board in the C repo.
-      </p>
-
-      <p class="docs-canonical">
-        Reproduce: the <code>bench_xslt_*</code> binaries and their in-process
-        lxml twins under
-        <a href={`${SITE.githubC}/tree/main/benchmarks/xslt`}>benchmarks/xslt</a>.
-      </p>
-    </div>
-  </section>
-
-  <!-- ————— 03 HTML ————— -->
-  <section class="sec sec-tint-sage" data-ghost="03" id="html" style="padding-bottom:4rem">
-    <div class="wrap">
-      <p class="sec-label" data-num="03">HTML</p>
-      <h2 class="sec-title">Two engines, one core: <em>WHATWG + parity</em></h2>
-      <p class="sec-lede">
-        <code>leptris_parse_html_string</code> is the conformant WHATWG
-        tree-construction engine (adoption agency, active formatting
-        reconstruction, script-data escaped states, foster parenting), gated
-        against the vendored <strong>html5lib tree-construction corpus —
-        1129/1753 and rising every release</strong> across the September wave.
-        <code>leptris_parse_html4_string</code> is the Nokogiri/libxml2-parity
-        shape, byte-pinned against a 1555-case Nokogiri reference.
-      </p>
-
-      <h3>WHATWG parse throughput — vs Nokogiri&rsquo;s libxml2</h3>
-      <ResultsTable
-        rows={htmlC.results.map((result) => ({ result, campaign: htmlC }))}
-        competitorHead="nokogiri 1.19.4"
-      />
-      <Provenance campaign={htmlC} />
-      <p>
-        The conformant engine runs at libxml2&rsquo;s HTML-parser throughput:
-        the full WHATWG machinery costs nothing measurable on realistic pages,
-        and correctness gates (html5lib corpus, the Nokogiri byte-pin) hold on
-        every release.
-      </p>
-
-      <p class="docs-canonical">
-        Reproduce: <code>bench_html_parse</code> and its byte-identical Ruby
-        reference under
-        <a href={`${SITE.githubC}/tree/main/benchmarks/html`}>benchmarks/html</a>.
-      </p>
-    </div>
-  </section>
-
-  <!-- ————— 04 YAML ————— -->
-  <section class="sec sec-tint-periwinkle" data-ghost="04" id="yaml" style="padding-bottom:4rem">
-    <div class="wrap">
-      <p class="sec-label" data-num="04">YAML</p>
-      <h2 class="sec-title">yeptris: <em>libyaml is the mission, ryml is the field</em></h2>
-      <p class="sec-lede">
-        <strong>yeptris</strong> is the YAML counterpart of libleptris — YAML
-        1.2 parse/emit/stream in C11. <strong>libyaml</strong> (under
-        Ruby&rsquo;s Psych) is the mission: beat it on every measure.
-        <strong>rapidyaml</strong> is the field benchmark — and the honest
-        frontier.
-      </p>
-
-      <h3>Vs libyaml — every shape, every consumption model</h3>
-      <ResultsTable
-        rows={yamlC.results
-          .filter((r) => r.competitor === 'libyaml')
-          .map((result) => ({ result, campaign: yamlC }))}
-        competitorHead="libyaml 0.2.5"
-      />
-      <Provenance campaign={yamlC} />
-
-      <h3>Vs rapidyaml — the open frontier</h3>
-      <ResultsTable
-        rows={yamlC.results
-          .filter((r) => r.competitor === 'ryml')
-          .map((result) => ({ result, campaign: yamlC }))}
-        competitorHead="ryml 0.16.0"
-      />
-      <p>
-        The discipline file — every optimization attempt with before/after
-        numbers, wins and dead ends alike — is the
-        <a href="https://github.com/leptris/yeptris/blob/main/benchmarks/PERF-LEDGER.md">yeptris perf ledger</a>;
-        the named residual vs ryml is the engine dispatch loop and nested-map
-        opener machinery, recorded there with its measured ceilings.
-      </p>
-    </div>
-  </section>
-
-  <!-- ————— 05 Ruby ————— -->
-  <section class="sec sec-tint-rose" data-ghost="05" id="ruby" style="padding-bottom:4rem">
-    <div class="wrap">
-      <p class="sec-label" data-num="05">Ruby</p>
-      <h2 class="sec-title">The migrant&rsquo;s race: <em>Nokogiri, Ox, moxml</em></h2>
-      <p class="sec-lede">
-        <strong>Nokogiri</strong> (libxml2 C extension) is the incumbent most
-        of you are migrating from; <strong>Ox</strong> is the raw-parse C
-        extension; <strong>moxml</strong> is the libxml2-backed adapter the NS
-        race runs against. The pitch: Ox-level parse speed <em>with</em>
-        complete XPath 1.0 — 438/438 — and no libxml2.
-      </p>
-
-      <div class="reveal" style="margin:0 0 2.6rem">
-        <BenchBars client:visible blocks={rubyBlocks} />
       </div>
 
-      <h3>Operation matrix — vs Nokogiri</h3>
-      <ResultsTable
-        rows={xmlRuby.results.map((result) => ({ result, campaign: xmlRuby }))}
-        competitorHead="nokogiri 1.19.4"
-      />
-      <Provenance campaign={xmlRuby} />
-
-      <h3>The open rows in this field <span class="pill">ledger artifacts</span></h3>
-      <ResultsTable
-        rows={xmlRubyFrontier.results.map((result) => ({
-          result,
-          campaign: xmlRubyFrontier,
-        }))}
-        competitorHead="moxml / ox"
-      />
-      <Provenance campaign={xmlRubyFrontier} />
-
-      <h3>The full-field artifact <span class="pill">serialbench</span></h3>
-      <ResultsTable
-        rows={xmlRubySerialbench.results.map((result) => ({
-          result,
-          campaign: xmlRubySerialbench,
-        }))}
-        competitorHead="the field"
-      />
-      <Provenance campaign={xmlRubySerialbench} />
+      <h2 class="conformance-title">Conformance and capability gates</h2>
       <p>
-        The 4.38 MB real-world document race (Ox, Nokogiri, Oga, REXML in the
-        field) is carried from the serialbench artifact — the full harness
-        lives in its own repository and its adapter for leptris ships there.
-      </p>
-
-      <h3>The memoization arc <span class="pill">gem-internal A/B</span></h3>
-      <p>
-        Not a cross-library race: the binding measured against itself, same
-        machine, same loops, on the committed
-        <a href={`${SITE.githubRuby}/blob/main/benchmark/read_paths.rb`}>read-path harness</a>.
-        Every number is a published-gem A/B.
+        Some races are decided on conformance and capability before a
+        cross-library timing harness exists. These are stated as gates and
+        are excluded from the matrices until a committed harness publishes
+        numbers for them.
       </p>
       <table class="doc-table">
-        <tr><th>loop (300-element readonly doc)</th><th>gem 1.9.2</th><th>gem 1.9.17</th><th>verdict</th></tr>
-        <tr><td>namespace inspection</td><td class="bytes">0.62 s</td><td class="bytes">0.017 s</td><td class="note">36× faster</td></tr>
-        <tr><td>attribute reads</td><td class="bytes">0.63 s</td><td class="bytes">0.048 s</td><td class="note">13× faster</td></tr>
-        <tr><td>text content reads</td><td class="bytes">0.19 s</td><td class="bytes">0.035 s</td><td class="note">5× faster</td></tr>
+        <tr><th>Area</th><th>Standing</th><th>Gate</th></tr>
+        <tr><td>RELAX NG validation</td><td class="note">Native implementation; no JVM required</td><td class="note">Jing conformance corpus; <code>&lt;include&gt;</code> and <code>&lt;param&gt;</code> supported</td></tr>
+        <tr><td>Schematron validation</td><td class="note">Native implementation producing SVRL</td><td class="note">Conformance corpus; abstract patterns; phase selection</td></tr>
+        <tr><td>XQuery</td><td class="note">FLWOR expressions and constructors on the same core</td><td class="note">W3C QT3 function sets adopted with exact-N semantics</td></tr>
+        <tr><td>XPath 1.0 conformance</td><td class="note">Complete</td><td class="note">438 of 438 W3C test cases</td></tr>
+        <tr><td>XSLT conformance</td><td class="note">Byte-identical output</td><td class="note">205 of 205 tests from the libxslt general suite</td></tr>
+        <tr><td>HTML conformance</td><td class="note">Improving with every release</td><td class="note">html5lib tree-construction suite, 1169 of 1753; Nokogiri byte-compatibility suite</td></tr>
       </table>
 
       <p class="docs-canonical" style="margin-top:2rem">
-        Reproduce: <code>bundle exec ruby -Ilib benchmark/leptris_vs_nokogiri.rb</code>.
-        <a href={`${SITE.githubRuby}/blob/main/benchmark/README.md`}>The benchmark guide in leptris-ruby</a>.
-      </p>
-    </div>
-  </section>
-
-  <!-- ————— 06 Python ————— -->
-  <section class="sec sec-tint-sage" data-ghost="06" id="python" style="padding-bottom:4rem">
-    <div class="wrap">
-      <p class="sec-label" data-num="06">Python</p>
-      <h2 class="sec-title">The incumbent&rsquo;s race: <em>lxml and the stdlib</em></h2>
-      <p class="sec-lede">
-        <strong>lxml</strong> wraps the very libxml2 Nokogiri wraps;
-        <strong>ElementTree</strong> ships with Python (C-accelerated via
-        <code>_elementtree</code>); <strong>minidom</strong> is the pure-Python
-        floor. The binding&rsquo;s engine room is an abi3 C accelerator bound
-        to libleptris through a 45-symbol positional protocol — wheels ship for
-        macOS and manylinux, both architectures, plus Windows.
-      </p>
-
-      <div class="reveal" style="margin:0 0 2.6rem">
-        <BenchBars client:visible blocks={pyBlocks} />
-      </div>
-
-      <h3>Operation matrix — the whole field</h3>
-      <ResultsTable
-        rows={xmlPython.results.map((result) => ({ result, campaign: xmlPython }))}
-        competitorHead="lxml / stdlib"
-      />
-      <Provenance campaign={xmlPython} />
-      <p>
-        The one open loss is traversal against the stdlib:
-        ElementTree&rsquo;s <code>iter()</code> is a bare generator over a
-        lean list — the single crown it keeps. Against lxml the matrix is a
-        clean sweep.
-      </p>
-
-      <p class="docs-canonical" style="margin-top:2rem">
-        Reproduce: <code>LEPTRIS_LIB_PATH=…/libleptris.dylib python3
-        benchmarks/matrix.py</code> in
-        <a href={`${SITE.githubPy}`}>leptris-py</a> — same fixtures and
-        operations as the Ruby matrix.
-      </p>
-    </div>
-  </section>
-
-  <!-- ————— 07 validation & friends ————— -->
-  <section class="sec" data-ghost="07" id="validation" style="padding-bottom:4rem">
-    <div class="wrap">
-      <p class="sec-label" data-num="07">Validation, XQuery, conformance</p>
-      <h2 class="sec-title">Races without a <em>throughput number</em> — yet</h2>
-      <p class="sec-lede">
-        Some races are won on capability and conformance before they have a
-        committed cross-library timing harness; they stay out of the matrix
-        until a harness publishes numbers.
-      </p>
-      <table class="doc-table">
-        <tr><th>race</th><th>standing</th><th>gate</th></tr>
-        <tr><td>RELAX NG validation</td><td class="note">native — pattern IR + backtracking fold</td><td class="note">Jing-parity corpus gate, <code>&lt;include&gt;</code>, params</td></tr>
-        <tr><td>Schematron</td><td class="note">native — schema IR → SVRL, no JVM</td><td class="note">conformance corpus 50/50, phase selection</td></tr>
-        <tr><td>XQuery</td><td class="note">same-core FLWOR/constructors</td><td class="note">QT3 function sets adopted exact-N</td></tr>
-        <tr><td>XPath 1.0 conformance</td><td class="note">complete</td><td class="note">438/438 W3C suite</td></tr>
-        <tr><td>XSLT conformance</td><td class="note">byte-identical</td><td class="note">205/205 vs the libxslt general suite</td></tr>
-        <tr><td>HTML conformance</td><td class="note">rising every release</td><td class="note">html5lib tree suite 1129/1753; Nokogiri byte-pin at 784</td></tr>
-      </table>
-    </div>
-  </section>
-
-  <!-- ————— frontier ————— -->
-  <section class="sec" id="frontier">
-    <div class="wrap">
-      <p class="sec-label" data-num="08">The ledger of losses</p>
-      <h2 class="sec-title">The open <em>frontier</em></h2>
-      <p class="sec-lede">
-        Every deficit in the data, weakest first, with its measured ratio and
-        its lever. Nothing is hidden, nothing is rounded into a win — this
-        table is generated from the same result files as the matrix above.
-        Everything else on this page&rsquo;s history — the iterparse fixed
-        cost, the namespaced and variable-bound evals, Ruby bare reads and the
-        SAX drain, traversal vs Nokogiri — already fell; the tombstones stay
-        in the repos&rsquo; ledgers.
-      </p>
-      <ResultsTable rows={frontierRows} competitorHead="vs" />
-      <p class="frontier-source">
-        Sources: the same versioned result files that render the matrix —
-        see <a href="/benchmarks/methodology">methodology</a> for the schema
-        and each campaign&rsquo;s harness link.
+        All harnesses are committed to the product repositories:
+        <a href={`${SITE.githubC}/tree/main/benchmarks`}>libleptris benchmarks</a>,
+        <a href={`${SITE.githubYaml}/tree/main/benchmarks`}>yeptris benchmarks</a>,
+        <a href={`${SITE.githubRuby}/blob/main/benchmark/README.md`}>leptris gem benchmarks</a>, and
+        <a href={`${SITE.githubPy}/blob/main/benchmarks/matrix.py`}>leptris Python benchmarks</a>.
       </p>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .pill-win {
-    color: color-mix(in srgb, var(--color-sage) 55%, var(--color-ink));
-    font-weight: 600;
+  .fmt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 1.2rem;
+    margin-top: 1rem;
   }
-  .pill-loss {
+  .fmt-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1.4rem 1.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.8rem;
+    text-decoration: none;
+    color: inherit;
+  }
+  .fmt-card:hover {
+    border-color: color-mix(in srgb, var(--color-rose) 60%, transparent);
+  }
+  .fmt-card h2 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    margin: 0;
+  }
+  .fmt-card p {
+    margin: 0;
+    color: var(--color-ink-muted);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    flex: 1;
+  }
+  .fmt-card .go {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
     color: var(--color-rose-deep);
-    font-weight: 600;
   }
-  .frontier-source {
-    font-size: 0.85rem;
-    color: var(--color-ink-faint);
-    margin-top: 1.4rem;
+  .by-lang {
+    margin-top: 1.6rem;
+    color: var(--color-ink-muted);
+    font-size: 0.9rem;
+  }
+  .conformance-title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    margin: 3.2rem 0 0.8rem;
   }
 </style>
+
+<script>
+  // Redirect legacy anchor links from before the per-technology pages.
+  const routes: Record<string, string> = {
+    xml: '/benchmarks/xml/',
+    ruby: '/benchmarks/xml/#ruby',
+    python: '/benchmarks/xml/#python',
+    ledger: '/benchmarks/xml/#python',
+    xslt: '/benchmarks/xslt/',
+    html: '/benchmarks/html/',
+    yaml: '/benchmarks/yaml/',
+    frontier: '/benchmarks/xml/',
+  };
+  const hash = window.location.hash.replace('#', '');
+  if (hash && routes[hash]) {
+    window.location.replace(routes[hash]);
+  }
+</script>

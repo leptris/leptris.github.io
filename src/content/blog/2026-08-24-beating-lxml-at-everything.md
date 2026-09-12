@@ -63,5 +63,5 @@ and when. If you want to see exactly how, the harness is in the tree:
 matrix. Run it yourself.
 
 [race]: /blog/2026-08-23-leptris-1-2-0-the-race-per-language/
-[ledger]: /benchmarks#ledger
+[ledger]: /benchmarks/xml/#python
 [py]: https://github.com/leptris/leptris-py

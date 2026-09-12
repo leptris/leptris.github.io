@@ -147,7 +147,7 @@ export function matrixRows(languages: Language[]): CompetitorRow[] {
   );
 }
 
-/** Every loss row across all campaigns, with its campaign provenance — the frontier. */
+/** Every loss row across all campaigns, with its campaign provenance — the deficits. */
 export function frontier(): Cell[] {
   const out: Cell[] = [];
   for (const campaign of CAMPAIGNS) {
@@ -156,6 +156,83 @@ export function frontier(): Cell[] {
     }
   }
   return out.sort((a, b) => a.result.ratio - b.result.ratio);
+}
+
+export interface TechCell {
+  language: Language;
+  competitor: string;
+  tech: Tech;
+  rows: Cell[];
+}
+
+/**
+ * All rows for one technology, grouped by (language, competitor).
+ * The standing of a pairing is summarized from every row in the group.
+ */
+export function techMatrix(tech: Tech): Map<string, TechCell> {
+  const groups = new Map<string, TechCell>();
+  for (const campaign of CAMPAIGNS) {
+    for (const result of campaign.results) {
+      if (result.tech !== tech) continue;
+      const key = `${campaign.language}:${result.competitor}`;
+      let group = groups.get(key);
+      if (!group) {
+        group = {
+          language: campaign.language,
+          competitor: result.competitor,
+          tech,
+          rows: [],
+        };
+        groups.set(key, group);
+      }
+      group.rows.push({ result, campaign });
+    }
+  }
+  return groups;
+}
+
+export interface StandingSummary {
+  kind: 'sweep' | 'mixed' | 'lost';
+  floor: number;
+  best: number;
+  wins: number;
+  losses: number;
+  total: number;
+  lostOps: string[];
+  artifact: boolean;
+}
+
+/** Worst/best summary of one pairing's rows — the decision-level view. */
+export function standingOf(rows: Cell[]): StandingSummary {
+  const ratios = rows.map((r) => r.result.ratio);
+  const losses = rows.filter((r) => r.result.status === 'loss');
+  const wins = rows.filter((r) => r.result.status === 'win');
+  return {
+    kind: losses.length === 0 ? 'sweep' : wins.length > 0 ? 'mixed' : 'lost',
+    floor: Math.min(...ratios),
+    best: Math.max(...ratios),
+    wins: wins.length,
+    losses: losses.length,
+    total: rows.length,
+    lostOps: losses.map((r) => r.result.operation_label ?? r.result.operation),
+    artifact: rows.some((r) => r.result.artifact),
+  };
+}
+
+export interface FrontierFilter {
+  language?: Language;
+  only?: Tech[];
+  exclude?: Tech[];
+}
+
+/** Loss rows narrowed by language and/or tech. */
+export function frontierFor(filter: FrontierFilter = {}): Cell[] {
+  return frontier().filter(({ result, campaign }) => {
+    if (filter.language && campaign.language !== filter.language) return false;
+    if (filter.only && !filter.only.includes(result.tech)) return false;
+    if (filter.exclude?.includes(result.tech)) return false;
+    return true;
+  });
 }
 
 /** All rows for one tech + language, merged across campaigns. */

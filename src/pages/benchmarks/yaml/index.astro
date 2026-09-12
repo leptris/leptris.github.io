@@ -1,0 +1,120 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import Matrix from '~/components/bench/Matrix.astro';
+import Provenance from '~/components/bench/Provenance.astro';
+import ResultsTable from '~/components/bench/ResultsTable.astro';
+import { SITE } from '~/data/site';
+import { CAMPAIGNS, frontierFor, type Campaign } from '~/data/benchmarks';
+
+const campaign = (id: string): Campaign => {
+  const found = CAMPAIGNS.find((c) => c.id === id);
+  if (!found) throw new Error(`unknown campaign ${id}`);
+  return found;
+};
+
+const yamlC = campaign('yaml-c-2026-09-12');
+const deficits = frontierFor({ only: ['yaml'] });
+---
+
+<BaseLayout
+  title="YAML benchmarks — yeptris"
+  description="yeptris measured against libyaml and rapidyaml in C: eight document shapes across DOM construction, pull parsing, event recording and emission, with the interleaved head-to-head against rapidyaml."
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="sec-label"><a href="/benchmarks/">Benchmarks</a> · YAML</p>
+      <h1 class="sec-title">yeptris, the YAML <em>engine</em></h1>
+      <p class="sec-lede">
+        yeptris is the YAML counterpart of libleptris: a YAML 1.2 parser,
+        emitter and streamer in C11 with hard memory bounds. The
+        benchmark matrix runs both engines over the same corpora in the
+        same process, across eight document shapes and three consumption
+        models — DOM construction, pull parsing and event recording — in
+        addition to emission. Every corpus is generated deterministically
+        with a fixed seed, and the harness can dump each corpus so that
+        any number on this page reproduces byte for byte.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:1.6rem">
+    <div class="wrap">
+      <Matrix tech="yaml" />
+    </div>
+  </section>
+
+  <section class="sec sec-tint-periwinkle lang-sec" id="c">
+    <div class="wrap">
+      <p class="sec-label">C</p>
+      <h2 class="sec-title">Versus <em>libyaml</em></h2>
+      <p class="sec-lede">
+        libyaml is the reference implementation underlying Ruby&rsquo;s
+        Psych and a large share of YAML tooling. The comparison below is
+        the committed release gate: every shape and consumption model
+        must stay ahead of the same-run libyaml measurement, and the
+        weakest cell is the headline of each release.
+      </p>
+      <ResultsTable
+        rows={yamlC.results
+          .filter((r) => r.competitor === 'libyaml')
+          .map((result) => ({ result, campaign: yamlC }))}
+        competitorHead="libyaml 0.2.5"
+      />
+      <Provenance campaign={yamlC} />
+
+      <h2 class="sec-title" style="margin-top:3.4rem">Versus <em>rapidyaml</em></h2>
+      <p class="sec-lede">
+        rapidyaml is a C++ YAML parser with substantially different
+        internal design, and the comparison against it is run as an
+        interleaved head-to-head with a fair ordering referee, reporting
+        the median of rounds. yeptris is behind on most of these shapes
+        today; the performance ledger in the repository records every
+        optimization attempt against this gap with before-and-after
+        numbers, including the attempts that measured flat and were
+        reverted.
+      </p>
+      <ResultsTable
+        rows={yamlC.results
+          .filter((r) => r.competitor === 'ryml')
+          .map((result) => ({ result, campaign: yamlC }))}
+        competitorHead="ryml 0.16.0"
+      />
+      <p>
+        The recorded residual against rapidyaml concentrates in the
+        engine dispatch loop and the nested-mapping construction path,
+        where rapidyaml builds leaner nodes with a lazier strategy. The
+        discipline file for this work is the
+        <a href={`${SITE.githubYaml}/blob/main/benchmarks/PERF-LEDGER.md`}>yeptris performance ledger</a>.
+      </p>
+
+      <p class="docs-canonical">
+        To reproduce: configure yeptris with
+        <code>-DYEPTRIS_BUILD_BENCHMARKS=ON -DYEPTRIS_BENCH_LIBYAML_ROOT=…</code>
+        (and <code>-DYEPTRIS_BENCH_RYML_ROOT=…</code> for the
+        head-to-head), then run <code>bench_matrix --full</code>. The
+        harness is committed at
+        <a href={`${SITE.githubYaml}/tree/main/benchmarks`}>benchmarks</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" id="deficits">
+    <div class="wrap">
+      <p class="sec-label">YAML</p>
+      <h2 class="sec-title">Measured <em>deficits</em></h2>
+      <p class="sec-lede">
+        Every YAML operation in the result data that remains behind its
+        competitor, ordered from the weakest ratio. All of the current
+        deficits are in the interleaved head-to-head against rapidyaml.
+      </p>
+      <ResultsTable rows={deficits} competitorHead="versus" />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .lang-sec {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+</style>
