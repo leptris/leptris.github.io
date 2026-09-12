@@ -158,6 +158,50 @@ const pyBlocks = [
   <section class="sec sec-tint-rose" data-ghost="02" id="ruby" style="padding-bottom:4rem">
     <div class="wrap">
       <p class="sec-label" data-num="02">Interpreted — Ruby</p>
+      <h3>Transforms — XSLT vs libxslt, in-process <span class="pill">v1.9.142, #682 board</span></h3>
+      <p>
+        The XSLT engine is gated at <strong>205/205 byte-identical</strong>
+        against the libxslt general suite (closed at v1.9.19, regression-gated
+        since). In-process, same fixtures, against libxslt itself:
+      </p>
+      <table class="doc-table">
+        <tr><th>operation</th><th>vs libxslt</th><th>verdict</th></tr>
+        <tr><td>template dispatch (heavy stylesheet)</td><td class="bytes">~2.25×</td><td class="note">ahead</td></tr>
+        <tr><td>subtree copy (<code>xsl:copy-of</code> fan)</td><td class="bytes">~2.27×</td><td class="note">ahead</td></tr>
+        <tr><td><code>xsl:value-of</code> hot loop</td><td class="bytes">~135×</td><td class="note">ahead</td></tr>
+      </table>
+      <p>
+        The eval-environment caching arc (document-cached function registry,
+        dirty-skip variable sets, VM fast paths) is what moved these; the one
+        open row — heavy dispatch under streaming — is on the tracked perf
+        board with its ceiling analysis published.
+      </p>
+
+      <h3>HTML — two engines, one core <span class="pill">v1.9.137–.142, html5lib tree suite</span></h3>
+      <p>
+        Two WHATWG entries: <code>leptris_parse_html_string</code> is the
+        conformant tree-construction engine (adoption agency, active
+        formatting reconstruction, script-data escaped states, RCDATA family,
+        foreign content integration points, foster parenting), gated against
+        the vendored <strong>html5lib tree-construction corpus — 1129/1753
+        and rising every release</strong> (933 → 1129 across the September
+        wave); <code>leptris_parse_html4_string</code> is the
+        Nokogiri/libxml2-parity shape, byte-pinned against a 1555-case
+        Nokogiri reference (floor 784, held). Against Nokogiri itself the
+        WHATWG entry runs <strong>3.6–11×</strong> on the operation matrix;
+        C14N 23×, XPath 31×.
+      </p>
+
+      <h3>Validation — RELAX NG and Schematron, no JVM <span class="pill">v1.9.109–.129</span></h3>
+      <p>
+        Native RELAX NG (pattern IR + backtracking fold, Jing-parity corpus
+        gate, <code>&lt;include&gt;</code>, params) and native Schematron
+        (schema IR → SVRL, abstract patterns, <code>let</code> scoping,
+        phase selection, conformance corpus 50/50) ship in the C library with
+        a single <code>leptris validate</code> CLI for both — the
+        metanorma-standoc migration path off the JVM.
+      </p>
+
       <h2 class="sec-title">The migrant&rsquo;s race: <em>Nokogiri, Ox, Oga, REXML</em></h2>
       <p class="sec-lede">
         <strong>Nokogiri</strong> (libxml2 C extension) is the incumbent most
@@ -331,11 +375,12 @@ const pyBlocks = [
         <tr><td>Attr-heavy parse vs pugixml</td><td class="bytes">~1.5×</td><td class="note">the parse wall: single-pass is at a compiler-global optimum; ~1.5–1.8× behind on this shape, no remaining known lever</td></tr>
         <tr><td>Raw child append vs pugixml</td><td class="bytes">1.3×</td><td class="note">doc-level index bookkeeping — the price of O(1) duplicate-rejecting attribute sets at scale</td></tr>
         <tr><td>Text-heavy serialize vs pugixml</td><td class="bytes">1.1×</td><td class="note">parity within run noise</td></tr>
+        <tr><td>Expanded-name reads + prefixed paths vs moxml (Ruby, NS-heavy)</td><td class="bytes">0.69×</td><td class="note">measured: the C resolver is off the profile (~20 ns/read either way) — the cost is the adapter&rsquo;s per-read FFI fan-out; next lever is one batched expanded-name call, tracked on the perf board</td></tr>
         <tr><td>Tree traversal vs Ox (Ruby)</td><td class="bytes">~2×</td><td class="note">Ox&rsquo;s native C walk holds the crown across the whole Ruby field — the one place it still wins anything</td></tr>
         <tr><td>Python iterparse vs lxml</td><td class="bytes">~2×</td><td class="note">a fixed ~7 µs engine cost per <code>iterparse_next</code> call, measured binding-share 1.4% — leptris/leptris#563, also tracks the missing error channel for truncated input</td></tr>
         <tr><td>Python namespaced XPath vs lxml</td><td class="bytes">~2×<br />(engine ~18×)</td><td class="note">raw <code>xpath_eval_ns</code> costs 17.5 µs vs 0.95 µs un-namespaced for the same scan — leptris/leptris#564</td></tr>
         <tr><td>Python XPath with variables vs lxml</td><td class="bytes">~1.3×<br />(engine ~79×)</td><td class="note">raw <code>eval_with_vars</code> costs 53 µs vs 0.67 µs for the literal equivalent — leptris/leptris#565</td></tr>
-        <tr><td>Formerly lost, since won</td><td class="bytes">—</td><td class="note">Python <code>//book</code>, union, traversal, multi-step <code>find</code>, and the compiled-XPath path — and Ruby traversal vs Nokogiri — all fell to the batch-accessor and accelerator sprints; the tombstones stay in the repos&rsquo; perf ledgers (32 B split-stream attrs, two-pass SIMD parse, and friends)</td></tr>
+        <tr><td>Formerly lost, since won</td><td class="bytes">—</td><td class="note">Python <code>//book</code>, union, traversal, multi-step <code>find</code>, and the compiled-XPath path — Ruby bare reads and the SAX drain vs moxml (leptris-ruby#154/#156), and Ruby traversal vs Nokogiri — all fell to the batch-accessor and accelerator sprints; the tombstones stay in the repos&rsquo; perf ledgers (32 B split-stream attrs, two-pass SIMD parse, and friends)</td></tr>
       </table>
     </div>
   </section>

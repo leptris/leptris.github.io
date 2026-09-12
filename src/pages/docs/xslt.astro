@@ -1,0 +1,213 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE } from '~/data/site';
+---
+
+<BaseLayout
+  title="XSLT 1.0 — leptris docs"
+  description="libleptris ships a complete XSLT 1.0 engine: compile a stylesheet once, apply it to any document — templates, keys, result-tree fragments, xsl:sort/number, EXSLT func:function, and a libxml2-parity HTML output method. Gated case by case against the libxslt test suite."
+>
+  <DocsShell
+    crumb="XSLT 1.0"
+    title="XSLT 1.0 — transforms in the same core"
+    lede="Since v1.9.1 (and far beyond since): leptris compiles a stylesheet once into an immutable instruction forest and applies it to any number of documents — the same arena, the same 438/438 XPath engine underneath. Verified case by case against the libxslt test suite: 205/205 byte-identical to libxslt 2.16.0 — closed since v1.9.19 and regression-gated ever since."
+  >
+    <h2>The API</h2>
+    <CodeBlock
+      lang="c"
+      title="transform.c"
+      code={`#include <leptris.h>
+
+/* Compile once — patterns to XPath ASTs, selects through the
+   compiled-expression path, literal result elements verbatim. */
+LeptrisXslt sheet = leptris_xslt_parse_file("report.xsl");
+
+/* Apply to any number of documents. */
+LeptrisDocument doc  = leptris_parse_file("data.xml", NULL);
+LeptrisDocument out  = leptris_xslt_apply(sheet, doc);
+
+/* Or serialize in one call — keeps top-level text nodes and
+   result fragments the tree API would flatten. */
+char* html = leptris_xslt_apply_string(sheet, doc);
+printf("%s", html);
+
+leptris_free_string(html);
+leptris_document_free(out);
+leptris_document_free(doc);
+leptris_xslt_free(sheet);`}
+    />
+    <p>
+      Five functions, all in <code>leptris.h</code>:
+      <code>leptris_xslt_parse(xml, len)</code> /
+      <code>leptris_xslt_parse_file(path)</code> compile (the file
+      variant also resolves §2.7 embedded stylesheets — the
+      <code>xml-stylesheet</code> PI with an <code>href="#id"</code>
+      fragment); <code>leptris_xslt_apply</code> returns a result tree
+      you walk with the ordinary DOM API;
+      <code>leptris_xslt_apply_string</code> wraps apply + serialize;
+      <code>leptris_xslt_free</code> releases the handle. Errors land
+      in <code>leptris_last_error</code> (compilation) and
+      <code>leptris_document_last_error</code> (application).
+    </p>
+
+    <h2>What the engine covers</h2>
+    <table class="doc-table">
+      <tr><th>area</th><th>elements &amp; features</th></tr>
+      <tr>
+        <td>templating</td>
+        <td class="note">
+          <code>template</code> (match + name + mode + priority),
+          <code>apply-templates</code>, <code>call-template</code>,
+          <code>apply-imports</code>, <code>with-param</code>,
+          literal result elements with namespace copying (§7.1) and
+          xsl:* attribute stripping
+        </td>
+      </tr>
+      <tr>
+        <td>flow</td>
+        <td class="note">
+          <code>value-of</code>, <code>for-each</code>, <code>if</code>,
+          <code>choose/when/otherwise</code>, <code>copy</code>,
+          <code>copy-of</code> (mixed content, namespace fidelity),
+          <code>element</code>, <code>attribute</code>,
+          <code>text</code> (incl. <code>disable-output-escaping</code>),
+          <code>comment</code>, <code>processing-instruction</code>,
+          <code>message</code>, <code>fallback</code>
+        </td>
+      </tr>
+      <tr>
+        <td>variables</td>
+        <td class="note">
+          <code>variable</code>/<code>param</code> with select or
+          content — content builds a <strong>result-tree fragment</strong>
+          in a scratch document (§11.1), usable as a node-set;
+          §11 scoping resolved at the invocation seam (call-template
+          sees globals, not the caller&rsquo;s locals)
+        </td>
+      </tr>
+      <tr>
+        <td>sorting &amp; numbering</td>
+        <td class="note">
+          multi-key <code>sort</code> (numeric, case-order,
+          apply-templates support; non-numeric keys are NaN and sort
+          per §10), full <code>number</code> — level
+          single/multiple/any, roman, letters, grouping separators
+        </td>
+      </tr>
+      <tr>
+        <td>top level</td>
+        <td class="note">
+          <code>include</code>/<code>import</code> chains with import
+          precedence, <code>attribute-set</code> (use-attribute-sets
+          chains resolve at use time), <code>key</code>,
+          <code>decimal-format</code> (named, namespace-expanded),
+          <code>strip-space</code>/<code>preserve-space</code> with
+          prefixed NameTests, <code>output</code>
+        </td>
+      </tr>
+      <tr>
+        <td>§12 functions</td>
+        <td class="note">
+          <code>key()</code>, <code>current()</code>,
+          <code>format-number()</code>, <code>generate-id()</code>,
+          <code>system-property()</code>, <code>document()</code>
+          (external files and <code>document('')</code>),
+          <code>unparsed-entity-uri()</code>,
+          <code>element-available()</code>,
+          <code>function-available()</code>
+        </td>
+      </tr>
+      <tr>
+        <td>EXSLT</td>
+        <td class="note">
+          the <strong><code>func:function</code></strong> module —
+          stylesheet-defined XPath functions with
+          <code>func:param</code> binding and <code>func:result</code>
+          returning node-sets — plus <code>exsl:node-set</code> for
+          result-tree fragments and the str:/set:/math: pack from
+          <code>leptris_exslt_enable</code>
+        </td>
+      </tr>
+      <tr>
+        <td>output</td>
+        <td class="note">
+          XML method with <code>cdata-section-elements</code> (§16.1),
+          indent, encoding, declaration control; the
+          <strong>HTML method matches libxml2</strong> — indent rules,
+          <code>&lt;meta charset&gt;</code> injection, void elements,
+          raw-text <code>script</code>/<code>style</code>, URI
+          escaping on href/src — implemented in the serializer, not
+          string post-passes
+        </td>
+      </tr>
+    </table>
+
+    <Callout>
+      <p>
+        <strong>The gate.</strong> The engine is developed against the
+        <strong>libxslt general test suite</strong>: 205 stylesheet +
+        input fixtures from the real libxslt 2.16.0 tree, each run
+        with the engine&rsquo;s output byte-compared to the libxslt
+        reference. Current standing: <strong>136/205</strong>. The
+        open cases are tracked on the repo&rsquo;s board — xsl:number
+        corners, namespace edge cases, <code>document()</code> chains
+        lead the census — and no case is marked done without the
+        byte-match.
+      </p>
+    </Callout>
+
+    <h2>Performance</h2>
+    <p>
+      Select/test expressions evaluate through the compiled-XPath
+      path; the hot loop skips re-hashing via a document-cached
+      function registry and a dirty-skip variable-set mirror —
+      <strong>2.3–3.7×</strong> over the v1.9.0 engine on suite
+      fixtures (a churn-report transform 115.3 → 48.5 ms; a
+      <code>document()</code> load + transform 0.204 → 0.056 ms).
+      The numbers and their fixtures:
+      <a href="/benchmarks">the benchmarks page</a>.
+    </p>
+
+    <h2>Where it surfaces</h2>
+    <p>
+      C API today. The Ruby and Python bindings adopt the transform
+      surface next; the CLI gains a <code>transform</code> verb with
+      it. When the bindings land, stylesheets keep the same contract:
+      compile once, apply many, one arena per result.
+    </p>
+
+    <h2>Where next</h2>
+    <ul>
+      <li><a href={`${SITE.githubC}/blob/main/CHANGELOG.md`}>The engine&rsquo;s changelog entries</a> — v1.9.1 and v1.9.2 in the canonical CHANGELOG.</li>
+      <li><a href={`${SITE.githubC}/tree/main/test/xslt/libxslt_suite_general`}>The suite fixtures</a> — the 205 cases and their reference outputs, in the source tree.</li>
+      <li><a href="/docs/xpath">The XPath page</a> — the 438/438 engine every <code>select</code> runs on.</li>
+    </ul>
+
+    <h2>Beyond 1.0</h2>
+    <p>
+      The 1.9 line grew the 2.0/3.0 working set on the same core:
+      tunnel parameters, grouping keys, temporary trees, character
+      maps, <code>xsl:evaluate</code>, <code>xsl:merge</code>,
+      <code>xsl:result-document</code>, accumulators, inline
+      functions and higher-order calls, maps and arrays end to
+      end, streaming-friendly pull access — with the XQuery 1.0
+      layer (FLWOR, constructors, try/catch, external variables)
+      sharing the same evaluator. Conformance is exact-N gated:
+      the libxslt suite at 205/205, W3C QT3 function sets adopted
+      set by set (substring, contains, starts-with, ends-with,
+      concat).
+    </p>
+    <h2>Speed</h2>
+    <p>
+      In-process against libxslt (same machine, same fixtures,
+      #682 board): template dispatch ~2.25×, subtree copy ~2.27×,
+      <code>xsl:value-of</code> fan-out ~135× after the eval-
+      environment caching arc. The remaining open row — heavy
+      in-process dispatch under streaming — is tracked on the
+      perf board, ceiling analysis published.
+    </p>
+  </DocsShell>
+</BaseLayout>

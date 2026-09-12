@@ -12,8 +12,8 @@ export const SITE = {
 } as const;
 
 export const VERSIONS = {
-  lib: '1.9.2',
-  libDate: '2026-08-27',
+  lib: '1.9.142',
+  libDate: '2026-09-12',
   gem: '1.9.17',
   gemDate: '2026-08-27',
   py: '1.14.3',
