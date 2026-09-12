@@ -138,6 +138,7 @@ const benchBlocks = [
       <div class="stat"><span class="n" data-count="3.4" data-suffix="×">0×</span><span class="l">faster text parse than pugixml</span></div>
       <div class="stat"><span class="n" data-count="6.8" data-suffix="×">0×</span><span class="l">faster than nokogiri, real docs</span></div>
       <div class="stat"><span class="n" data-count="438" data-suffix="/438">0/438</span><span class="l">W3C XPath 1.0 conformance</span></div>
+      <div class="stat"><span class="n" data-count="205" data-suffix="/205">0/205</span><span class="l">XSLT byte-identical to libxslt</span></div>
       <div class="stat"><span class="n" data-raw="zero">zero</span><span class="l">required runtime dependencies</span></div>
     </div>
   </div>
@@ -209,10 +210,13 @@ const benchBlocks = [
           <span class="big">586<small> tests pin the semantics</small></span>
           <h3>Conformant where it counts</h3>
           <p>
-            XPath 1.0: <strong>438/438</strong> on the W3C suite. XML 1.0
-            namespaces, DTD validation phases 1–7, XInclude, exclusive C14N —
-            semantics pinned by 586 tests plus large-document and
-            allocation-failure suites in CI.
+            XPath 1.0: <strong>438/438</strong> on the W3C suite. XSLT:
+            <strong>205/205</strong> byte-identical to libxslt. HTML: the
+            html5lib tree suite, rising every release. XML 1.0 namespaces,
+            DTD validation phases 1–7, XInclude, exclusive C14N, RELAX NG and
+            Schematron behind one <code>validate</code> — semantics pinned by
+            the corpora plus large-document and allocation-failure suites in
+            CI.
           </p>
         </div>
         <div class="feat feat-compact periwinkle reveal" data-d="1">
