@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "id": "xml-ruby-frontier-2026-09-12",
+  "language": "ruby",
+  "subject": { "name": "leptris", "version": "1.9.121.0 (gem, lockstep with libleptris 1.9.121)" },
+  "harness": {
+    "label": "perf board (TODO.xslt-full/13) + leptris-ruby perf ledger — artifact rows, not re-run here",
+    "url": "https://github.com/leptris/leptris/blob/main/TODO.xslt-full/13-perf-inprocess.md"
+  },
+  "machine": "Apple silicon dev machine (per ledger)",
+  "date": "2026-09-12",
+  "stat": "ledger-measured",
+  "artifact": true,
+  "results": [
+    {
+      "tech": "xml",
+      "operation": "ns-reads",
+      "operation_label": "Expanded-name reads, NS-heavy loop",
+      "competitor": "moxml",
+      "competitor_version": "0.5.31",
+      "ratio": 0.69,
+      "status": "loss",
+      "note": "measured off the C profile: the C resolver is ~20 ns/read either way — the cost is the adapter's per-read FFI fan-out. The batched-call lever (leptris_element_expanded_name, v1.9.144) shipped as an adapter primitive but was 4-way benchmarked for the gem's read path and does not pay there: the batch's buffer+tuple allocation outweighs the saved crossing. The row stays open on the adapter seam"
+    },
+    {
+      "tech": "xml",
+      "operation": "traverse-native-loop",
+      "operation_label": "Native-loop traversal",
+      "competitor": "ox",
+      "competitor_version": "2.14.x",
+      "ratio": 0.5,
+      "status": "loss",
+      "note": "Ox's C walk holds the crown across the whole Ruby field — the one place it still wins anything; ~2x per the ledger"
+    }
+  ]
+}

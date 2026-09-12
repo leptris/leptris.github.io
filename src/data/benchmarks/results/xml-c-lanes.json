@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "id": "xml-c-lanes-2026-09-12",
+  "language": "c",
+  "subject": {
+    "name": "libleptris",
+    "version": "1.9.143-dev (main eea85cf)"
+  },
+  "harness": {
+    "label": "DOM / SAX / XPath lane benches (bench_dom_*, bench_sax_*, bench_xpath_*)",
+    "url": "https://github.com/leptris/leptris/tree/main/benchmarks"
+  },
+  "machine": "Apple M1 Max, macOS 14.1.1, arm64",
+  "date": "2026-09-12",
+  "stat": "mean of 1000 (Release + LTO)",
+  "results": [
+    {
+      "tech": "xml",
+      "operation": "dom-parse-medium",
+      "operation_label": "DOM parse (~10 KB medium doc)",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 7.43,
+      "competitor_value": 42.38,
+      "unit": "µs",
+      "ratio": 5.7,
+      "status": "win"
+    },
+    {
+      "tech": "xml",
+      "operation": "dom-traversal",
+      "operation_label": "Tree traversal (full walk)",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 2.19,
+      "competitor_value": 1.11,
+      "unit": "µs",
+      "ratio": 0.51,
+      "status": "loss",
+      "note": "libxml2's next/prev pointers are bare struct hops; the arena layout pays a small toll per step"
+    },
+    {
+      "tech": "xml",
+      "operation": "dom-attr-access",
+      "operation_label": "Attribute access (100×)",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 2.92,
+      "competitor_value": 3.24,
+      "unit": "µs",
+      "ratio": 1.11,
+      "status": "parity"
+    },
+    {
+      "tech": "xml",
+      "operation": "dom-text-extraction",
+      "operation_label": "Text extraction (100×)",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 1.13,
+      "competitor_value": 7.82,
+      "unit": "µs",
+      "ratio": 6.92,
+      "status": "win"
+    },
+    {
+      "tech": "xml",
+      "operation": "sax-small",
+      "operation_label": "SAX parse — small (~1 KB)",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 3.37,
+      "competitor_value": 6.75,
+      "unit": "µs",
+      "ratio": 2.0,
+      "status": "win"
+    },
+    {
+      "tech": "xml",
+      "operation": "sax-medium",
+      "operation_label": "SAX parse — medium (~5 KB)",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 14.38,
+      "competitor_value": 16.0,
+      "unit": "µs",
+      "ratio": 1.11,
+      "status": "parity"
+    },
+    {
+      "tech": "xpath",
+      "operation": "xpath-simple",
+      "operation_label": "XPath //book",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 0.75,
+      "competitor_value": 4.43,
+      "unit": "µs",
+      "ratio": 5.91,
+      "status": "win"
+    },
+    {
+      "tech": "xpath",
+      "operation": "xpath-predicate",
+      "operation_label": "XPath //book[@id='101']",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 0.73,
+      "competitor_value": 14.67,
+      "unit": "µs",
+      "ratio": 20.1,
+      "status": "win"
+    },
+    {
+      "tech": "xpath",
+      "operation": "xpath-count",
+      "operation_label": "XPath count(//book)",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 0.71,
+      "competitor_value": 4.5,
+      "unit": "µs",
+      "ratio": 6.34,
+      "status": "win"
+    },
+    {
+      "tech": "xpath",
+      "operation": "xpath-complex",
+      "operation_label": "XPath complex query",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 2.53,
+      "competitor_value": 16.02,
+      "unit": "µs",
+      "ratio": 6.33,
+      "status": "win"
+    },
+    {
+      "tech": "xpath",
+      "operation": "xpath-union",
+      "operation_label": "XPath //book | //magazine",
+      "competitor": "libxml2",
+      "competitor_version": "2.9.13 (SDK)",
+      "leptris_value": 1.12,
+      "competitor_value": 4.18,
+      "unit": "µs",
+      "ratio": 3.73,
+      "status": "win"
+    }
+  ]
+}

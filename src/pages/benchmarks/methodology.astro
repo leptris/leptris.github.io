@@ -1,0 +1,175 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE } from '~/data/site';
+import { CAMPAIGNS } from '~/data/benchmarks';
+---
+
+<BaseLayout
+  title="Benchmark methodology — leptris"
+  description="How every number on the leptris benchmarks page is measured, versioned and traced — same-binary baselines, fresh Release builds, per-repo timing conventions, and losses kept in view."
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="sec-label">Benchmarks</p>
+      <h1 class="sec-title">Methodology — <em>how every number is made</em></h1>
+      <p class="sec-lede">
+        The benchmarks pages are generated from versioned result files, one
+        JSON file per measurement campaign, each carrying its own provenance:
+        the exact versions measured, the machine, the date, the statistic and
+        a link to the published harness the number reproduces from. No number
+        on those pages is hand-written into markup.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:2.4rem">
+    <div class="wrap">
+      <h2 class="sec-title">The rules</h2>
+
+      <h3>Same-binary baselines</h3>
+      <p>
+        Every cross-library ratio comes from a single run of a single harness
+        that measures both sides on the same fixtures, in the same process,
+        back to back — <code>bench_matrix</code> for the XML C races and the
+        yeptris matrix for YAML (which links the reference engines
+        statically). Where a lane bench pairs with a reference twin
+        (XPath lanes, XSLT fixtures, the HTML parse lane), the twin generates
+        a byte-identical fixture and follows the identical timing protocol.
+      </p>
+
+      <h3>Fresh Release builds, identical flags</h3>
+      <p>
+        Each campaign builds from a fresh build directory with
+        <code>CMAKE_BUILD_TYPE=Release</code> and the repo&rsquo;s default LTO
+        policy; A/B comparisons never mix build directories. Version strings
+        are recorded from what was actually built and run — including
+        <code>-dev</code> trees — never from marketing version files.
+      </p>
+
+      <h3>Per-repo timing conventions</h3>
+      <p>
+        Each repo&rsquo;s harness sets its own statistic, and the result file
+        carries it: the C matrices report <em>min-of-iterations</em>, the XSLT
+        scorecard <em>best of 9</em> (its transform fixture keeps the older
+        mean-of-400 protocol), the lane benches mean-of-1000, the Ruby matrix
+        mean-per-iteration, and the yeptris-vs-ryml rows interleaved medians
+        with a fair-order referee. Means are avoided where allocator and GC
+        churn would smear the signal.
+      </p>
+
+      <h3>Machine-relative ratios</h3>
+      <p>
+        Ratios are the currency, and they are always same-machine:
+        <em>ratio = how many times faster the leptris side is</em> on the same
+        operation — latency ratios divide the competitor&rsquo;s time by
+        ours, throughput ratios divide our rate by theirs. A ratio below 1 is
+        a loss and stays visible. Absolute numbers are per-machine context
+        only; compare CI artifacts across commits on the same runner class,
+        never against a dev machine.
+      </p>
+
+      <h3>The honest-cell rule</h3>
+      <p>
+        The matrix shows, for each technology × language × competitor cell,
+        the <strong>weakest</strong> measured ratio for that pairing — not a
+        chosen headline. A race only reads as a win when no measured operation
+        in it loses. Frontier rows can never be outranked by a better number
+        elsewhere in the same race.
+      </p>
+
+      <h3>Artifact marking</h3>
+      <p>
+        A row carried from a published artifact or ledger instead of a fresh
+        run is marked <code>†</code> and its file sets
+        <code>artifact: true</code>, with the carrying harness linked. Stale
+        numbers are replaced, not averaged: when a campaign re-runs, the new
+        file supersedes the old one.
+      </p>
+
+      <h3>No unmeasured claims</h3>
+      <p>
+        If a race has no committed cross-library harness, it gets no numbers
+        — the validation/XQuery section states capability and conformance
+        gates instead. A number without a published harness behind it does
+        not appear on the pages.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec sec-tint-periwinkle" style="padding-bottom:4rem">
+    <div class="wrap">
+      <h2 class="sec-title">The result schema</h2>
+      <p class="sec-lede">
+        One versioned JSON Schema
+        (<code>src/data/benchmarks/schema/benchmarks-results.schema.json</code>,
+        <code>schema_version: 1</code>) validates every campaign file; a test
+        enforces required fields, ratio/status coherence, provenance links and
+        that artifact rows carry explanations. The plan: the repos&rsquo; CI
+        harnesses emit this shape directly on push.
+      </p>
+      <Callout>
+        <p>
+          <strong>Campaigns currently in the data.</strong>
+          {CAMPAIGNS.map((c) => (
+            <span>
+              <code>{c.id}</code> — {c.subject.name} {c.subject.version}, {c.date}{' '}
+              <a href={c.harness.url}>harness</a>;{' '}
+            </span>
+          ))}
+        </p>
+      </Callout>
+
+      <h3>Re-running a campaign</h3>
+      <table class="doc-table">
+        <tr><th>campaign</th><th>command</th></tr>
+        <tr>
+          <td>XML C matrix + lanes</td>
+          <td class="bytes">
+            <code>cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DLEPTRIS_BUILD_BENCHMARKS=ON</code>
+            in <a href={`${SITE.githubC}`}>leptris</a>, then
+            <code>build/benchmarks/bench_matrix</code> and the
+            <code>bench_{'{dom,sax,xpath}'}_*</code> lanes
+          </td>
+        </tr>
+        <tr>
+          <td>XSLT scorecard</td>
+          <td class="bytes">
+            the <code>bench_xslt_*</code> binaries plus their in-process lxml
+            twins in <a href={`${SITE.githubC}/tree/main/benchmarks/xslt`}>benchmarks/xslt</a>
+          </td>
+        </tr>
+        <tr>
+          <td>HTML parse lane</td>
+          <td class="bytes">
+            <code>bench_html_parse</code> + <code>nokogiri_html_parse.rb</code> in
+            <a href={`${SITE.githubC}/tree/main/benchmarks/html`}>benchmarks/html</a>
+          </td>
+        </tr>
+        <tr>
+          <td>YAML matrix</td>
+          <td class="bytes">
+            <code>bench_matrix --full</code> in
+            <a href="https://github.com/leptris/yeptris/tree/main/benchmarks">yeptris</a>,
+            with <code>-DYEPTRIS_BENCH_LIBYAML_ROOT</code> (and
+            <code>YEPTRIS_BENCH_RYML_ROOT</code> for the head-to-head)
+          </td>
+        </tr>
+        <tr>
+          <td>Ruby matrix</td>
+          <td class="bytes">
+            <code>bundle exec ruby -Ilib benchmark/leptris_vs_nokogiri.rb</code> in
+            <a href={`${SITE.githubRuby}`}>leptris-ruby</a>
+          </td>
+        </tr>
+        <tr>
+          <td>Python matrix</td>
+          <td class="bytes">
+            <code>LEPTRIS_LIB_PATH=… python -m benchmarks.matrix</code> in
+            <a href={`${SITE.githubPy}`}>leptris-py</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </section>
+</BaseLayout>

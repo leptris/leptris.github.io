@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "id": "xml-ruby-2026-09-12",
+  "language": "ruby",
+  "subject": { "name": "leptris", "version": "1.9.121.0 (gem, lockstep with libleptris 1.9.121)" },
+  "harness": {
+    "label": "leptris_vs_nokogiri.rb — same fixtures, same iteration counts",
+    "url": "https://github.com/leptris/leptris-ruby/blob/main/benchmark/leptris_vs_nokogiri.rb"
+  },
+  "machine": "Apple M1 Max, macOS 14.1.1, arm64; Ruby 3.4.8",
+  "date": "2026-09-12",
+  "stat": "mean per iteration (µs)",
+  "results": [
+    {
+      "tech": "xml",
+      "operation": "parse-small",
+      "operation_label": "Parse small (431 B)",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4",
+      "leptris_value": 8.74,
+      "competitor_value": 11.61,
+      "unit": "µs",
+      "ratio": 1.33,
+      "status": "win"
+    },
+    {
+      "tech": "xml",
+      "operation": "parse-medium",
+      "operation_label": "Parse medium (12 KB)",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4",
+      "leptris_value": 20.38,
+      "competitor_value": 187.2,
+      "unit": "µs",
+      "ratio": 9.19,
+      "status": "win"
+    },
+    {
+      "tech": "xpath",
+      "operation": "xpath-count",
+      "operation_label": "XPath count(//book)",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4",
+      "leptris_value": 1.56,
+      "competitor_value": 9.38,
+      "unit": "µs",
+      "ratio": 6.02,
+      "status": "win"
+    },
+    {
+      "tech": "xpath",
+      "operation": "xpath-nodeset",
+      "operation_label": "XPath //book (100 nodes)",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4",
+      "leptris_value": 2.93,
+      "competitor_value": 9.81,
+      "unit": "µs",
+      "ratio": 3.35,
+      "status": "win"
+    },
+    {
+      "tech": "xpath",
+      "operation": "xpath-predicate",
+      "operation_label": "XPath //book[@id='50']",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4",
+      "leptris_value": 2.49,
+      "competitor_value": 56.06,
+      "unit": "µs",
+      "ratio": 22.55,
+      "status": "win"
+    },
+    {
+      "tech": "xpath",
+      "operation": "xpath-complex",
+      "operation_label": "XPath //book[price > 50]",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4",
+      "leptris_value": 6.29,
+      "competitor_value": 71.72,
+      "unit": "µs",
+      "ratio": 11.4,
+      "status": "win"
+    },
+    {
+      "tech": "xpath",
+      "operation": "xpath-union",
+      "operation_label": "XPath //author | //title",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4",
+      "leptris_value": 7.32,
+      "competitor_value": 22.16,
+      "unit": "µs",
+      "ratio": 3.03,
+      "status": "win"
+    },
+    {
+      "tech": "xml",
+      "operation": "traverse",
+      "operation_label": "Tree traversal (root.traverse)",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4",
+      "leptris_value": 268.81,
+      "competitor_value": 468.38,
+      "unit": "µs",
+      "ratio": 1.74,
+      "status": "win",
+      "note": "formerly the one loss vs Nokogiri — fell to the batch-accessor sprint"
+    },
+    {
+      "tech": "xml",
+      "operation": "serialize",
+      "operation_label": "Serialize (Document#to_xml)",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4",
+      "leptris_value": 25.61,
+      "competitor_value": 79.53,
+      "unit": "µs",
+      "ratio": 3.11,
+      "status": "win"
+    }
+  ]
+}

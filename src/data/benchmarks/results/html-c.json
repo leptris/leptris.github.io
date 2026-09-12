@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "id": "html-c-2026-09-12",
+  "language": "c",
+  "subject": { "name": "libleptris", "version": "1.9.143-dev (main eea85cf)" },
+  "harness": {
+    "label": "bench_html_parse.c vs nokogiri_html_parse.rb — byte-identical generated pages, best-of-9 MB/s",
+    "url": "https://github.com/leptris/leptris/tree/main/benchmarks/html"
+  },
+  "machine": "Apple M1 Max, macOS 14.1.1, arm64",
+  "date": "2026-09-12",
+  "stat": "best of 9",
+  "results": [
+    {
+      "tech": "html",
+      "operation": "parse-realistic-450k",
+      "operation_label": "WHATWG parse — realistic 450 KB page",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4 (in-process libxml2 HTML)",
+      "leptris_value": 13998,
+      "competitor_value": 14748,
+      "unit": "µs",
+      "ratio": 1.05,
+      "status": "parity",
+      "note": "the conformant WHATWG tree builder at libxml2's HTML-parser throughput: full adoption-agency/script-data machinery costs nothing measurable on realistic pages"
+    },
+    {
+      "tech": "html",
+      "operation": "parse-entity-laden-1329k",
+      "operation_label": "WHATWG parse — entity-laden 1.3 MB page",
+      "competitor": "nokogiri",
+      "competitor_version": "1.19.4 (in-process libxml2 HTML)",
+      "leptris_value": 44034,
+      "competitor_value": 43953,
+      "unit": "µs",
+      "ratio": 1.0,
+      "status": "parity"
+    }
+  ]
+}

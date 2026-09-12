@@ -6,6 +6,7 @@ export const SITE = {
   url: 'https://www.leptris.org',
   githubOrg: 'https://github.com/leptris',
   githubC: 'https://github.com/leptris/leptris',
+  githubYaml: 'https://github.com/leptris/yeptris',
   githubRuby: 'https://github.com/leptris/leptris-ruby',
   githubPy: 'https://github.com/leptris/leptris-py',
   rubygems: 'https://rubygems.org/gems/leptris',

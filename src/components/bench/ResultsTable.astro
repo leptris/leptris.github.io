@@ -1,0 +1,55 @@
+---
+import type { Cell } from '~/data/benchmarks';
+import StatusPill from './StatusPill.astro';
+
+interface Props {
+  rows: Cell[];
+  /** Optional column header for the competitor side. */
+  competitorHead?: string;
+}
+
+const { rows, competitorHead = 'competitor' } = Astro.props;
+---
+
+<table class="doc-table bench-results">
+  <tr>
+    <th>operation</th>
+    <th>leptris side</th>
+    <th>{competitorHead}</th>
+    <th>standing</th>
+  </tr>
+  {
+    rows.map(({ result }) => (
+      <tr>
+        <td>{result.operation_label ?? result.operation}</td>
+        <td class="bytes">
+          {result.leptris_value !== undefined
+            ? `${result.leptris_value} ${result.unit ?? ''}`.trim()
+            : '—'}
+        </td>
+        <td class="bytes">
+          {result.competitor_value !== undefined
+            ? `${result.competitor_value} ${result.unit ?? ''}`.trim()
+            : `${result.competitor} ${result.competitor_version}`}
+        </td>
+        <td class="note">
+          <StatusPill
+            ratio={result.ratio}
+            status={result.status}
+            artifact={result.artifact}
+          />
+          {result.note && <p class="row-note">{result.note}</p>}
+        </td>
+      </tr>
+    ))
+  }
+</table>
+
+<style>
+  .bench-results .row-note {
+    margin: 0.35rem 0 0;
+    font-size: 0.78rem;
+    color: var(--color-ink-faint);
+    max-width: 34rem;
+  }
+</style>

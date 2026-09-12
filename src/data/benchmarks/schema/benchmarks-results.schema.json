@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.leptris.org/schemas/benchmarks-results-1.json",
+  "title": "leptris ecosystem benchmark results (v1)",
+  "description": "One file per measurement campaign. A campaign is a harness run on one machine on one date; every result row inherits its provenance. Ratio currency: ratio > 1 means the leptris side is that many times faster than the competitor on the same operation (latency: competitor_time / leptris_time; throughput: leptris_rate / competitor_rate).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "language",
+    "subject",
+    "harness",
+    "machine",
+    "date",
+    "stat",
+    "results"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Stable campaign id, e.g. 'xml-c-2026-09-12'."
+    },
+    "language": { "enum": ["c", "ruby", "python"] },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {
+          "enum": ["libleptris", "leptris", "yeptris", "yeptris-ruby", "yeptris-py"]
+        },
+        "version": {
+          "type": "string",
+          "description": "Version actually measured, e.g. '1.9.142' or '1.9.143-dev'."
+        }
+      }
+    },
+    "harness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "url"],
+      "properties": {
+        "label": { "type": "string" },
+        "url": {
+          "type": "string",
+          "pattern": "^https://github\\.com/leptris/",
+          "description": "Link to the published harness or ledger the number reproduces from."
+        }
+      }
+    },
+    "machine": {
+      "type": "string",
+      "description": "e.g. 'Apple M1 Pro (8 core), macOS 14, arm64'."
+    },
+    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "stat": {
+      "type": "string",
+      "description": "Reported statistic, e.g. 'median', 'best of 9', 'min-of-N interleaved'."
+    },
+    "artifact": {
+      "type": "boolean",
+      "description": "True when the whole campaign was not re-run for the site (carried from a published artifact or ledger)."
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tech",
+          "operation",
+          "competitor",
+          "competitor_version",
+          "ratio",
+          "status"
+        ],
+        "properties": {
+          "tech": {
+            "enum": [
+              "xml",
+              "xpath",
+              "xslt",
+              "html",
+              "validation",
+              "c14n",
+              "xquery",
+              "yaml"
+            ]
+          },
+          "operation": {
+            "type": "string",
+            "description": "Machine-ish operation id, e.g. 'parse-small'."
+          },
+          "operation_label": {
+            "type": "string",
+            "description": "Human label for tables, e.g. 'Parse small (431 B)'."
+          },
+          "competitor": {
+            "type": "string",
+            "description": "Lowercase product name, e.g. 'nokogiri', 'libxslt', 'ryml'."
+          },
+          "competitor_version": { "type": "string" },
+          "leptris_value": {
+            "type": "number",
+            "description": "Absolute value in `unit` (time for latency benches)."
+          },
+          "competitor_value": { "type": "number" },
+          "unit": { "type": "string", "description": "e.g. 'µs', 'ms', 'MB/s'." },
+          "ratio": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Speed factor of the leptris side vs the competitor; <1 is a loss and stays visible."
+          },
+          "status": { "enum": ["win", "parity", "loss"] },
+          "artifact": {
+            "type": "boolean",
+            "description": "Per-row override: this row was not re-run."
+          },
+          "note": {
+            "type": "string",
+            "description": "Short honest context, e.g. the lever or the noise band."
+          }
+        }
+      }
+    }
+  }
+}

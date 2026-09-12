@@ -1,0 +1,74 @@
+---
+import { TECH_LABELS, TECH_ORDER, type Language, matrixRows } from '~/data/benchmarks';
+import StatusPill from './StatusPill.astro';
+
+interface Props {
+  languages: Language[];
+}
+
+const { languages } = Astro.props;
+const rows = matrixRows(languages);
+
+const languageLabels: Record<Language, string> = {
+  c: 'C / C++',
+  ruby: 'Ruby',
+  python: 'Python',
+};
+
+// Only techs that have at least one measured cell in these languages.
+const techs = TECH_ORDER.filter((t) =>
+  rows.some((r) => languages.some((l) => r.cells[l]?.[t])),
+);
+---
+
+<div class="matrix-wrap">
+  <table class="doc-table matrix">
+    <thead>
+      <tr>
+        <th>{languages.map((l) => languageLabels[l]).join(' / ')} — competitor</th>
+        {techs.map((t) => <th>{TECH_LABELS[t]}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((row) => (
+          <tr>
+            <td class="who">{row.competitor}</td>
+            {techs.map((t) => {
+              const cells = languages
+                .map((l) => ({ lang: l, cell: row.cells[l]?.[t] }))
+                .filter((c) => c.cell !== undefined);
+              if (cells.length === 0) return <td class="empty">—</td>;
+              const weakest = cells.reduce((a, b) =>
+                b.cell!.result.ratio < a.cell!.result.ratio ? b : a,
+              );
+              return (
+                <td>
+                  <StatusPill
+                    ratio={weakest.cell!.result.ratio}
+                    status={weakest.cell!.result.status}
+                    artifact={weakest.cell!.result.artifact || weakest.cell!.campaign.artifact}
+                  />
+                </td>
+              );
+            })}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .matrix-wrap {
+    overflow-x: auto;
+  }
+  .matrix .who {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .matrix .empty {
+    color: var(--color-ink-faint);
+  }
+</style>
