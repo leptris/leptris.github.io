@@ -1,0 +1,118 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import Matrix from '~/components/bench/Matrix.astro';
+import Provenance from '~/components/bench/Provenance.astro';
+import ResultsTable from '~/components/bench/ResultsTable.astro';
+import { SITE } from '~/data/site';
+import { CAMPAIGNS, frontierFor, type Campaign } from '~/data/benchmarks';
+
+const campaign = (id: string): Campaign => {
+  const found = CAMPAIGNS.find((c) => c.id === id);
+  if (!found) throw new Error(`unknown campaign ${id}`);
+  return found;
+};
+
+const htmlC = campaign('html-c-2026-09-12');
+const xmlPython = campaign('xml-python-2026-09-12');
+const deficits = frontierFor({ only: ['html'] });
+---
+
+<BaseLayout
+  title="HTML benchmarks — leptris"
+  description="The conformant WHATWG HTML parser in libleptris, measured against Nokogiri's libxml2 HTML parser through Ruby and through the Python binding, with the html5lib conformance gate."
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="sec-label"><a href="/benchmarks/">Benchmarks</a> · HTML</p>
+      <h1 class="sec-title">HTML, the <em>WHATWG way</em></h1>
+      <p class="sec-lede">
+        The library exposes two HTML entry points.
+        <code>leptris_parse_html_string</code> implements the WHATWG
+        tree-construction algorithm, including the adoption agency, the
+        active formatting elements reconstruction, script-data escaped
+        states and foster parenting, and is validated against the vendored
+        html5lib tree-construction corpus, which currently passes 1169 of
+        1753 cases and improves with every release.
+        <code>leptris_parse_html4_string</code> reproduces the
+        Nokogiri and libxml2 output shape and is checked byte for byte
+        against a 1555-case Nokogiri reference. The throughput
+        measurements below use the WHATWG entry point in both languages.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:1.6rem">
+    <div class="wrap">
+      <Matrix tech="html" />
+    </div>
+  </section>
+
+  <section class="sec sec-tint-periwinkle lang-sec" id="c">
+    <div class="wrap">
+      <p class="sec-label">C, with a Ruby reference</p>
+      <h2 class="sec-title">Parse throughput versus <em>Nokogiri&rsquo;s libxml2</em></h2>
+      <p class="sec-lede">
+        The benchmark program and its Ruby reference generate
+        byte-identical pages — one realistic page with headings,
+        paragraphs, tables, links and entities, and one entity-laden page
+        — and report the best of nine runs on each side. The reference
+        measures libxml2 in process through Nokogiri.
+      </p>
+      <ResultsTable
+        rows={htmlC.results.map((result) => ({ result, campaign: htmlC }))}
+        competitorHead="nokogiri 1.19.4"
+      />
+      <Provenance campaign={htmlC} />
+      <p>
+        The conformant WHATWG engine parses at the throughput of the
+        libxml2 HTML parser on both shapes. The full tree-construction
+        machinery carries no measurable cost on realistic pages, and the
+        conformance gates are enforced on every release.
+      </p>
+
+      <p class="docs-canonical">
+        To reproduce: run <code>bench_html_parse</code> and
+        <code>ruby nokogiri_html_parse.rb</code> from
+        <a href={`${SITE.githubC}/tree/main/benchmarks/html`}>benchmarks/html</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec sec-tint-sage lang-sec" id="python">
+    <div class="wrap">
+      <p class="sec-label">Python</p>
+      <h2 class="sec-title">The leptris package versus <em>lxml</em></h2>
+      <p class="sec-lede">
+        The Python operation matrix includes one HTML parsing shape: a
+        200-element page with entities, parsed through each
+        library&rsquo;s HTML parser in the same process.
+      </p>
+      <ResultsTable
+        rows={xmlPython.results
+          .filter((r) => r.tech === 'html')
+          .map((result) => ({ result, campaign: xmlPython }))}
+        competitorHead="lxml 6.0.2"
+      />
+      <Provenance campaign={xmlPython} />
+    </div>
+  </section>
+
+  <section class="sec" id="deficits">
+    <div class="wrap">
+      <p class="sec-label">HTML</p>
+      <h2 class="sec-title">Measured <em>deficits</em></h2>
+      <p class="sec-lede">
+        Every HTML operation in the result data that remains behind its
+        competitor. There are none at present.
+      </p>
+      {deficits.length > 0 && <ResultsTable rows={deficits} competitorHead="versus" />}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .lang-sec {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+</style>

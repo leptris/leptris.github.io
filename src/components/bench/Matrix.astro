@@ -1,54 +1,75 @@
 ---
-import { TECH_LABELS, TECH_ORDER, type Language, matrixRows } from '~/data/benchmarks';
-import StatusPill from './StatusPill.astro';
+import {
+  TECH_LABELS,
+  type Language,
+  type Tech,
+  standingOf,
+  techMatrix,
+} from '~/data/benchmarks';
 
 interface Props {
-  languages: Language[];
+  /** The technology this matrix summarizes; columns are languages. */
+  tech: Tech;
 }
 
-const { languages } = Astro.props;
-const rows = matrixRows(languages);
+const { tech } = Astro.props;
 
 const languageLabels: Record<Language, string> = {
   c: 'C / C++',
   ruby: 'Ruby',
   python: 'Python',
 };
+const languageOrder: Language[] = ['c', 'ruby', 'python'];
 
-// Only techs that have at least one measured cell in these languages.
-const techs = TECH_ORDER.filter((t) =>
-  rows.some((r) => languages.some((l) => r.cells[l]?.[t])),
-);
+const groups = [...techMatrix(tech).values()];
+const competitors = [...new Set(groups.map((g) => g.competitor))].sort();
+
+const byCell = (language: Language, competitor: string) =>
+  groups.find((g) => g.language === language && g.competitor === competitor);
+
+const fmt = (n: number) => `${n.toFixed(2)}×`;
 ---
 
 <div class="matrix-wrap">
   <table class="doc-table matrix">
     <thead>
       <tr>
-        <th>{languages.map((l) => languageLabels[l]).join(' / ')} — competitor</th>
-        {techs.map((t) => <th>{TECH_LABELS[t]}</th>)}
+        <th>{TECH_LABELS[tech]} — competitor</th>
+        {languageOrder.map((l) => <th scope="col">{languageLabels[l]}</th>)}
       </tr>
     </thead>
     <tbody>
       {
-        rows.map((row) => (
+        competitors.map((competitor) => (
           <tr>
-            <td class="who">{row.competitor}</td>
-            {techs.map((t) => {
-              const cells = languages
-                .map((l) => ({ lang: l, cell: row.cells[l]?.[t] }))
-                .filter((c) => c.cell !== undefined);
-              if (cells.length === 0) return <td class="empty">—</td>;
-              const weakest = cells.reduce((a, b) =>
-                b.cell!.result.ratio < a.cell!.result.ratio ? b : a,
-              );
+            <td class="who">{competitor}</td>
+            {languageOrder.map((l) => {
+              const group = byCell(l, competitor);
+              if (!group) return <td class="empty">—</td>;
+              const s = standingOf(group.rows);
               return (
                 <td>
-                  <StatusPill
-                    ratio={weakest.cell!.result.ratio}
-                    status={weakest.cell!.result.status}
-                    artifact={weakest.cell!.result.artifact || weakest.cell!.campaign.artifact}
-                  />
+                  <span
+                    class={`race ${s.kind}`}
+                    title={
+                      s.kind === 'sweep'
+                        ? `All ${s.total} measured operations are ahead; the smallest margin is ${fmt(s.floor)}.`
+                        : `${s.wins} of ${s.total} measured operations are ahead. Operations that remain behind: ${s.lostOps.join('; ')}.`
+                    }
+                  >
+                    {s.kind === 'sweep' ? (
+                      <span class="floor">
+                        {fmt(s.floor)}+{s.artifact && <sup aria-label="carried from an artifact or ledger">†</sup>}
+                      </span>
+                    ) : (
+                      <span class="range">
+                        <b class="worst">{fmt(s.floor)}</b>
+                        <span class="arr">–</span>
+                        <b class="best">{fmt(s.best)}</b>
+                        {s.artifact && <sup aria-label="carried from an artifact or ledger">†</sup>}
+                      </span>
+                    )}
+                  </span>
                 </td>
               );
             })}
@@ -57,6 +78,13 @@ const techs = TECH_ORDER.filter((t) =>
       }
     </tbody>
   </table>
+  <p class="matrix-key">
+    A green cell with a single value means every measured operation in that
+    race is ahead, and the value shown is the smallest margin. A neutral
+    cell shows the range from the weakest to the strongest operation;
+    hovering lists the operations that remain behind. All rows, including
+    deficits, appear in the tables below.
+  </p>
 </div>
 
 <style>
@@ -70,5 +98,45 @@ const techs = TECH_ORDER.filter((t) =>
   }
   .matrix .empty {
     color: var(--color-ink-faint);
+  }
+  .race {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.12rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    cursor: help;
+  }
+  .race.sweep {
+    color: color-mix(in srgb, var(--color-sage) 55%, var(--color-ink));
+    background: color-mix(in srgb, var(--color-sage) 22%, transparent);
+  }
+  .race.mixed,
+  .race.lost {
+    background: color-mix(in srgb, var(--color-ink-faint) 12%, transparent);
+  }
+  .race .worst {
+    color: var(--color-rose-deep);
+  }
+  .race .best {
+    color: color-mix(in srgb, var(--color-sage) 55%, var(--color-ink));
+  }
+  .race .arr {
+    color: var(--color-ink-faint);
+    font-weight: 400;
+  }
+  .race sup {
+    font-size: 0.6rem;
+    margin-left: 0.1rem;
+  }
+  .matrix-key {
+    margin-top: 0.8rem;
+    font-size: 0.78rem;
+    color: var(--color-ink-faint);
+    max-width: 46rem;
   }
 </style>

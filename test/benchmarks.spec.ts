@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -120,6 +120,42 @@ describe('benchmark campaigns conform to the results schema', () => {
       c.results.filter((r) => r.status === 'loss'),
     );
     expect(losses.length).toBeGreaterThan(0);
+  });
+});
+
+describe('benchmark pages exist for every technology with data', () => {
+  const pages = [
+    '/benchmarks',
+    '/benchmarks/xml',
+    '/benchmarks/xpath',
+    '/benchmarks/xslt',
+    '/benchmarks/html',
+    '/benchmarks/yaml',
+    '/benchmarks/methodology',
+  ];
+
+  it('every benchmarks route resolves to a page', () => {
+    for (const href of pages) {
+      const rel = href === '/benchmarks' ? 'benchmarks' : href.replace(/^\//, '');
+      const exists = [`src/pages/${rel}.astro`, `src/pages/${rel}/index.astro`].some(
+        (candidate) => existsSync(join(root, candidate)),
+      );
+      expect(exists, `${href} should have a page`).toBe(true);
+    }
+  });
+
+  it('every technology in the data has a page', () => {
+    const techs = new Set(CAMPAIGNS.flatMap((c) => c.results.map((r) => r.tech)));
+    const techPages: Record<string, string> = {
+      xml: '/benchmarks/xml',
+      xpath: '/benchmarks/xpath',
+      xslt: '/benchmarks/xslt',
+      html: '/benchmarks/html',
+      yaml: '/benchmarks/yaml',
+    };
+    for (const tech of techs) {
+      expect(techPages[tech], `tech ${tech} needs a page`).toBeDefined();
+    }
   });
 });
 

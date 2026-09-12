@@ -1,0 +1,266 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import BenchBars from '~/components/BenchBars.vue';
+import Callout from '~/components/Callout.astro';
+import Matrix from '~/components/bench/Matrix.astro';
+import Provenance from '~/components/bench/Provenance.astro';
+import ResultsTable from '~/components/bench/ResultsTable.astro';
+import { SITE } from '~/data/site';
+import { CAMPAIGNS, frontierFor, type Campaign } from '~/data/benchmarks';
+
+const campaign = (id: string): Campaign => {
+  const found = CAMPAIGNS.find((c) => c.id === id);
+  if (!found) throw new Error(`unknown campaign ${id}`);
+  return found;
+};
+
+const xmlCMatrix = campaign('xml-c-matrix-2026-09-12');
+const xmlCLanes = campaign('xml-c-lanes-2026-09-12');
+const xmlRuby = campaign('xml-ruby-2026-09-12');
+const xmlRubySerialbench = campaign('xml-ruby-serialbench-2026-09');
+const xmlPython = campaign('xml-python-2026-09-12');
+
+const xmlRows = (c: Campaign) =>
+  c.results
+    .filter((r) => r.tech === 'xml')
+    .map((result) => ({ result, campaign: c }));
+
+const deficits = frontierFor({ only: ['xml'] });
+
+const cParseBlocks = [
+  {
+    title: 'DOM parsing of a 2 MB text-heavy document, measured in C',
+    sub: 'Minimum of 20 iterations; Release builds with identical flags on the same machine',
+    chip: '3.4× vs pugixml',
+    rows: [
+      { who: 'libleptris', val: '191 µs', w: 29.8 },
+      { who: 'pugixml', val: '642 µs', w: 100, them: true },
+    ],
+  },
+];
+
+const rubyBlocks = [
+  {
+    title: 'Parsing and serializing a 12 KB document through Ruby',
+    sub: 'Identical fixtures and iteration counts from the committed matrix harness',
+    chip: '9.2× / 3.1× vs Nokogiri',
+    rows: [
+      { who: 'leptris', ver: 'gem 1.9.121.0', val: '20.4 µs', w: 10.9 },
+      { who: 'Nokogiri', ver: '1.19.4', val: '187.2 µs', w: 100, them: true },
+    ],
+  },
+];
+
+const pyBlocks = [
+  {
+    title: 'Parsing a 12 KB document through Python',
+    sub: 'Mean per iteration after warm-up, with garbage collection quieted during the timed loop',
+    chip: '4.6× vs lxml',
+    rows: [
+      { who: 'leptris', ver: '1.9.121.0', val: '22.6 µs', w: 21.6 },
+      { who: 'lxml', ver: '6.0.2', val: '104.9 µs', w: 100, them: true },
+      { who: 'ElementTree', ver: 'stdlib', val: '158.3 µs', w: 100, them: true },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="XML benchmarks — leptris"
+  description="XML parsing, DOM operations, traversal and serialization: libleptris versus libxml2 and pugixml in C, the leptris gem versus Nokogiri and Ox in Ruby, and the leptris package versus lxml, ElementTree and minidom in Python."
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="sec-label"><a href="/benchmarks/">Benchmarks</a> · XML</p>
+      <h1 class="sec-title">XML parsing and <em>DOM operations</em></h1>
+      <p class="sec-lede">
+        This page collects every measured XML race for the leptris
+        ecosystem, one section per language. Each section presents the
+        standing matrix followed by the complete operation tables with
+        their provenance. All deficits listed here are reproduced in the
+        measured-deficits table at the end of the page.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:1.6rem">
+    <div class="wrap">
+      <Matrix tech="xml" />
+    </div>
+  </section>
+
+  <!-- ————— C ————— -->
+  <section class="sec sec-tint-periwinkle lang-sec" id="c">
+    <div class="wrap">
+      <p class="sec-label">C and C++</p>
+      <h2 class="sec-title">libleptris versus <em>libxml2 and pugixml</em></h2>
+      <p class="sec-lede">
+        libxml2 is the de facto standard C parser and underlies lxml and
+        Nokogiri. pugixml is a C++ library optimized for zero-copy DOM
+        construction. Both comparisons below run in a single harness on
+        identical fixtures with identical iteration protocols, so the
+        ratios are same-binary baselines.
+      </p>
+
+      <div class="reveal">
+        <BenchBars client:visible blocks={cParseBlocks} />
+      </div>
+
+      <h3>Parse, SAX, serialization and mutation</h3>
+      <ResultsTable
+        rows={xmlRows(xmlCMatrix)}
+        competitorHead="competitor (same run)"
+      />
+      <Provenance campaign={xmlCMatrix} />
+
+      <h3>DOM read operations</h3>
+      <ResultsTable rows={xmlRows(xmlCLanes)} competitorHead="libxml2 2.9.13" />
+      <Provenance campaign={xmlCLanes} />
+
+      <Callout>
+        <p>
+          <strong>A note on whitespace semantics.</strong> libleptris
+          retains whitespace-only text nodes by default, which matches
+          libxml2 and Nokogiri behavior, whereas pugixml discards them.
+          The pretty-printed parse row above reflects that semantic
+          difference. For a comparison with pugixml semantics, parse with
+          <code>LEPTRIS_PARSE_DROP_WS_TEXT</code>.
+        </p>
+      </Callout>
+
+      <p class="docs-canonical">
+        To reproduce: configure with
+        <code>cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DLEPTRIS_BUILD_BENCHMARKS=ON</code>
+        and run the binaries under <code>build/benchmarks/</code>. The
+        harness is committed to the repository at
+        <a href={`${SITE.githubC}/tree/main/benchmarks`}>benchmarks</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ————— Ruby ————— -->
+  <section class="sec sec-tint-rose lang-sec" id="ruby">
+    <div class="wrap">
+      <p class="sec-label">Ruby</p>
+      <h2 class="sec-title">The leptris gem versus <em>Nokogiri, Ox and moxml</em></h2>
+      <p class="sec-lede">
+        The gem exposes an API compatible with Nokogiri on top of
+        libleptris. The operation matrix below was measured with the
+        committed harness on identical fixtures. The comparison against
+        Ox and moxml is carried from the performance ledger in the gem
+        repository, as noted per row.
+      </p>
+
+      <div class="reveal">
+        <BenchBars client:visible blocks={rubyBlocks} />
+      </div>
+
+      <h3>Operation matrix versus Nokogiri</h3>
+      <ResultsTable rows={xmlRows(xmlRuby)} competitorHead="nokogiri 1.19.4" />
+      <Provenance campaign={xmlRuby} />
+      <p>
+        Tree traversal, which was the last operation to lose against
+        Nokogiri in earlier releases, is now 1.74× ahead following the
+        batch-accessor work recorded in the gem changelog.
+      </p>
+
+      <h3>Whole-field comparison on a real-world document</h3>
+      <ResultsTable
+        rows={xmlRows(xmlRubySerialbench)}
+        competitorHead="the field"
+      />
+      <Provenance campaign={xmlRubySerialbench} />
+      <p>
+        The 4.38 MB real-world document comparison covers Ox, Nokogiri,
+        Oga and REXML in a single process. The serialbench harness is
+        maintained in its own repository, and the leptris adapter is
+        published there.
+      </p>
+
+      <h3>Binding-internal improvement measurements</h3>
+      <p>
+        The following table is not a cross-library comparison. It measures
+        the gem against earlier releases of itself, on the same machine
+        and loops, using the committed read-path harness, and is provided
+        to show the effect of the memoization work in the 1.9 line.
+      </p>
+      <table class="doc-table">
+        <tr>
+          <th>Loop over a 300-element read-only document</th>
+          <th>gem 1.9.2</th>
+          <th>gem 1.9.17</th>
+          <th>Result</th>
+        </tr>
+        <tr><td>Namespace inspection</td><td class="bytes">0.62 s</td><td class="bytes">0.017 s</td><td class="note">36× faster</td></tr>
+        <tr><td>Attribute reads</td><td class="bytes">0.63 s</td><td class="bytes">0.048 s</td><td class="note">13× faster</td></tr>
+        <tr><td>Text content reads</td><td class="bytes">0.19 s</td><td class="bytes">0.035 s</td><td class="note">5× faster</td></tr>
+      </table>
+
+      <p class="docs-canonical">
+        To reproduce: run
+        <code>bundle exec ruby -Ilib benchmark/leptris_vs_nokogiri.rb</code>
+        in the gem repository. The benchmark guide is
+        <a href={`${SITE.githubRuby}/blob/main/benchmark/README.md`}>in the repository</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ————— Python ————— -->
+  <section class="sec sec-tint-sage lang-sec" id="python">
+    <div class="wrap">
+      <p class="sec-label">Python</p>
+      <h2 class="sec-title">The leptris package versus <em>lxml and the standard library</em></h2>
+      <p class="sec-lede">
+        lxml is a C extension over the same libxml2 library that Nokogiri
+        wraps. ElementTree ships with Python and is accelerated in C.
+        The binding uses an abi3 C accelerator bound to libleptris
+        through a fixed positional protocol, with wheels published for
+        macOS and manylinux on both architectures and for Windows.
+      </p>
+
+      <div class="reveal">
+        <BenchBars client:visible blocks={pyBlocks} />
+      </div>
+
+      <h3>Operation matrix against the full field</h3>
+      <ResultsTable rows={xmlRows(xmlPython)} competitorHead="lxml / stdlib" />
+      <Provenance campaign={xmlPython} />
+      <p>
+        The binding is ahead of lxml on every measured operation. The one
+        standard-library comparison it loses is traversal against
+        ElementTree, whose iterator is a bare generator over a compact
+        internal list; that deficit appears in the table below and is
+        tracked in the binding repository.
+      </p>
+
+      <p class="docs-canonical">
+        To reproduce: run
+        <code>LEPTRIS_LIB_PATH=…/libleptris.dylib python3 benchmarks/matrix.py</code>
+        in the Python binding repository, which uses the same fixtures
+        and operations as the Ruby matrix.
+      </p>
+    </div>
+  </section>
+
+  <!-- ————— deficits ————— -->
+  <section class="sec" id="deficits">
+    <div class="wrap">
+      <p class="sec-label">XML</p>
+      <h2 class="sec-title">Measured <em>deficits</em></h2>
+      <p class="sec-lede">
+        Every XML operation in the result data that remains behind its
+        competitor, ordered from the weakest ratio. Each row links to the
+        harness it was measured with, and none of these rows is hidden
+        elsewhere on this site.
+      </p>
+      <ResultsTable rows={deficits} competitorHead="versus" />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .lang-sec {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+</style>
