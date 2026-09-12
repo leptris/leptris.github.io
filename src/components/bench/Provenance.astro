@@ -1,0 +1,55 @@
+---
+import type { Campaign } from '~/data/benchmarks';
+
+interface Props {
+  campaign: Campaign;
+}
+
+const { campaign } = Astro.props;
+const artifact = campaign.artifact === true;
+---
+
+<p class="provenance">
+  <span class="pv-pill">{artifact ? 'artifact' : 'fresh run'}</span>
+  <span class="pv-ver">{campaign.subject.name} {campaign.subject.version}</span>
+  <span class="pv-sep">·</span>
+  <span>{campaign.stat}</span>
+  <span class="pv-sep">·</span>
+  <span>{campaign.machine}</span>
+  <span class="pv-sep">·</span>
+  <time datetime={campaign.date}>{campaign.date}</time>
+  <span class="pv-sep">·</span>
+  <a href={campaign.harness.url}>{campaign.harness.label}</a>
+</p>
+
+<style>
+  .provenance {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0.6rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-ink-faint);
+  }
+  .provenance a {
+    color: var(--color-ink-muted);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  }
+  .pv-pill {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.08rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-ink-faint) 45%, transparent);
+    color: var(--color-ink-muted);
+  }
+  .pv-ver {
+    color: var(--color-ink-muted);
+  }
+  .pv-sep {
+    opacity: 0.5;
+  }
+</style>

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "id": "xml-ruby-serialbench-2026-09",
+  "language": "ruby",
+  "subject": { "name": "leptris", "version": "gem 1.9.x line" },
+  "harness": {
+    "label": "serialbench full-field run — artifact carried from the September 2026 site refresh (not re-run here)",
+    "url": "https://github.com/metanorma/serialbench"
+  },
+  "machine": "not recorded in the artifact",
+  "date": "2026-09-10",
+  "stat": "per-iteration, same process",
+  "artifact": true,
+  "results": [
+    {
+      "tech": "xml",
+      "operation": "realworld-parse-serialize",
+      "operation_label": "Real-world document, 4.38 MB — parse + serialize (10,000 records, pretty-printed, encoding-declared)",
+      "competitor": "nokogiri",
+      "competitor_version": "libxml2 line",
+      "leptris_value": 18,
+      "competitor_value": 123,
+      "unit": "ms",
+      "ratio": 6.83,
+      "status": "win",
+      "note": "carried from the serialbench full-field artifact behind the September site refresh; re-run when serialbench gains a local environment config"
+    },
+    {
+      "tech": "xml",
+      "operation": "realworld-parse-serialize",
+      "operation_label": "Real-world document, 4.38 MB — parse + serialize (10,000 records, pretty-printed, encoding-declared)",
+      "competitor": "ox",
+      "competitor_version": "C extension line",
+      "leptris_value": 18,
+      "competitor_value": 118,
+      "unit": "ms",
+      "ratio": 6.56,
+      "status": "win",
+      "note": "carried from the serialbench full-field artifact behind the September site refresh; re-run when serialbench gains a local environment config"
+    }
+  ]
+}

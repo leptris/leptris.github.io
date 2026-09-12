@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "id": "xslt-c-2026-09-12",
+  "language": "c",
+  "subject": { "name": "libleptris", "version": "1.9.143-dev (main eea85cf)" },
+  "harness": {
+    "label": "bench_xslt_* scorecard vs in-process libxslt twins (same fixtures, same protocol)",
+    "url": "https://github.com/leptris/leptris/tree/main/benchmarks/xslt"
+  },
+  "machine": "Apple M1 Max, macOS 14.1.1, arm64",
+  "date": "2026-09-12",
+  "stat": "best of 9 (transform: mean of 400), Release + LTO",
+  "results": [
+    {
+      "tech": "xslt",
+      "operation": "dispatch-2000-books",
+      "operation_label": "Template dispatch — diffuse 2000-book sheet",
+      "competitor": "libxslt",
+      "competitor_version": "1.1.43 (in-process via lxml 6.0.2)",
+      "leptris_value": 3.42,
+      "competitor_value": 2.65,
+      "unit": "ms",
+      "ratio": 0.77,
+      "status": "loss",
+      "note": "the dispatch shapes sit behind a 20-year-tuned libxslt on its core fixture; the ceiling analysis (streaming + eval-side rewrites ≈ 25-30%) is published in the perf board — parity is the reachable bar here, and value-of/pred/copy shapes carry the wins"
+    },
+    {
+      "tech": "xslt",
+      "operation": "dispatch-heavy-120-templates",
+      "operation_label": "Template dispatch — heavy 120-template sheet",
+      "competitor": "libxslt",
+      "competitor_version": "1.1.43 (in-process via lxml 6.0.2)",
+      "leptris_value": 3.82,
+      "competitor_value": 3.42,
+      "unit": "ms",
+      "ratio": 0.9,
+      "status": "loss",
+      "note": "streaming result emission (phases landed) closed most of the historic 3.3x gap on this fixture"
+    },
+    {
+      "tech": "xslt",
+      "operation": "dispatch-pred-120",
+      "operation_label": "Predicate dispatch — 120 pred templates / 2400 items",
+      "competitor": "libxslt",
+      "competitor_version": "1.1.43 (in-process via lxml 6.0.2)",
+      "leptris_value": 19.43,
+      "competitor_value": 32.95,
+      "unit": "ms",
+      "ratio": 1.7,
+      "status": "win",
+      "note": "the literal @attr='value' dispatch index"
+    },
+    {
+      "tech": "xslt",
+      "operation": "value-of-50k",
+      "operation_label": "xsl:value-of hot loop — 50k top-level texts",
+      "competitor": "libxslt",
+      "competitor_version": "1.1.43 (in-process via lxml 6.0.2)",
+      "leptris_value": 8.58,
+      "competitor_value": 8.98,
+      "unit": "ms",
+      "ratio": 1.05,
+      "status": "parity",
+      "note": "the fragment tail caches took leptris from 1424 ms to this; against libxslt the shape is now a wash"
+    },
+    {
+      "tech": "xslt",
+      "operation": "transform-predicate-fan",
+      "operation_label": "Transform — //book[@price>100] value-of fan (499 books)",
+      "competitor": "libxslt",
+      "competitor_version": "1.1.43 (in-process via lxml 6.0.2)",
+      "leptris_value": 0.263,
+      "competitor_value": 0.188,
+      "unit": "ms",
+      "ratio": 0.72,
+      "status": "loss"
+    },
+    {
+      "tech": "xslt",
+      "operation": "subtree-copy-100-books",
+      "operation_label": "Subtree copy — 100-book catalog",
+      "competitor": "libxslt",
+      "competitor_version": "1.1.43 (in-process via lxml 6.0.2)",
+      "leptris_value": 0.044,
+      "competitor_value": 0.09,
+      "unit": "ms/copy",
+      "ratio": 2.05,
+      "status": "win",
+      "note": "pool-threaded copy_subtree_detached; through Ruby, Element#dup runs 2.27x ahead of Nokogiri 1.19.4 on the same fixture"
+    }
+  ]
+}

@@ -2,29 +2,54 @@
 import BaseLayout from '~/components/BaseLayout.astro';
 import BenchBars from '~/components/BenchBars.vue';
 import Callout from '~/components/Callout.astro';
+import Matrix from '~/components/bench/Matrix.astro';
+import Provenance from '~/components/bench/Provenance.astro';
+import ResultsTable from '~/components/bench/ResultsTable.astro';
 import { SITE } from '~/data/site';
+import {
+  CAMPAIGNS,
+  frontier,
+  type Campaign,
+} from '~/data/benchmarks';
+
+const campaign = (id: string): Campaign => {
+  const found = CAMPAIGNS.find((c) => c.id === id);
+  if (!found) throw new Error(`unknown campaign ${id}`);
+  return found;
+};
+
+const xmlCMatrix = campaign('xml-c-matrix-2026-09-12');
+const xmlCLanes = campaign('xml-c-lanes-2026-09-12');
+const xsltC = campaign('xslt-c-2026-09-12');
+const htmlC = campaign('html-c-2026-09-12');
+const yamlC = campaign('yaml-c-2026-09-12');
+const xmlRuby = campaign('xml-ruby-2026-09-12');
+const xmlRubyFrontier = campaign('xml-ruby-frontier-2026-09-12');
+const xmlRubySerialbench = campaign('xml-ruby-serialbench-2026-09');
+const xmlPython = campaign('xml-python-2026-09-12');
+
+const frontierRows = frontier();
 
 const cParseBlocks = [
   {
     title: '2 MB text-heavy DOM parse — vs pugixml, C harness',
-    sub: 'median of interleaved runs, identical Release flags, same machine',
+    sub: 'min of 20, identical Release + LTO builds, same machine',
     chip: '3.4× vs pugixml',
     rows: [
-      { who: 'leptris', val: '193 µs', w: 29.1 },
-      { who: 'pugixml', val: '663 µs', w: 100, them: true },
+      { who: 'leptris', val: '191 µs', w: 29.8 },
+      { who: 'pugixml', val: '642 µs', w: 100, them: true },
     ],
   },
 ];
 
 const rubyBlocks = [
   {
-    title: 'Real-world document, 4.38 MB — parse + serialize, through Ruby',
-    sub: '10,000 records, pretty-printed, encoding-declared; same process, same harness (serialbench)',
-    chip: '6.8× vs nokogiri',
+    title: 'Parse + serialize a 12 KB document, through Ruby',
+    sub: 'same fixtures, same iteration counts — the committed matrix harness',
+    chip: '9.2× / 3.1× vs nokogiri',
     rows: [
-      { who: 'leptris', ver: 'via binding', val: '18 ms', w: 14.6 },
-      { who: 'Ox', ver: 'C extension', val: '118 ms', w: 95.9, them: true },
-      { who: 'Nokogiri', ver: 'libxml2', val: '123 ms', w: 100, them: true },
+      { who: 'leptris', ver: 'gem 1.9.121.0', val: '20.4 µs', w: 10.9 },
+      { who: 'Nokogiri', ver: '1.19.4', val: '187.2 µs', w: 100, them: true },
     ],
   },
 ];
@@ -32,24 +57,12 @@ const rubyBlocks = [
 const pyBlocks = [
   {
     title: 'Parse — 12 KB medium document, through Python',
-    sub: 'leptris 1.6.1 (C accelerator), libleptris 1.3.0 — Python 3.10.5, macOS arm64, lxml 6.0.2',
-    chip: '8× vs lxml',
+    sub: 'mean per iteration, warm caches, gc-quiet loops',
+    chip: '4.6× vs lxml',
     rows: [
-      { who: 'leptris', val: '15.2 µs', w: 12.6 },
-      { who: 'lxml', ver: 'libxml2', val: '121.0 µs', w: 100, them: true },
-    ],
-  },
-  {
-    title: 'The three that used to lose — leptris 1.6.1 vs lxml',
-    sub: 'cost accounting found the whole gap was Python object construction; the ~180-line abi3 accelerator closed it',
-    chip: '9/9 operations',
-    rows: [
-      { who: 'leptris //book', ver: '100 elems', val: '6.4 µs', w: 53 },
-      { who: 'lxml //book', ver: '100 elems', val: '12.0 µs', w: 100, them: true },
-      { who: 'leptris union', ver: '200 elems', val: '19.2 µs', w: 69 },
-      { who: 'lxml union', ver: '200 elems', val: '27.9 µs', w: 100, them: true },
-      { who: 'leptris traversal', ver: '401 elems', val: '18.0 µs', w: 83 },
-      { who: 'lxml traversal', ver: '401 elems', val: '21.6 µs', w: 100, them: true },
+      { who: 'leptris', ver: '1.9.121.0', val: '22.6 µs', w: 21.6 },
+      { who: 'lxml', ver: '6.0.2', val: '104.9 µs', w: 100, them: true },
+      { who: 'ElementTree', ver: 'stdlib', val: '158.3 µs', w: 100, them: true },
     ],
   },
 ];
@@ -57,17 +70,20 @@ const pyBlocks = [
 
 <BaseLayout
   title="Benchmarks — leptris"
-  description="The full race, per language: leptris vs libxml2 and pugixml in C/C++, vs Nokogiri, Ox, and Oga in Ruby, and the Python field (lxml, ElementTree) — with the losses recorded alongside the wins."
+  description="One comparison surface for the leptris ecosystem: libleptris and yeptris vs libxml2, pugixml, libxslt, Nokogiri, Ox, lxml, libyaml and rapidyaml — across C, Ruby and Python, with every number traced to a published harness and the losses kept in view."
 >
   <section class="page-head">
     <div class="wrap">
       <p class="sec-label">Benchmarks</p>
-      <h1 class="sec-title">The race, <em>per language</em></h1>
+      <h1 class="sec-title">The whole field, <em>one surface</em></h1>
       <p class="sec-lede">
-        Three audiences, three fields. Embedded C and C++ developers race
-        against libxml2 and pugixml. Ruby developers weigh Nokogiri, Ox, and
-        Oga. Python developers live with lxml and the stdlib. Every number
-        below reproduces from a published harness — wins and losses both.
+        Two engines — <strong>libleptris</strong> for XML/XPath/XSLT/HTML and
+        <strong>yeptris</strong> for YAML — against every incumbent we ship
+        against, in every language we ship. The matrix below is generated from
+        versioned result data: each cell is the <em>weakest</em> measured ratio
+        for that pairing, so a race only reads green when nothing in it loses.
+        Wins and losses alike trace to a published harness — see the
+        <a href="/benchmarks/methodology">methodology</a>.
       </p>
     </div>
   </section>
@@ -75,101 +91,75 @@ const pyBlocks = [
   <div class="wrap">
     <div class="callout" style="margin-top:2.4rem">
       <p>
-        <strong>Methodology.</strong> Interleaved A/B runs, median reported,
-        fresh Release builds, identical flags and machine. The C harness
-        builds with <code>-DLEPTRIS_BUILD_BENCHMARKS=ON</code> and CI uploads
-        JSON + Markdown results on every push. Where a number is historical,
-        its version is labeled. Nothing is cherry-picked.
+        <strong>Reading the matrix.</strong> A cell shows how many times faster
+        the leptris side is on its weakest measured operation against that
+        competitor — <span class="pill-win">green</span> is a clean sweep,
+        <span class="pill-loss">rose</span> is a race with an open deficit, and
+        <code>†</code> marks artifact numbers carried from a published ledger
+        rather than a fresh run. The <a href="#frontier">frontier</a> section
+        names every open deficit and its lever.
       </p>
     </div>
   </div>
 
-  <!-- ————— scoreboard ————— -->
-  <section class="sec" style="padding-top:2rem;padding-bottom:1rem">
+  <!-- ————— matrix ————— -->
+  <section class="sec" id="matrix" style="padding-top:2rem;padding-bottom:1rem">
     <div class="wrap">
-      <h2 class="sec-title">Scoreboard — <em>September 2026, libleptris 1.9.142</em></h2>
+      <h2 class="sec-title">The matrix — <em>leptris vs everything</em></h2>
       <p class="sec-lede">
-        One row per competitor, the headline number from its race below.
-        Every deficit that remains is on the tracked frontier at the bottom
-        of this page — with its lever and its owner.
+        One standing row per competitor per language. Cells carry the weakest
+        ratio from the campaigns below; drill into a technology to see every
+        operation behind the number.
       </p>
-      <table class="doc-table">
-        <tr><th>race</th><th>competitor</th><th>headline</th><th>standing</th></tr>
-        <tr><td>XML parse + SAX</td><td>libxml2</td><td class="bytes">ahead on every parse shape</td><td class="note">won</td></tr>
-        <tr><td>DOM reads / writes / serialize</td><td>libxml2, pugixml</td><td class="bytes">serialize 1.5–1.6× ahead of pugixml; reads ahead; attr-heavy parse ~1.5× behind (the parse wall — frontier)</td><td class="note">mostly won</td></tr>
-        <tr><td>XPath 1.0</td><td>libxml2</td><td class="bytes">31× vs the Nokogiri stack; 438/438 conformant</td><td class="note">won</td></tr>
-        <tr><td>XSLT transforms</td><td>libxslt</td><td class="bytes">205/205 byte-identical; dispatch ~2.25×, copy ~2.27×, value-of ~135× in-process</td><td class="note">won</td></tr>
-        <tr><td>XQuery + QT3</td><td>Saxon-HE</td><td class="bytes">same-core FLWOR/constructors; QT3 function sets adopted exact-N</td><td class="note">shipping</td></tr>
-        <tr><td>HTML (WHATWG + parity)</td><td>Nokogiri</td><td class="bytes">3.6–11× on the operation matrix; html5lib tree suite gated every release</td><td class="note">won</td></tr>
-        <tr><td>Canonicalization</td><td>Nokogiri / libxml2</td><td class="bytes">23×</td><td class="note">won</td></tr>
-        <tr><td>Validation (RELAX NG, Schematron)</td><td>Jing (JVM)</td><td class="bytes">native, corpus-gated, one CLI — no JVM in the process</td><td class="note">won</td></tr>
-        <tr><td>Ruby end-to-end</td><td>Nokogiri</td><td class="bytes">parse 2.6–2.8×, serialize 2.4×, e2e 2.15×</td><td class="note">won</td></tr>
-        <tr><td>Ruby native loop</td><td>Ox</td><td class="bytes">traversal ~2× behind Ox&rsquo;s C walk (frontier)</td><td class="note">frontier</td></tr>
-        <tr><td>Ruby adapter reads (NS-heavy)</td><td>moxml</td><td class="bytes">0.69× — measured off the C resolver; the lever is the adapter&rsquo;s FFI fan-out (frontier)</td><td class="note">frontier</td></tr>
-        <tr><td>Python</td><td>lxml</td><td class="bytes">parse/serialize/XPath ahead; the iterparse fixed-cost and ns/vars eval rows fell in 1.3–1.5</td><td class="note">won</td></tr>
-      </table>
+
+      <h3>Compiled — C and C++</h3>
+      <Matrix languages={['c']} />
+
+      <h3>Interpreted — Ruby</h3>
+      <Matrix languages={['ruby']} />
+
+      <h3>Interpreted — Python</h3>
+      <Matrix languages={['python']} />
     </div>
   </section>
 
-  <!-- ————— 01 C / C++ ————— -->
-  <section class="sec sec-tint-periwinkle" data-ghost="01" id="c" style="padding-bottom:4rem">
+  <!-- ————— 01 XML + XPath ————— -->
+  <section class="sec sec-tint-periwinkle" data-ghost="01" id="xml" style="padding-bottom:4rem">
     <div class="wrap">
-      <p class="sec-label" data-num="01">Compiled — C and C++</p>
+      <p class="sec-label" data-num="01">XML and XPath</p>
       <h2 class="sec-title">The embedder&rsquo;s race: <em>libxml2 and pugixml</em></h2>
       <p class="sec-lede">
-        <strong>libxml2</strong> is the de facto standard — C, everywhere,
-        and the engine under Chrome, Firefox, and Python&rsquo;s lxml.
-        <strong>pugixml</strong> is C++ and the acknowledged speed king of
-        DOM parsing: zero-copy, superb cache locality. Those are the two to
-        beat, and the ones we gate against in CI.
+        <strong>libxml2</strong> is the de facto standard — C, everywhere, and
+        the engine under Chrome, Firefox, Python&rsquo;s lxml and Ruby&rsquo;s
+        Nokogiri. <strong>pugixml</strong> is C++ and the acknowledged speed
+        king of zero-copy DOM parsing. Those are the two we gate against.
       </p>
-
-      <h3>Parse and SAX throughput — vs libxml2</h3>
-      <table class="doc-table">
-        <tr><th>benchmark</th><th>leptris</th><th>libxml2</th><th>advantage</th></tr>
-        <tr><td>SAX small (~1 KB)</td><td class="bytes">2.8 µs (377 MB/s)</td><td class="bytes">7.1 µs (124 MB/s)</td><td class="note">2.5× faster</td></tr>
-        <tr><td>SAX medium (~5 KB)</td><td class="bytes">7.5 µs (624 MB/s)</td><td class="bytes">26.9 µs (175 MB/s)</td><td class="note">3.6× faster</td></tr>
-        <tr><td>DOM parse (~5 KB)</td><td class="bytes">33 µs</td><td class="bytes">47 µs</td><td class="note">1.4× faster</td></tr>
-      </table>
-
-      <h3>DOM read access — vs libxml2</h3>
-      <table class="doc-table">
-        <tr><th>benchmark</th><th>leptris</th><th>libxml2</th><th>advantage</th></tr>
-        <tr><td>Attribute lookup by name</td><td class="bytes">1.6 µs</td><td class="bytes">3.0 µs</td><td class="note">1.9× faster</td></tr>
-        <tr><td>Text content extraction</td><td class="bytes">1.4 µs</td><td class="bytes">3.5 µs</td><td class="note">2.6× faster</td></tr>
-        <tr><td>Indexed child access (1000 × 50)</td><td class="bytes">2.3 µs (O(1) cached)</td><td class="bytes">2.5 µs</td><td class="note">9% faster</td></tr>
-      </table>
 
       <div class="reveal" style="margin:2.6rem 0">
         <BenchBars client:visible blocks={cParseBlocks} />
       </div>
 
-      <h3>DOM writes and serialization — vs pugixml</h3>
-      <table class="doc-table">
-        <tr><th>benchmark</th><th>leptris</th><th>pugixml</th><th>verdict</th></tr>
-        <tr><td>Set 2000 attributes (duplicate-rejecting)</td><td class="bytes">347 µs</td><td class="bytes">~8–14 ms (find+set)</td><td class="note">~25× faster</td></tr>
-        <tr><td>Serialize attr-heavy 2 MB</td><td class="bytes">490 µs</td><td class="bytes">799 µs</td><td class="note">1.6× faster</td></tr>
-        <tr><td>Serialize text-heavy 2 MB</td><td class="bytes">566 µs</td><td class="bytes">521 µs</td><td class="note">1.1× slower — parity within noise</td></tr>
-        <tr><td>Append 10000 children</td><td class="bytes">160 µs</td><td class="bytes">119 µs</td><td class="note">1.3× slower — the cost of the O(1) duplicate-rejecting index</td></tr>
-      </table>
+      <h3>Parse, SAX, serialize, mutate — same-binary matrix</h3>
+      <ResultsTable
+        rows={xmlCMatrix.results.map((result) => ({ result, campaign: xmlCMatrix }))}
+        competitorHead="competitor (same run)"
+      />
+      <Provenance campaign={xmlCMatrix} />
 
-      <h3>XPath — vs libxml2</h3>
-      <p>
-        leptris leads on <strong>all ten</strong> XPath benchmarks, from the
-        per-call floor (<code>self::*</code>, 1.6×) to attribute lookups
-        (<code>attribute::id</code>, <strong>4.0×</strong>) and counted
-        predicates (<code>count(//book[@id='b1'])</code>, 2.7×). Since
-        v1.1.2, union dedup is ~140× faster on large merged sets. The full
-        table: <a href="/docs/xpath">the XPath page</a>.
-      </p>
+      <h3>DOM reads and XPath eval — lane benches</h3>
+      <ResultsTable
+        rows={xmlCLanes.results.map((result) => ({ result, campaign: xmlCLanes }))}
+        competitorHead="libxml2 2.15.3"
+      />
+      <Provenance campaign={xmlCLanes} />
 
       <Callout>
         <p>
           <strong>Apples-to-apples on whitespace.</strong> leptris keeps
           whitespace-only text nodes by default (libxml2/Nokogiri behavior);
-          pugixml discards them. For a fair parse race on pretty-printed
-          documents use <code>LEPTRIS_PARSE_DROP_WS_TEXT</code> — that flag
-          is the entire gap on whitespace-heavy shapes.
+          pugixml discards them. The pretty-printed parse row above is that
+          semantic difference — for a like-for-like race use
+          <code>LEPTRIS_PARSE_DROP_WS_TEXT</code>.
         </p>
       </Callout>
 
@@ -181,92 +171,174 @@ const pyBlocks = [
     </div>
   </section>
 
-  <!-- ————— 02 Ruby ————— -->
-  <section class="sec sec-tint-rose" data-ghost="02" id="ruby" style="padding-bottom:4rem">
+  <!-- ————— 02 XSLT ————— -->
+  <section class="sec sec-tint-rose" data-ghost="02" id="xslt" style="padding-bottom:4rem">
     <div class="wrap">
-      <p class="sec-label" data-num="02">Interpreted — Ruby</p>
-      <h3>Transforms — XSLT vs libxslt, in-process <span class="pill">v1.9.142, #682 board</span></h3>
-      <p>
-        The XSLT engine is gated at <strong>205/205 byte-identical</strong>
-        against the libxslt general suite (closed at v1.9.19, regression-gated
-        since). In-process, same fixtures, against libxslt itself:
-      </p>
-      <table class="doc-table">
-        <tr><th>operation</th><th>vs libxslt</th><th>verdict</th></tr>
-        <tr><td>template dispatch (heavy stylesheet)</td><td class="bytes">~2.25×</td><td class="note">ahead</td></tr>
-        <tr><td>subtree copy (<code>xsl:copy-of</code> fan)</td><td class="bytes">~2.27×</td><td class="note">ahead</td></tr>
-        <tr><td><code>xsl:value-of</code> hot loop</td><td class="bytes">~135×</td><td class="note">ahead</td></tr>
-      </table>
-      <p>
-        The eval-environment caching arc (document-cached function registry,
-        dirty-skip variable sets, VM fast paths) is what moved these; the one
-        open row — heavy dispatch under streaming — is on the tracked perf
-        board with its ceiling analysis published.
+      <p class="sec-label" data-num="02">XSLT</p>
+      <h2 class="sec-title">Transforms: <em>libxslt, in-process</em></h2>
+      <p class="sec-lede">
+        The engine is gated at <strong>205/205 byte-identical</strong> against
+        the libxslt general suite (closed at v1.9.19, regression-gated since).
+        Speed is measured against in-process libxslt — not
+        <code>xsltproc</code> wall time — on byte-identical fixtures, both
+        sides compiled once and timed on the apply only.
       </p>
 
-      <h3>HTML — two engines, one core <span class="pill">v1.9.137–.142, html5lib tree suite</span></h3>
+      <ResultsTable
+        rows={xsltC.results.map((result) => ({ result, campaign: xsltC }))}
+        competitorHead="libxslt 1.1.43"
+      />
+      <Provenance campaign={xsltC} />
+
       <p>
-        Two WHATWG entries: <code>leptris_parse_html_string</code> is the
-        conformant tree-construction engine (adoption agency, active
-        formatting reconstruction, script-data escaped states, RCDATA family,
-        foreign content integration points, foster parenting), gated against
-        the vendored <strong>html5lib tree-construction corpus — 1129/1753
-        and rising every release</strong> (933 → 1129 across the September
-        wave); <code>leptris_parse_html4_string</code> is the
-        Nokogiri/libxml2-parity shape, byte-pinned against a 1555-case
-        Nokogiri reference (floor 784, held). Against Nokogiri itself the
-        WHATWG entry runs <strong>3.6–11×</strong> on the operation matrix;
-        C14N 23×, XPath 31×.
+        The eval-environment arc (AVT compile cache, dispatch name keys and
+        mode buckets, streaming result emission) is what moved these rows; the
+        remaining dispatch-shape gap carries a published ceiling analysis —
+        the honest verdict is that <strong>2×</strong> against a 20-year-tuned
+        engine on its core dispatch shape is not reachable by optimization
+        alone, while the predicate-dispatch and subtree-copy shapes hold the
+        wins and value-of sits at parity. The analysis lives with the perf
+        board in the C repo.
       </p>
 
-      <h3>Validation — RELAX NG and Schematron, no JVM <span class="pill">v1.9.109–.129</span></h3>
-      <p>
-        Native RELAX NG (pattern IR + backtracking fold, Jing-parity corpus
-        gate, <code>&lt;include&gt;</code>, params) and native Schematron
-        (schema IR → SVRL, abstract patterns, <code>let</code> scoping,
-        phase selection, conformance corpus 50/50) ship in the C library with
-        a single <code>leptris validate</code> CLI for both — the
-        metanorma-standoc migration path off the JVM.
+      <p class="docs-canonical">
+        Reproduce: the <code>bench_xslt_*</code> binaries and their in-process
+        lxml twins under
+        <a href={`${SITE.githubC}/tree/main/benchmarks/xslt`}>benchmarks/xslt</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ————— 03 HTML ————— -->
+  <section class="sec sec-tint-sage" data-ghost="03" id="html" style="padding-bottom:4rem">
+    <div class="wrap">
+      <p class="sec-label" data-num="03">HTML</p>
+      <h2 class="sec-title">Two engines, one core: <em>WHATWG + parity</em></h2>
+      <p class="sec-lede">
+        <code>leptris_parse_html_string</code> is the conformant WHATWG
+        tree-construction engine (adoption agency, active formatting
+        reconstruction, script-data escaped states, foster parenting), gated
+        against the vendored <strong>html5lib tree-construction corpus —
+        1129/1753 and rising every release</strong> across the September wave.
+        <code>leptris_parse_html4_string</code> is the Nokogiri/libxml2-parity
+        shape, byte-pinned against a 1555-case Nokogiri reference.
       </p>
 
-      <h2 class="sec-title">The migrant&rsquo;s race: <em>Nokogiri, Ox, Oga, REXML</em></h2>
+      <h3>WHATWG parse throughput — vs Nokogiri&rsquo;s libxml2</h3>
+      <ResultsTable
+        rows={htmlC.results.map((result) => ({ result, campaign: htmlC }))}
+        competitorHead="nokogiri 1.19.4"
+      />
+      <Provenance campaign={htmlC} />
+      <p>
+        The conformant engine runs at libxml2&rsquo;s HTML-parser throughput:
+        the full WHATWG machinery costs nothing measurable on realistic pages,
+        and correctness gates (html5lib corpus, the Nokogiri byte-pin) hold on
+        every release.
+      </p>
+
+      <p class="docs-canonical">
+        Reproduce: <code>bench_html_parse</code> and its byte-identical Ruby
+        reference under
+        <a href={`${SITE.githubC}/tree/main/benchmarks/html`}>benchmarks/html</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ————— 04 YAML ————— -->
+  <section class="sec sec-tint-periwinkle" data-ghost="04" id="yaml" style="padding-bottom:4rem">
+    <div class="wrap">
+      <p class="sec-label" data-num="04">YAML</p>
+      <h2 class="sec-title">yeptris: <em>libyaml is the mission, ryml is the field</em></h2>
+      <p class="sec-lede">
+        <strong>yeptris</strong> is the YAML counterpart of libleptris — YAML
+        1.2 parse/emit/stream in C11. <strong>libyaml</strong> (under
+        Ruby&rsquo;s Psych) is the mission: beat it on every measure.
+        <strong>rapidyaml</strong> is the field benchmark — and the honest
+        frontier.
+      </p>
+
+      <h3>Vs libyaml — every shape, every consumption model</h3>
+      <ResultsTable
+        rows={yamlC.results
+          .filter((r) => r.competitor === 'libyaml')
+          .map((result) => ({ result, campaign: yamlC }))}
+        competitorHead="libyaml 0.2.5"
+      />
+      <Provenance campaign={yamlC} />
+
+      <h3>Vs rapidyaml — the open frontier</h3>
+      <ResultsTable
+        rows={yamlC.results
+          .filter((r) => r.competitor === 'ryml')
+          .map((result) => ({ result, campaign: yamlC }))}
+        competitorHead="ryml 0.16.0"
+      />
+      <p>
+        The discipline file — every optimization attempt with before/after
+        numbers, wins and dead ends alike — is the
+        <a href="https://github.com/leptris/yeptris/blob/main/benchmarks/PERF-LEDGER.md">yeptris perf ledger</a>;
+        the named residual vs ryml is the engine dispatch loop and nested-map
+        opener machinery, recorded there with its measured ceilings.
+      </p>
+    </div>
+  </section>
+
+  <!-- ————— 05 Ruby ————— -->
+  <section class="sec sec-tint-rose" data-ghost="05" id="ruby" style="padding-bottom:4rem">
+    <div class="wrap">
+      <p class="sec-label" data-num="05">Ruby</p>
+      <h2 class="sec-title">The migrant&rsquo;s race: <em>Nokogiri, Ox, moxml</em></h2>
       <p class="sec-lede">
         <strong>Nokogiri</strong> (libxml2 C extension) is the incumbent most
-        of you are migrating from. <strong>Ox</strong> (C extension) is the
-        raw-parse speed demon — with no XPath engine. <strong>Oga</strong>
-        and <strong>REXML</strong> are the pure-Ruby tier: dependency-free,
-        and paying the interpreter tax for it. leptris&rsquo; pitch in this
-        field: Ox-level (and better) parse speed <em>with</em> complete
-        XPath 1.0 — 438/438 — and no libxml2.
+        of you are migrating from; <strong>Ox</strong> is the raw-parse C
+        extension; <strong>moxml</strong> is the libxml2-backed adapter the NS
+        race runs against. The pitch: Ox-level parse speed <em>with</em>
+        complete XPath 1.0 — 438/438 — and no libxml2.
       </p>
 
       <div class="reveal" style="margin:0 0 2.6rem">
         <BenchBars client:visible blocks={rubyBlocks} />
       </div>
 
-      <h3>Operation matrix — vs Nokogiri <span class="pill">libleptris v0.12.0, Apple M1</span></h3>
-      <table class="doc-table">
-        <tr><th>operation</th><th>leptris</th><th>Nokogiri</th><th>verdict</th></tr>
-        <tr><td>Parse small (431 B)</td><td class="bytes">~6 µs</td><td class="bytes">~14 µs</td><td class="note">~2× faster</td></tr>
-        <tr><td>Parse medium (12 KB)</td><td class="bytes">~32 µs</td><td class="bytes">~200 µs</td><td class="note">~6× faster</td></tr>
-        <tr><td>XPath <code>count(//book)</code></td><td class="bytes">~1.5 µs</td><td class="bytes">~9 µs</td><td class="note">~6× faster</td></tr>
-        <tr><td>XPath <code>//book</code> (100 nodes)</td><td class="bytes">~4 µs</td><td class="bytes">~13 µs</td><td class="note">~5× faster</td></tr>
-        <tr><td>XPath <code>//book[@id='50']</code></td><td class="bytes">~6 µs</td><td class="bytes">~80 µs</td><td class="note">~10× faster</td></tr>
-        <tr><td>XPath <code>//book[price &gt; 50]</code></td><td class="bytes">~80 µs</td><td class="bytes">~100 µs</td><td class="note">~1.3× faster</td></tr>
-        <tr><td>XPath union <code>//author | //title</code></td><td class="bytes">~14 µs</td><td class="bytes">~25 µs</td><td class="note">~3× faster</td></tr>
-        <tr><td>Serialize</td><td class="bytes">~28 µs</td><td class="bytes">~85 µs</td><td class="note">~3× faster</td></tr>
-        <tr><td>Tree traversal</td><td class="bytes">~900 µs</td><td class="bytes">~500 µs</td><td class="note">1.8× slower — the one loss, tracked</td></tr>
-      </table>
+      <h3>Operation matrix — vs Nokogiri</h3>
+      <ResultsTable
+        rows={xmlRuby.results.map((result) => ({ result, campaign: xmlRuby }))}
+        competitorHead="nokogiri 1.19.4"
+      />
+      <Provenance campaign={xmlRuby} />
+
+      <h3>The open rows in this field <span class="pill">ledger artifacts</span></h3>
+      <ResultsTable
+        rows={xmlRubyFrontier.results.map((result) => ({
+          result,
+          campaign: xmlRubyFrontier,
+        }))}
+        competitorHead="moxml / ox"
+      />
+      <Provenance campaign={xmlRubyFrontier} />
+
+      <h3>The full-field artifact <span class="pill">serialbench</span></h3>
+      <ResultsTable
+        rows={xmlRubySerialbench.results.map((result) => ({
+          result,
+          campaign: xmlRubySerialbench,
+        }))}
+        competitorHead="the field"
+      />
+      <Provenance campaign={xmlRubySerialbench} />
       <p>
-        <strong>8 of 9 operations.</strong> Tree traversal still loses to
-        Nokogiri&rsquo;s native iterator; closing it is on the ledger.
+        The 4.38 MB real-world document race (Ox, Nokogiri, Oga, REXML in the
+        field) is carried from the serialbench artifact — the full harness
+        lives in its own repository and its adapter for leptris ships there.
       </p>
 
-      <h3>The memoization arc <span class="pill">gem 1.9.2 → 1.9.17, committed harness</span></h3>
+      <h3>The memoization arc <span class="pill">gem-internal A/B</span></h3>
       <p>
-        Gem-internal before/after on the read paths — same machine, same
-        loops, the <a href={`${SITE.githubRuby}/blob/main/benchmark/read_paths.rb`}>committed harness</a>:
-        every number below is a published-gem A/B, not a dev-tree run.
+        Not a cross-library race: the binding measured against itself, same
+        machine, same loops, on the committed
+        <a href={`${SITE.githubRuby}/blob/main/benchmark/read_paths.rb`}>read-path harness</a>.
+        Every number is a published-gem A/B.
       </p>
       <table class="doc-table">
         <tr><th>loop (300-element readonly doc)</th><th>gem 1.9.2</th><th>gem 1.9.17</th><th>verdict</th></tr>
@@ -274,140 +346,112 @@ const pyBlocks = [
         <tr><td>attribute reads</td><td class="bytes">0.63 s</td><td class="bytes">0.048 s</td><td class="note">13× faster</td></tr>
         <tr><td>text content reads</td><td class="bytes">0.19 s</td><td class="bytes">0.035 s</td><td class="note">5× faster</td></tr>
       </table>
-      <table class="doc-table">
-        <tr><th>loop (writable document — the DOM-editing shape)</th><th>gem 1.9.13</th><th>gem 1.9.14</th><th>verdict</th></tr>
-        <tr><td>namespace inspection</td><td class="bytes">0.37 s</td><td class="bytes">0.013 s</td><td class="note">29× faster — readonly parity, via the mutation-version cache</td></tr>
-        <tr><td>children iteration</td><td class="bytes">0.15 s</td><td class="bytes">0.014 s</td><td class="note">11× faster — readonly parity</td></tr>
-      </table>
-      <table class="doc-table">
-        <tr><th>single-node query loop</th><th>before</th><th>after</th><th>verdict</th></tr>
-        <tr><td><code>at_xpath</code> (2000 iterations)</td><td class="bytes">0.011 s</td><td class="bytes">0.0045 s</td><td class="note">2.5× — container-free seam</td></tr>
-        <tr><td><code>at_css</code></td><td class="bytes">0.036 s</td><td class="bytes">0.020 s</td><td class="note">1.8×</td></tr>
-      </table>
-      <p>
-        The design notes live in the repo&rsquo;s
-        <a href={`${SITE.githubRuby}/blob/main/docs/adr/`}>ADR set</a> —
-        the versioned cache (0003) records the rejected shared-stamp
-        variant alongside the shipped per-field stamps.
-      </p>
-
-      <h3>The wider field <span class="pill">documented at gem v1.0.0</span></h3>
-      <p>
-        Historical context for the tier below Nokogiri — measured when the
-        binding was young; the engine has since gained the contiguous arena,
-        fused scans, and the XPath VM, so treat these as relative order, not
-        current numbers:
-      </p>
-      <table class="doc-table">
-        <tr><th>parser</th><th>parse 10 KB</th><th>XPath <code>//book</code></th><th>deps</th><th>notes</th></tr>
-        <tr><td><strong>Ox</strong></td><td class="bytes">2.4 µs</td><td class="bytes">— none</td><td class="note">C extension</td><td class="note">fastest raw parse, no XPath engine</td></tr>
-        <tr><td><strong>leptris</strong></td><td class="bytes">5.87 µs</td><td class="bytes">9.0 µs</td><td class="note">none</td><td class="note">complete XPath 1.0; ~18% FFI overhead documented</td></tr>
-        <tr><td><strong>Nokogiri</strong></td><td class="bytes">10.0 µs</td><td class="bytes">3.87 µs</td><td class="note">libxml2</td><td class="note">the incumbent</td></tr>
-        <tr><td><strong>Oga</strong></td><td class="bytes">15.0 µs</td><td class="bytes">~300 µs</td><td class="note">none</td><td class="note">pure Ruby — the interpreter tax, ~77× on XPath</td></tr>
-        <tr><td><strong>REXML</strong></td><td class="bytes">—</td><td class="bytes">—</td><td class="note">stdlib</td><td class="note">pure Ruby, same tier as Oga; not in the harness yet</td></tr>
-      </table>
-
-      <h3>Memory, same field</h3>
-      <table class="doc-table">
-        <tr><th>parser</th><th>parse + DOM, 100 KB doc</th><th>relative</th></tr>
-        <tr><td>Ox</td><td class="bytes">165 KB</td><td class="note">baseline</td></tr>
-        <tr><td>leptris</td><td class="bytes">173 KB</td><td class="note">+5%</td></tr>
-        <tr><td>Nokogiri</td><td class="bytes">222 KB</td><td class="note">+35%</td></tr>
-      </table>
 
       <p class="docs-canonical" style="margin-top:2rem">
         Reproduce: <code>bundle exec ruby -Ilib benchmark/leptris_vs_nokogiri.rb</code>.
-        <a href={`${SITE.githubRuby}/blob/main/docs/PERFORMANCE.md`}>Full performance guide in leptris-ruby</a>.
+        <a href={`${SITE.githubRuby}/blob/main/benchmark/README.md`}>The benchmark guide in leptris-ruby</a>.
       </p>
     </div>
   </section>
 
-  <!-- ————— 03 Python ————— -->
-  <section class="sec sec-tint-sage" data-ghost="03" id="python" style="padding-bottom:4rem">
+  <!-- ————— 06 Python ————— -->
+  <section class="sec sec-tint-sage" data-ghost="06" id="python" style="padding-bottom:4rem">
     <div class="wrap">
-      <p class="sec-label" data-num="03">Interpreted — Python</p>
+      <p class="sec-label" data-num="06">Python</p>
       <h2 class="sec-title">The incumbent&rsquo;s race: <em>lxml and the stdlib</em></h2>
       <p class="sec-lede">
-        <strong>lxml</strong> is the incumbent — a C extension over the very
-        same libxml2 Nokogiri wraps. <strong>xml.etree.ElementTree</strong>
-        ships with Python (C-accelerated via <code>_elementtree</code>);
-        <strong>xml.dom.minidom</strong> is the pure-Python floor. Since
-        1.6.1, leptris <strong>beats lxml on every operation</strong> in the
-        matrix — and ships five cp39-abi3 wheels plus sdist on PyPI, so
-        <code>pip install leptris</code> is the whole setup.
+        <strong>lxml</strong> wraps the very libxml2 Nokogiri wraps;
+        <strong>ElementTree</strong> ships with Python (C-accelerated via
+        <code>_elementtree</code>); <strong>minidom</strong> is the pure-Python
+        floor. The binding&rsquo;s engine room is an abi3 C accelerator bound
+        to libleptris through a 45-symbol positional protocol — wheels ship for
+        macOS and manylinux, both architectures, plus Windows.
       </p>
 
       <div class="reveal" style="margin:0 0 2.6rem">
         <BenchBars client:visible blocks={pyBlocks} />
       </div>
 
-      <h3>Final scoreboard <span class="pill">leptris 1.6.1 — Python 3.10, macOS arm64, lxml 6.0.2, libleptris 1.3.0 (artifact numbers; refreshed when the pipeline re-runs)</span></h3>
-      <table class="doc-table">
-        <tr><th>operation</th><th>leptris</th><th>lxml</th><th>margin</th></tr>
-        <tr><td>Parse medium (12 KB)</td><td class="bytes">15.2 µs</td><td class="bytes">121 µs</td><td class="note">8× faster</td></tr>
-        <tr><td>XPath <code>//book[@id='50']</code></td><td class="bytes">3.8 µs</td><td class="bytes">37 µs</td><td class="note">10× faster</td></tr>
-        <tr><td>XPath <code>count(//book)</code></td><td class="bytes">1.7 µs</td><td class="bytes">8.1 µs</td><td class="note">4.7× faster</td></tr>
-        <tr><td>XPath <code>//book[price &gt; 50]</code></td><td class="bytes">9.7 µs</td><td class="bytes">52 µs</td><td class="note">5.3× faster</td></tr>
-        <tr><td>Serialize</td><td class="bytes">18.4 µs</td><td class="bytes">67 µs</td><td class="note">3.7× faster</td></tr>
-        <tr><td>XPath <code>//book</code> (100 elems)</td><td class="bytes">6.4 µs</td><td class="bytes">12.0 µs</td><td class="note">1.9× faster — the morning&rsquo;s loss, gone by evening</td></tr>
-        <tr><td>XPath union (200 elems)</td><td class="bytes">19.2 µs</td><td class="bytes">27.9 µs</td><td class="note">1.5× faster</td></tr>
-        <tr><td>Traversal (401 elems)</td><td class="bytes">18.0 µs</td><td class="bytes">21.6 µs</td><td class="note">1.2× faster — was 15× behind two releases ago</td></tr>
-      </table>
+      <h3>Operation matrix — the whole field</h3>
+      <ResultsTable
+        rows={xmlPython.results.map((result) => ({ result, campaign: xmlPython }))}
+        competitorHead="lxml / stdlib"
+      />
+      <Provenance campaign={xmlPython} />
       <p>
-        <strong>How the last three fell — and what grew since.</strong> The
-        1.6.0 release moved Element allocation into an abi3 C accelerator;
-        by 1.14 that accelerator is the binding&rsquo;s engine room — the hot
-        accessors, a subtree-walk cursor for <code>iter()</code>, one-call
-        parse and serialization seams, presized nodeset materialization, a
-        first-match DFS for multi-step <code>find()</code> — bound to
-        libleptris through a 45-symbol positional protocol. The whole API
-        surface stays in Python, attached onto the C heap type; the
-        pure-Python fallback is gone, and wheels ship the accelerator
-        compiled for macOS arm64/x86_64, manylinux x86_64/aarch64 (built
-        natively on arm runners), and Windows.
-      </p>
-      <p class="callout">
-        <strong>Numbers status.</strong> The <code>python-benchmark</code>
-        artifacts — this page&rsquo;s only number source — have carried no
-        leptris rows since the binding went single-mode (the workflow never
-        built the extension in place;
-        <a href={`${SITE.githubC}/pull/575`}>the fix is up</a>). The table
-        above keeps the last good artifact&rsquo;s numbers, clearly labeled;
-        it refreshes from the next clean run, not from hand measurements.
+        The one open loss is traversal against the stdlib:
+        ElementTree&rsquo;s <code>iter()</code> is a bare generator over a
+        lean list — the single crown it keeps. Against lxml the matrix is a
+        clean sweep.
       </p>
 
       <p class="docs-canonical" style="margin-top:2rem">
         Reproduce: <code>LEPTRIS_LIB_PATH=…/libleptris.dylib python3
         benchmarks/matrix.py</code> in
         <a href={`${SITE.githubPy}`}>leptris-py</a> — same fixtures and
-        operations as the Ruby matrix, and it runs in CI (the C repo&rsquo;s
-        <code>python-benchmark</code> workflow); its artifacts are the
-        canonical numbers.
+        operations as the Ruby matrix.
       </p>
     </div>
   </section>
 
-  <!-- ————— ledger ————— -->
-  <section class="sec" id="ledger">
+  <!-- ————— 07 validation & friends ————— -->
+  <section class="sec" data-ghost="07" id="validation" style="padding-bottom:4rem">
     <div class="wrap">
-      <p class="sec-label" data-num="04">The ledger of losses</p>
-      <h2 class="sec-title">The open <em>frontier</em></h2>
+      <p class="sec-label" data-num="07">Validation, XQuery, conformance</p>
+      <h2 class="sec-title">Races without a <em>throughput number</em> — yet</h2>
       <p class="sec-lede">
-        Four deficits remain, each measured, each with its lever on the
-        repository perf board. Everything else on this page&rsquo;s history —
-        the iterparse fixed cost, the namespaced and variable-bound evals,
-        Ruby bare reads and the SAX drain, traversal vs Nokogiri — has
-        already fallen; the tombstones stay in the repos&rsquo; ledgers.
+        Some races are won on capability and conformance before they have a
+        committed cross-library timing harness; they stay out of the matrix
+        until a harness publishes numbers.
       </p>
       <table class="doc-table">
-        <tr><th>race</th><th>deficit</th><th>why</th></tr>
-        <tr><td>Attr-heavy parse vs pugixml</td><td class="bytes">~1.5×</td><td class="note">the parse wall: single-pass is at a compiler-global optimum; ~1.5–1.8× behind on this shape, no remaining known lever</td></tr>
-        <tr><td>Raw child append vs pugixml</td><td class="bytes">1.3×</td><td class="note">doc-level index bookkeeping — the price of O(1) duplicate-rejecting attribute sets at scale</td></tr>
-        <tr><td>Text-heavy serialize vs pugixml</td><td class="bytes">1.1×</td><td class="note">parity within run noise</td></tr>
-        <tr><td>Expanded-name reads + prefixed paths vs moxml (Ruby, NS-heavy)</td><td class="bytes">0.69×</td><td class="note">measured: the C resolver is off the profile (~20 ns/read either way) — the cost is the adapter&rsquo;s per-read FFI fan-out; next lever is one batched expanded-name call, tracked on the perf board</td></tr>
-        <tr><td>Tree traversal vs Ox (Ruby)</td><td class="bytes">~2×</td><td class="note">Ox&rsquo;s native C walk holds the crown across the whole Ruby field — the one place it still wins anything</td></tr>
-        <tr><td>Formerly lost, since won</td><td class="bytes">—</td><td class="note">Python <code>//book</code>, union, traversal, multi-step <code>find</code>, and the compiled-XPath path — Ruby bare reads and the SAX drain vs moxml (leptris-ruby#154/#156), and Ruby traversal vs Nokogiri — all fell to the batch-accessor and accelerator sprints; the tombstones stay in the repos&rsquo; perf ledgers (32 B split-stream attrs, two-pass SIMD parse, and friends)</td></tr>
+        <tr><th>race</th><th>standing</th><th>gate</th></tr>
+        <tr><td>RELAX NG validation</td><td class="note">native — pattern IR + backtracking fold</td><td class="note">Jing-parity corpus gate, <code>&lt;include&gt;</code>, params</td></tr>
+        <tr><td>Schematron</td><td class="note">native — schema IR → SVRL, no JVM</td><td class="note">conformance corpus 50/50, phase selection</td></tr>
+        <tr><td>XQuery</td><td class="note">same-core FLWOR/constructors</td><td class="note">QT3 function sets adopted exact-N</td></tr>
+        <tr><td>XPath 1.0 conformance</td><td class="note">complete</td><td class="note">438/438 W3C suite</td></tr>
+        <tr><td>XSLT conformance</td><td class="note">byte-identical</td><td class="note">205/205 vs the libxslt general suite</td></tr>
+        <tr><td>HTML conformance</td><td class="note">rising every release</td><td class="note">html5lib tree suite 1129/1753; Nokogiri byte-pin at 784</td></tr>
       </table>
     </div>
   </section>
+
+  <!-- ————— frontier ————— -->
+  <section class="sec" id="frontier">
+    <div class="wrap">
+      <p class="sec-label" data-num="08">The ledger of losses</p>
+      <h2 class="sec-title">The open <em>frontier</em></h2>
+      <p class="sec-lede">
+        Every deficit in the data, weakest first, with its measured ratio and
+        its lever. Nothing is hidden, nothing is rounded into a win — this
+        table is generated from the same result files as the matrix above.
+        Everything else on this page&rsquo;s history — the iterparse fixed
+        cost, the namespaced and variable-bound evals, Ruby bare reads and the
+        SAX drain, traversal vs Nokogiri — already fell; the tombstones stay
+        in the repos&rsquo; ledgers.
+      </p>
+      <ResultsTable rows={frontierRows} competitorHead="vs" />
+      <p class="frontier-source">
+        Sources: the same versioned result files that render the matrix —
+        see <a href="/benchmarks/methodology">methodology</a> for the schema
+        and each campaign&rsquo;s harness link.
+      </p>
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  .pill-win {
+    color: color-mix(in srgb, var(--color-sage) 55%, var(--color-ink));
+    font-weight: 600;
+  }
+  .pill-loss {
+    color: var(--color-rose-deep);
+    font-weight: 600;
+  }
+  .frontier-source {
+    font-size: 0.85rem;
+    color: var(--color-ink-faint);
+    margin-top: 1.4rem;
+  }
+</style>

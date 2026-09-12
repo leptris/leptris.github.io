@@ -1,0 +1,41 @@
+---
+interface Props {
+  ratio: number;
+  status: 'win' | 'parity' | 'loss';
+  artifact?: boolean;
+}
+
+const { ratio, status, artifact } = Astro.props;
+const label = `${ratio.toFixed(2)}×`;
+---
+
+<span class={`ratio ${status}`}>
+  {label}{artifact && <sup aria-label="artifact number">†</sup>}
+</span>
+
+<style>
+  .ratio {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .ratio.win {
+    color: color-mix(in srgb, var(--color-sage) 55%, var(--color-ink));
+    background: color-mix(in srgb, var(--color-sage) 22%, transparent);
+  }
+  .ratio.loss {
+    color: var(--color-rose-deep);
+    background: color-mix(in srgb, var(--color-rose) 24%, transparent);
+  }
+  .ratio.parity {
+    color: var(--color-ink-muted);
+    background: color-mix(in srgb, var(--color-ink-faint) 14%, transparent);
+  }
+  .ratio sup {
+    font-size: 0.6rem;
+    margin-left: 0.1rem;
+  }
+</style>
