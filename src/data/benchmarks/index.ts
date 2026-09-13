@@ -51,6 +51,8 @@ import xmlRuby from './results/xml-ruby.json';
 import xmlRubyFrontier from './results/xml-ruby-frontier.json';
 import xmlRubySerialbench from './results/xml-ruby-serialbench.json';
 import tomlC from './results/toml-c.json';
+import tomlPython from './results/toml-python.json';
+import tomlRuby from './results/toml-ruby.json';
 import xsltC from './results/xslt-c.json';
 import yamlC from './results/yaml-c.json';
 
@@ -61,6 +63,8 @@ const imported = [
   xmlCLanes,
   xsltC,
   tomlC,
+  tomlRuby,
+  tomlPython,
   htmlC,
   yamlC,
   jsonC,
