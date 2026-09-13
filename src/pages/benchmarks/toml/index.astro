@@ -13,6 +13,8 @@ const campaign = (id: string): Campaign => {
 };
 
 const tomlC = campaign('toml-c-2026-09-13');
+const tomlRuby = campaign('toml-ruby-2026-09-13');
+const tomlPython = campaign('toml-python-2026-09-13');
 const deficits = frontierFor({ only: ['toml'] });
 ---
 
@@ -83,6 +85,68 @@ const deficits = frontierFor({ only: ['toml'] });
         <code>benchmarks/results/bench_parse.json</code>. The harness is
         committed at
         <a href={`${SITE.githubToml}/tree/main/benchmarks`}>benchmarks</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec sec-tint-rose lang-sec" id="ruby">
+    <div class="wrap">
+      <p class="sec-label">Ruby</p>
+      <h2 class="sec-title">The teptris gem versus <em>tomlib and tomlrb</em></h2>
+      <p class="sec-lede">
+        The Ruby binding provides a tomlib-shaped API over the native
+        engine. The harness parses every corpus file through each library
+        in the same process, reporting the best of twelve iterations after
+        warm-up. tomlib is a pure-Ruby parser and tomlrb is a Ragel-based
+        Ruby extension; both are measured at their pinned release
+        versions.
+      </p>
+      <ResultsTable
+        rows={tomlRuby.results.map((result) => ({ result, campaign: tomlRuby }))}
+        competitorHead="tomlib / tomlrb"
+      />
+      <Provenance campaign={tomlRuby} />
+      <p>
+        One observation belongs here rather than in a table: the
+        datetime-heavy corpus costs the engine 3.7 milliseconds through
+        the C API but 142 milliseconds through the Ruby binding, because
+        constructing one Ruby Time object per datetime dominates the
+        binding&rsquo;s time on that shape. Binding overhead of this kind
+        is inherent to rich object models and is recorded so it stays
+        visible.
+      </p>
+
+      <p class="docs-canonical">
+        To reproduce: run
+        <code>TEPTRIS_LIB_PATH=… bundle exec ruby benchmark/lang_tier.rb</code>
+        in the
+        <a href={`${SITE.githubToml.replace('teptris', 'teptris-ruby')}`}>teptris-ruby</a>
+        repository.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec sec-tint-sage lang-sec" id="python">
+    <div class="wrap">
+      <p class="sec-label">Python</p>
+      <h2 class="sec-title">The teptris package versus <em>tomli</em></h2>
+      <p class="sec-lede">
+        The Python binding mirrors the standard library&rsquo;s tomllib
+        interface and is measured against tomli, the parser that
+        tomllib itself wraps, under the same protocol as the Ruby tier.
+      </p>
+      <ResultsTable
+        rows={tomlPython.results.map((result) => ({ result, campaign: tomlPython }))}
+        competitorHead="tomli 2.4.1"
+      />
+      <Provenance campaign={tomlPython} />
+
+      <p class="docs-canonical">
+        To reproduce: run
+        <code>TEPTRIS_LIB_PATH=… python3 benchmark/lang_tier.py</code> in
+        the
+        <a href={`${SITE.githubToml.replace('teptris', 'teptris-py')}`}>teptris-py</a>
+        repository.
       </p>
     </div>
   </section>

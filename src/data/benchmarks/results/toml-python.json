@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "id": "toml-python-2026-09-13",
+  "language": "python",
+  "subject": {
+    "name": "teptris",
+    "version": "0.1.1 (binding) on libteptris 0.1.0"
+  },
+  "harness": {
+    "label": "lang_tier.py — teptris.loads vs tomli.loads over the bench corpus",
+    "url": "https://github.com/leptris/teptris-py/blob/main/benchmark/lang_tier.py"
+  },
+  "machine": "Apple M1 Max, macOS 14.1.1, arm64; Python 3.10.5",
+  "date": "2026-09-13",
+  "stat": "best of 12 after 2 warm-up iterations",
+  "results": [
+    {
+      "tech": "toml",
+      "operation": "parse-array-heavy",
+      "operation_label": "Parse — array heavy",
+      "competitor": "tomli",
+      "competitor_version": "2.4.1",
+      "leptris_value": 3.94,
+      "competitor_value": 149.96,
+      "unit": "ms",
+      "ratio": 38.06,
+      "status": "win"
+    },
+    {
+      "tech": "toml",
+      "operation": "parse-cargo-like",
+      "operation_label": "Parse — cargo like",
+      "competitor": "tomli",
+      "competitor_version": "2.4.1",
+      "leptris_value": 3.08,
+      "competitor_value": 66.16,
+      "unit": "ms",
+      "ratio": 21.48,
+      "status": "win"
+    },
+    {
+      "tech": "toml",
+      "operation": "parse-datetime-heavy",
+      "operation_label": "Parse — datetime heavy",
+      "competitor": "tomli",
+      "competitor_version": "2.4.1",
+      "leptris_value": 9.75,
+      "competitor_value": 131.04,
+      "unit": "ms",
+      "ratio": 13.44,
+      "status": "win"
+    },
+    {
+      "tech": "toml",
+      "operation": "parse-deep-tables",
+      "operation_label": "Parse — deep tables",
+      "competitor": "tomli",
+      "competitor_version": "2.4.1",
+      "leptris_value": 1.79,
+      "competitor_value": 54.17,
+      "unit": "ms",
+      "ratio": 30.26,
+      "status": "win"
+    },
+    {
+      "tech": "toml",
+      "operation": "parse-mixed",
+      "operation_label": "Parse — mixed",
+      "competitor": "tomli",
+      "competitor_version": "2.4.1",
+      "leptris_value": 3.91,
+      "competitor_value": 88.9,
+      "unit": "ms",
+      "ratio": 22.74,
+      "status": "win"
+    },
+    {
+      "tech": "toml",
+      "operation": "parse-scalar-float",
+      "operation_label": "Parse — scalar float",
+      "competitor": "tomli",
+      "competitor_version": "2.4.1",
+      "leptris_value": 13.36,
+      "competitor_value": 188.6,
+      "unit": "ms",
+      "ratio": 14.12,
+      "status": "win"
+    },
+    {
+      "tech": "toml",
+      "operation": "parse-scalar-int",
+      "operation_label": "Parse — scalar int",
+      "competitor": "tomli",
+      "competitor_version": "2.4.1",
+      "leptris_value": 11.68,
+      "competitor_value": 181.12,
+      "unit": "ms",
+      "ratio": 15.51,
+      "status": "win"
+    },
+    {
+      "tech": "toml",
+      "operation": "parse-scalar-string",
+      "operation_label": "Parse — scalar string",
+      "competitor": "tomli",
+      "competitor_version": "2.4.1",
+      "leptris_value": 7.34,
+      "competitor_value": 136.2,
+      "unit": "ms",
+      "ratio": 18.56,
+      "status": "win"
+    },
+    {
+      "tech": "toml",
+      "operation": "parse-table-heavy",
+      "operation_label": "Parse — table heavy",
+      "competitor": "tomli",
+      "competitor_version": "2.4.1",
+      "leptris_value": 10.67,
+      "competitor_value": 224.44,
+      "unit": "ms",
+      "ratio": 21.03,
+      "status": "win"
+    }
+  ]
+}
