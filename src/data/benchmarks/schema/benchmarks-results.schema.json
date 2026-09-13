@@ -17,20 +17,38 @@
     "results"
   ],
   "properties": {
-    "schema_version": { "const": 1 },
+    "schema_version": {
+      "const": 1
+    },
     "id": {
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9-]*$",
       "description": "Stable campaign id, e.g. 'xml-c-2026-09-12'."
     },
-    "language": { "enum": ["c", "ruby", "python"] },
+    "language": {
+      "enum": [
+        "c",
+        "ruby",
+        "python"
+      ]
+    },
     "subject": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "version"],
+      "required": [
+        "name",
+        "version"
+      ],
       "properties": {
         "name": {
-          "enum": ["libleptris", "leptris", "yeptris", "yeptris-ruby", "yeptris-py"]
+          "enum": [
+            "libleptris",
+            "leptris",
+            "yeptris",
+            "yeptris-ruby",
+            "yeptris-py",
+            "teptris"
+          ]
         },
         "version": {
           "type": "string",
@@ -41,9 +59,14 @@
     "harness": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["label", "url"],
+      "required": [
+        "label",
+        "url"
+      ],
       "properties": {
-        "label": { "type": "string" },
+        "label": {
+          "type": "string"
+        },
         "url": {
           "type": "string",
           "pattern": "^https://github\\.com/leptris/",
@@ -55,7 +78,10 @@
       "type": "string",
       "description": "e.g. 'Apple M1 Pro (8 core), macOS 14, arm64'."
     },
-    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
     "stat": {
       "type": "string",
       "description": "Reported statistic, e.g. 'median', 'best of 9', 'min-of-N interleaved'."
@@ -88,6 +114,7 @@
               "validation",
               "c14n",
               "xquery",
+              "toml",
               "yaml"
             ]
           },
@@ -103,19 +130,32 @@
             "type": "string",
             "description": "Lowercase product name, e.g. 'nokogiri', 'libxslt', 'ryml'."
           },
-          "competitor_version": { "type": "string" },
+          "competitor_version": {
+            "type": "string"
+          },
           "leptris_value": {
             "type": "number",
             "description": "Absolute value in `unit` (time for latency benches)."
           },
-          "competitor_value": { "type": "number" },
-          "unit": { "type": "string", "description": "e.g. 'µs', 'ms', 'MB/s'." },
+          "competitor_value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string",
+            "description": "e.g. 'µs', 'ms', 'MB/s'."
+          },
           "ratio": {
             "type": "number",
             "exclusiveMinimum": 0,
             "description": "Speed factor of the leptris side vs the competitor; <1 is a loss and stays visible."
           },
-          "status": { "enum": ["win", "parity", "loss"] },
+          "status": {
+            "enum": [
+              "win",
+              "parity",
+              "loss"
+            ]
+          },
           "artifact": {
             "type": "boolean",
             "description": "Per-row override: this row was not re-run."

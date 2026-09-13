@@ -69,13 +69,18 @@ import { CAMPAIGNS } from '~/data/benchmarks';
         never against a dev machine.
       </p>
 
-      <h3>The honest-cell rule</h3>
+      <h3>How matrix cells summarize a race</h3>
       <p>
-        The matrix shows, for each technology × language × competitor cell,
-        the <strong>weakest</strong> measured ratio for that pairing — not a
-        chosen headline. A race only reads as a win when no measured operation
-        in it loses. Frontier rows can never be outranked by a better number
-        elsewhere in the same race.
+        Each matrix cell summarizes every measured operation for one
+        technology, one language and one competitor. When all operations are
+        ahead, the cell is shown in the positive color and displays the
+        smallest margin, so the displayed value is a lower bound for the
+        whole race. When a race contains measured deficits, the cell displays
+        the weakest and the strongest result together, and hovering over the
+        cell lists the operations that remain behind. A deficit can
+        therefore never be hidden by a stronger result elsewhere in the same
+        race, and a favorable cell can never overstate the weakest measured
+        operation.
       </p>
 
       <h3>Artifact marking</h3>

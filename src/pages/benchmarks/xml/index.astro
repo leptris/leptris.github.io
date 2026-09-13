@@ -75,10 +75,10 @@ const pyBlocks = [
       <h1 class="sec-title">XML parsing and <em>DOM operations</em></h1>
       <p class="sec-lede">
         This page collects every measured XML race for the leptris
-        ecosystem, one section per language. Each section presents the
-        standing matrix followed by the complete operation tables with
-        their provenance. All deficits listed here are reproduced in the
-        measured-deficits table at the end of the page.
+        ecosystem, with one section per language. Each section presents
+        the standing matrix followed by the complete operation tables
+        and their provenance, and the page closes with the consolidated
+        measured-deficits table.
       </p>
     </div>
   </section>
@@ -95,11 +95,11 @@ const pyBlocks = [
       <p class="sec-label">C and C++</p>
       <h2 class="sec-title">libleptris versus <em>libxml2 and pugixml</em></h2>
       <p class="sec-lede">
-        libxml2 is the de facto standard C parser and underlies lxml and
-        Nokogiri. pugixml is a C++ library optimized for zero-copy DOM
-        construction. Both comparisons below run in a single harness on
-        identical fixtures with identical iteration protocols, so the
-        ratios are same-binary baselines.
+        libxml2 is the de facto standard C parser and is the engine beneath
+        lxml and Nokogiri. pugixml is a C++ library optimized for
+        zero-copy DOM construction. The comparisons in this section run
+        in a single harness on identical fixtures with identical
+        iteration protocols, so every ratio is a same-binary baseline.
       </p>
 
       <div class="reveal">
@@ -121,9 +121,10 @@ const pyBlocks = [
         <p>
           <strong>A note on whitespace semantics.</strong> libleptris
           retains whitespace-only text nodes by default, which matches
-          libxml2 and Nokogiri behavior, whereas pugixml discards them.
-          The pretty-printed parse row above reflects that semantic
-          difference. For a comparison with pugixml semantics, parse with
+          the behavior of libxml2 and Nokogiri, whereas pugixml discards
+          them. The pretty-printed parse row in the table above reflects
+          this semantic difference rather than a parsing deficit. To
+          compare under pugixml semantics, parse with
           <code>LEPTRIS_PARSE_DROP_WS_TEXT</code>.
         </p>
       </Callout>
@@ -144,11 +145,12 @@ const pyBlocks = [
       <p class="sec-label">Ruby</p>
       <h2 class="sec-title">The leptris gem versus <em>Nokogiri, Ox and moxml</em></h2>
       <p class="sec-lede">
-        The gem exposes an API compatible with Nokogiri on top of
-        libleptris. The operation matrix below was measured with the
-        committed harness on identical fixtures. The comparison against
-        Ox and moxml is carried from the performance ledger in the gem
-        repository, as noted per row.
+        The gem provides an API compatible with Nokogiri on top of
+        libleptris. The operation matrix in this section was measured
+        with the committed harness on identical fixtures. The remaining
+        comparisons, against Ox and moxml, are carried from the
+        performance ledger in the gem repository, and each of those rows
+        is marked as an artifact with its provenance.
       </p>
 
       <div class="reveal">
@@ -159,8 +161,8 @@ const pyBlocks = [
       <ResultsTable rows={xmlRows(xmlRuby)} competitorHead="nokogiri 1.19.4" />
       <Provenance campaign={xmlRuby} />
       <p>
-        Tree traversal, which was the last operation to lose against
-        Nokogiri in earlier releases, is now 1.74× ahead following the
+        Tree traversal was the last operation to lose against Nokogiri in
+        earlier releases and is now 1.74× ahead, following the
         batch-accessor work recorded in the gem changelog.
       </p>
 
@@ -171,18 +173,19 @@ const pyBlocks = [
       />
       <Provenance campaign={xmlRubySerialbench} />
       <p>
-        The 4.38 MB real-world document comparison covers Ox, Nokogiri,
-        Oga and REXML in a single process. The serialbench harness is
-        maintained in its own repository, and the leptris adapter is
-        published there.
+        The 4.38 MB real-world document comparison races Ox, Nokogiri, Oga
+        and REXML in a single process. The serialbench harness is
+        maintained in its own repository, where the leptris adapter is
+        published.
       </p>
 
       <h3>Binding-internal improvement measurements</h3>
       <p>
         The following table is not a cross-library comparison. It measures
-        the gem against earlier releases of itself, on the same machine
-        and loops, using the committed read-path harness, and is provided
-        to show the effect of the memoization work in the 1.9 line.
+        the gem against earlier releases of itself on the same machine
+        and with the same loops, using the committed read-path harness,
+        and it is provided to show the effect of the memoization work in
+        the 1.9 release line.
       </p>
       <table class="doc-table">
         <tr>
@@ -212,10 +215,11 @@ const pyBlocks = [
       <h2 class="sec-title">The leptris package versus <em>lxml and the standard library</em></h2>
       <p class="sec-lede">
         lxml is a C extension over the same libxml2 library that Nokogiri
-        wraps. ElementTree ships with Python and is accelerated in C.
-        The binding uses an abi3 C accelerator bound to libleptris
-        through a fixed positional protocol, with wheels published for
-        macOS and manylinux on both architectures and for Windows.
+        wraps, and ElementTree ships with Python with C acceleration.
+        The leptris binding uses an abi3 C accelerator that is bound to
+        libleptris through a fixed positional protocol. Wheels are
+        published for macOS and manylinux on both architectures, and
+        for Windows.
       </p>
 
       <div class="reveal">
@@ -226,11 +230,11 @@ const pyBlocks = [
       <ResultsTable rows={xmlRows(xmlPython)} competitorHead="lxml / stdlib" />
       <Provenance campaign={xmlPython} />
       <p>
-        The binding is ahead of lxml on every measured operation. The one
+        The binding is ahead of lxml on every measured operation. The only
         standard-library comparison it loses is traversal against
         ElementTree, whose iterator is a bare generator over a compact
-        internal list; that deficit appears in the table below and is
-        tracked in the binding repository.
+        internal list. That deficit is listed in the measured-deficits
+        table below and is tracked in the binding repository.
       </p>
 
       <p class="docs-canonical">
@@ -248,10 +252,10 @@ const pyBlocks = [
       <p class="sec-label">XML</p>
       <h2 class="sec-title">Measured <em>deficits</em></h2>
       <p class="sec-lede">
-        Every XML operation in the result data that remains behind its
-        competitor, ordered from the weakest ratio. Each row links to the
-        harness it was measured with, and none of these rows is hidden
-        elsewhere on this site.
+        This table lists every XML operation in the result data that remains
+        behind its competitor, ordered from the weakest ratio. Each row
+        carries the harness it was measured with, and none of these
+        rows is omitted from any other table on this site.
       </p>
       <ResultsTable rows={deficits} competitorHead="versus" />
     </div>

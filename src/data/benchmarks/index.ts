@@ -6,6 +6,7 @@ export type Tech =
   | 'validation'
   | 'c14n'
   | 'xquery'
+  | 'toml'
   | 'yaml';
 
 export type Language = 'c' | 'ruby' | 'python';
@@ -47,6 +48,7 @@ import xmlPython from './results/xml-python.json';
 import xmlRuby from './results/xml-ruby.json';
 import xmlRubyFrontier from './results/xml-ruby-frontier.json';
 import xmlRubySerialbench from './results/xml-ruby-serialbench.json';
+import tomlC from './results/toml-c.json';
 import xsltC from './results/xslt-c.json';
 import yamlC from './results/yaml-c.json';
 
@@ -56,6 +58,7 @@ const imported = [
   xmlCMatrix,
   xmlCLanes,
   xsltC,
+  tomlC,
   htmlC,
   yamlC,
   xmlRuby,
@@ -74,6 +77,7 @@ export const TECH_LABELS: Record<Tech, string> = {
   c14n: 'Canonicalization',
   validation: 'Validation',
   xquery: 'XQuery',
+  toml: 'TOML',
   yaml: 'YAML',
 };
 
@@ -85,6 +89,7 @@ export const TECH_ORDER: Tech[] = [
   'c14n',
   'validation',
   'xquery',
+  'toml',
   'yaml',
 ];
 

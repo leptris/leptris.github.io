@@ -24,6 +24,11 @@ const formats = [
     lede: 'The conformant WHATWG tree-construction engine measured against Nokogiri’s libxml2 HTML parser through Ruby and through the Python binding.',
   },
   {
+    href: '/benchmarks/toml/',
+    label: 'TOML',
+    lede: 'teptris against tomlc99, tomlc17, cpptoml, toml11 and tomlplusplus across nine document shapes on a deterministic seeded corpus, in C.',
+  },
+  {
     href: '/benchmarks/yaml/',
     label: 'YAML',
     lede: 'yeptris against libyaml and rapidyaml across eight document shapes, three consumption models and emission, in C.',
@@ -40,8 +45,9 @@ const formats = [
       <p class="sec-label">Benchmarks</p>
       <h1 class="sec-title">Results, <em>by technology</em></h1>
       <p class="sec-lede">
-        The leptris ecosystem ships two engines — libleptris for XML,
-        XPath, XSLT and HTML, and yeptris for YAML — with bindings for
+        The leptris ecosystem ships three engines — libleptris for XML,
+        XPath, XSLT and HTML, yeptris for YAML, and teptris for TOML —
+        with bindings for
         Ruby and Python. Results are organized by technology, and within
         each technology page by language, so you can read only the race
         that concerns your stack. Every number is generated from versioned

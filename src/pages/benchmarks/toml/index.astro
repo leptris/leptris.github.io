@@ -1,0 +1,110 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import Matrix from '~/components/bench/Matrix.astro';
+import Provenance from '~/components/bench/Provenance.astro';
+import ResultsTable from '~/components/bench/ResultsTable.astro';
+import { SITE } from '~/data/site';
+import { CAMPAIGNS, frontierFor, type Campaign } from '~/data/benchmarks';
+
+const campaign = (id: string): Campaign => {
+  const found = CAMPAIGNS.find((c) => c.id === id);
+  if (!found) throw new Error(`unknown campaign ${id}`);
+  return found;
+};
+
+const tomlC = campaign('toml-c-2026-09-13');
+const deficits = frontierFor({ only: ['toml'] });
+---
+
+<BaseLayout
+  title="TOML benchmarks — teptris"
+  description="teptris measured against tomlc99, tomlc17, cpptoml, toml11 and tomlplusplus across nine TOML document shapes, with a deterministic seeded corpus and committed harness."
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="sec-label"><a href="/benchmarks/">Benchmarks</a> · TOML</p>
+      <h1 class="sec-title">teptris, the TOML <em>engine</em></h1>
+      <p class="sec-lede">
+        teptris is the TOML counterpart in the leptris ecosystem: a TOML 1.0
+        parser and writer in pure C11 with zero required runtime
+        dependencies and a stable C ABI. The benchmark below races it
+        against five widely used C and C++ TOML parsers on a deterministic,
+        seeded corpus of nine document shapes, with parsing measured from
+        memory and destruction timed separately. Every library that
+        provides a key-counting API is cross-checked for agreement on the
+        corpus, so a fast failure cannot masquerade as a fast parse.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:1.6rem">
+    <div class="wrap">
+      <Matrix tech="toml" />
+    </div>
+  </section>
+
+  <section class="sec sec-tint-periwinkle lang-sec" id="c">
+    <div class="wrap">
+      <p class="sec-label">C and C++</p>
+      <h2 class="sec-title">teptris versus <em>the reference parsers</em></h2>
+      <p class="sec-lede">
+        The competitors span the C and C++ ecosystems: tomlc99 and tomlc17
+        in C, and cpptoml, toml11 and tomlplusplus in C++. Each is pinned to
+        a recorded commit or release in the benchmark ledger. Two of them do
+        not parse the full corpus: tomlc17 rejects the largest scalar
+        shapes with its own keys-per-table cap, and cpptoml applies TOML
+        v0.5 semantics and rejects mixed-type arrays that are valid in TOML
+        1.0. Those shapes are excluded from the affected competitor&rsquo;s
+        rows rather than counted against it.
+      </p>
+
+      <ResultsTable
+        rows={tomlC.results.map((result) => ({ result, campaign: tomlC }))}
+        competitorHead="the reference parsers"
+      />
+      <Provenance campaign={tomlC} />
+
+      <p>
+        teptris is the fastest parser on every measured shape, with the
+        smallest margin at 2.9 times tomlc17 and the widest margins against
+        toml11, whose generic error-recovery machinery costs two orders of
+        magnitude on large files. The measurements follow three
+        profile-driven optimization rounds recorded, with before-and-after
+        numbers, in the
+        <a href={`${SITE.githubToml}/blob/main/benchmarks/LEDGER.md`}>teptris benchmark ledger</a>;
+        the same file records the corpus seed and the exact command that
+        regenerates every number on this page.
+      </p>
+
+      <p class="docs-canonical">
+        To reproduce: run <code>scripts/run_benchmarks.sh</code> in the
+        teptris repository, which builds the Release configuration,
+        regenerates the seeded corpus, and writes
+        <code>benchmarks/results/bench_parse.json</code>. The harness is
+        committed at
+        <a href={`${SITE.githubToml}/tree/main/benchmarks`}>benchmarks</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" id="deficits">
+    <div class="wrap">
+      <p class="sec-label">TOML</p>
+      <h2 class="sec-title">Measured <em>deficits</em></h2>
+      <p class="sec-lede">
+        Every TOML operation in the result data that remains behind its
+        competitor. There are none at present; this section is generated
+        from the same result files as the tables above and will list any
+        deficit that a future measurement records.
+      </p>
+      {deficits.length > 0 && <ResultsTable rows={deficits} competitorHead="versus" />}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .lang-sec {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+</style>
