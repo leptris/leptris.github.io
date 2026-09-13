@@ -131,6 +131,7 @@ describe('benchmark pages exist for every technology with data', () => {
     '/benchmarks/xslt',
     '/benchmarks/html',
     '/benchmarks/yaml',
+    '/benchmarks/toml',
     '/benchmarks/methodology',
   ];
 
@@ -152,6 +153,7 @@ describe('benchmark pages exist for every technology with data', () => {
       xslt: '/benchmarks/xslt',
       html: '/benchmarks/html',
       yaml: '/benchmarks/yaml',
+      toml: '/benchmarks/toml',
     };
     for (const tech of techs) {
       expect(techPages[tech], `tech ${tech} needs a page`).toBeDefined();
