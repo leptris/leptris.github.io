@@ -12,7 +12,7 @@ const campaign = (id: string): Campaign => {
   return found;
 };
 
-const yamlC = campaign('yaml-c-2026-09-12');
+const yamlC = campaign('yaml-c-2026-09-13');
 const deficits = frontierFor({ only: ['yaml'] });
 ---
 
@@ -64,14 +64,17 @@ const deficits = frontierFor({ only: ['yaml'] });
 
       <h2 class="sec-title" style="margin-top:3.4rem">Versus <em>rapidyaml</em></h2>
       <p class="sec-lede">
-        rapidyaml is a C++ YAML parser with substantially different
+        rapidyaml is a C++ YAML parser with a substantially different
         internal design, and the comparison against it is run as an
         interleaved head-to-head with a fair ordering referee, reporting
-        the median of rounds. yeptris is behind on most of these shapes
-        today; the performance ledger in the repository records every
-        optimization attempt against this gap with before-and-after
-        numbers, including the attempts that measured flat and were
-        reverted.
+        the median of rounds. On this machine, whose ARM cores run the
+        NEON kernels, the standing is mixed; the performance ledger
+        records that on the Linux CI runners, where the AVX2 kernels now
+        dispatch correctly, six of the eight shapes are ahead, block
+        parsing sits at parity, and anchor-heavy remains the open target.
+        Every optimization attempt against this gap is recorded in the
+        ledger with before-and-after numbers, including the attempts
+        that measured flat and were reverted.
       </p>
       <ResultsTable
         rows={yamlC.results
@@ -80,11 +83,13 @@ const deficits = frontierFor({ only: ['yaml'] });
         competitorHead="ryml 0.16.0"
       />
       <p>
-        The recorded residual against rapidyaml concentrates in the
-        engine dispatch loop and the nested-mapping construction path,
+        The recorded residual against rapidyaml concentrates in
+        anchor-and-alias machinery and block-structure construction,
         where rapidyaml builds leaner nodes with a lazier strategy. The
         discipline file for this work is the
         <a href={`${SITE.githubYaml}/blob/main/benchmarks/PERF-LEDGER.md`}>yeptris performance ledger</a>.
+        The JSON-shaped corpora in the same matrix are presented on the
+        <a href="/benchmarks/json/">JSON page</a>.
       </p>
 
       <p class="docs-canonical">
