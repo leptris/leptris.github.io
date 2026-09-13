@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "language": "c",
+  "subject": {
+    "name": "yeptris",
+    "version": "0.1.32 (main 39508ea)"
+  },
+  "harness": {
+    "label": "bench_matrix --full — same corpus both engines, same run; vs ryml: interleaved head-to-head",
+    "url": "https://github.com/leptris/yeptris/tree/main/benchmarks/matrix"
+  },
+  "machine": "Apple M1 Max, macOS 14.1.1, arm64",
+  "date": "2026-09-13",
+  "stat": "min-of-iters (--full); ryml rows: interleaved, median of rounds",
+  "id": "json-c-2026-09-13",
+  "results": [
+    {
+      "tech": "json",
+      "operation": "flow-json-dom",
+      "operation_label": "Parse DOM — flow json",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 169.06,
+      "competitor_value": 44.04,
+      "unit": "MB/s",
+      "ratio": 3.84,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "flow-json-pull",
+      "operation_label": "Parse pull — flow json",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 98.09,
+      "competitor_value": 44.04,
+      "unit": "MB/s",
+      "ratio": 2.23,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "flow-json-recorder",
+      "operation_label": "Parse recorder — flow json",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 111.75,
+      "competitor_value": 44.04,
+      "unit": "MB/s",
+      "ratio": 2.54,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "flow-json-emit",
+      "operation_label": "Emit — flow json",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 138.68,
+      "competitor_value": 44.04,
+      "unit": "MB/s",
+      "ratio": 3.15,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "flow-single-dom",
+      "operation_label": "Parse DOM — flow single",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 214.29,
+      "competitor_value": 45.43,
+      "unit": "MB/s",
+      "ratio": 4.72,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "flow-single-pull",
+      "operation_label": "Parse pull — flow single",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 111.28,
+      "competitor_value": 45.43,
+      "unit": "MB/s",
+      "ratio": 2.45,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "flow-single-recorder",
+      "operation_label": "Parse recorder — flow single",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 121.93,
+      "competitor_value": 45.43,
+      "unit": "MB/s",
+      "ratio": 2.68,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "flow-single-emit",
+      "operation_label": "Emit — flow single",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 153.72,
+      "competitor_value": 45.43,
+      "unit": "MB/s",
+      "ratio": 3.38,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "json-doc-dom",
+      "operation_label": "Parse DOM — json doc",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 196.48,
+      "competitor_value": 41.52,
+      "unit": "MB/s",
+      "ratio": 4.73,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "json-doc-pull",
+      "operation_label": "Parse pull — json doc",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 105.92,
+      "competitor_value": 41.52,
+      "unit": "MB/s",
+      "ratio": 2.55,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "json-doc-recorder",
+      "operation_label": "Parse recorder — json doc",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 119.08,
+      "competitor_value": 41.52,
+      "unit": "MB/s",
+      "ratio": 2.87,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "json-doc-emit",
+      "operation_label": "Emit — json doc",
+      "competitor": "libyaml",
+      "competitor_version": "0.2.5 (90a56d4)",
+      "leptris_value": 367.0,
+      "competitor_value": 41.52,
+      "unit": "MB/s",
+      "ratio": 8.84,
+      "status": "win"
+    },
+    {
+      "tech": "json",
+      "operation": "h2h-flow-json",
+      "operation_label": "Head-to-head DOM — flow json",
+      "competitor": "ryml",
+      "competitor_version": "0.16.0 (f8ac8dd)",
+      "ratio": 0.94,
+      "status": "parity"
+    },
+    {
+      "tech": "json",
+      "operation": "h2h-flow-single",
+      "operation_label": "Head-to-head DOM — flow single",
+      "competitor": "ryml",
+      "competitor_version": "0.16.0 (f8ac8dd)",
+      "ratio": 0.88,
+      "status": "parity"
+    },
+    {
+      "tech": "json",
+      "operation": "h2h-json-doc",
+      "operation_label": "Head-to-head DOM — json doc",
+      "competitor": "ryml",
+      "competitor_version": "0.16.0 (f8ac8dd)",
+      "ratio": 1.1,
+      "status": "parity"
+    },
+    {
+      "tech": "json",
+      "operation": "h2h-json-doc-simdjson",
+      "operation_label": "Head-to-head parse — json-doc, versus the JSON-native engine",
+      "competitor": "simdjson",
+      "competitor_version": "4.6.1 (3839ac6)",
+      "leptris_value": 209.39,
+      "unit": "MB/s",
+      "ratio": 0.2,
+      "status": "loss",
+      "note": "simdjson validates into a linear tape with SIMD structural indexing and no document model; the staged JSON work in the ledger, whose end state is a tape mode, is the recorded plan for this gap"
+    }
+  ]
+}

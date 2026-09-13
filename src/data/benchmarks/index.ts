@@ -6,6 +6,7 @@ export type Tech =
   | 'validation'
   | 'c14n'
   | 'xquery'
+  | 'json'
   | 'toml'
   | 'yaml';
 
@@ -42,6 +43,7 @@ export interface Campaign {
 }
 
 import htmlC from './results/html-c.json';
+import jsonC from './results/json-c.json';
 import xmlCLanes from './results/xml-c-lanes.json';
 import xmlCMatrix from './results/xml-c-matrix.json';
 import xmlPython from './results/xml-python.json';
@@ -61,6 +63,7 @@ const imported = [
   tomlC,
   htmlC,
   yamlC,
+  jsonC,
   xmlRuby,
   xmlRubyFrontier,
   xmlRubySerialbench,
@@ -77,6 +80,7 @@ export const TECH_LABELS: Record<Tech, string> = {
   c14n: 'Canonicalization',
   validation: 'Validation',
   xquery: 'XQuery',
+  json: 'JSON',
   toml: 'TOML',
   yaml: 'YAML',
 };
@@ -89,6 +93,7 @@ export const TECH_ORDER: Tech[] = [
   'c14n',
   'validation',
   'xquery',
+  'json',
   'toml',
   'yaml',
 ];

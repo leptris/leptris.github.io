@@ -114,6 +114,7 @@
               "validation",
               "c14n",
               "xquery",
+              "json",
               "toml",
               "yaml"
             ]

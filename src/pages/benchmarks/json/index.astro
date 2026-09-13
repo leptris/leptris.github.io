@@ -1,0 +1,133 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import Matrix from '~/components/bench/Matrix.astro';
+import Provenance from '~/components/bench/Provenance.astro';
+import ResultsTable from '~/components/bench/ResultsTable.astro';
+import { SITE } from '~/data/site';
+import { CAMPAIGNS, frontierFor, type Campaign } from '~/data/benchmarks';
+
+const campaign = (id: string): Campaign => {
+  const found = CAMPAIGNS.find((c) => c.id === id);
+  if (!found) throw new Error(`unknown campaign ${id}`);
+  return found;
+};
+
+const jsonC = campaign('json-c-2026-09-13');
+const deficits = frontierFor({ only: ['json'] });
+---
+
+<BaseLayout
+  title="JSON benchmarks — yeptris"
+  description="JSON documents through yeptris: the strict fused RFC 8259 parse path measured against libyaml and rapidyaml on JSON-shaped corpora, with the JSONTestSuite conformance gate."
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="sec-label"><a href="/benchmarks/">Benchmarks</a> · JSON</p>
+      <h1 class="sec-title">JSON, through <em>yeptris</em></h1>
+      <p class="sec-lede">
+        yeptris parses JSON as what it is — a strict subset of YAML 1.2 —
+        through a dedicated fused walk that validates the RFC 8259 grammar
+        and builds the document in a single pass. Conformance is gated by
+        the JSONTestSuite corpus under the YAML 1.2 schema, where yeptris
+        accepts all 95 valid inputs and rejects all 188 invalid inputs.
+        The measurements below race the JSON-shaped corpora through the
+        committed benchmark matrix against the YAML incumbents and against
+        simdjson, the reference JSON parser, in the same run. The simdjson
+        comparison is the honest centerpiece of this page: simdjson is a
+        JSON-only engine with a tape design, and closing that gap is the
+        recorded objective of the staged JSON work in the yeptris
+        performance ledger.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:1.6rem">
+    <div class="wrap">
+      <Matrix tech="json" />
+    </div>
+  </section>
+
+  <section class="sec sec-tint-periwinkle lang-sec" id="c">
+    <div class="wrap">
+      <p class="sec-label">C</p>
+      <h2 class="sec-title">yeptris versus <em>the YAML incumbents</em></h2>
+      <p class="sec-lede">
+        The matrix generates two JSON-shaped corpora: a multi-document
+        flow-json corpus and a single-document flow corpus. Both are
+        measured through DOM construction, pull parsing and event
+        recording, in addition to emission, in the same run against the
+        same-build reference libraries.
+      </p>
+
+      <ResultsTable
+        rows={jsonC.results
+          .filter((r) => r.competitor === 'libyaml')
+          .map((result) => ({ result, campaign: jsonC }))}
+        competitorHead="libyaml 0.2.5"
+      />
+      <Provenance campaign={jsonC} />
+
+      <h3>Versus rapidyaml on the same corpora</h3>
+      <ResultsTable
+        rows={jsonC.results
+          .filter((r) => r.competitor === 'ryml')
+          .map((result) => ({ result, campaign: jsonC }))}
+        competitorHead="ryml 0.16.0"
+      />
+      <p>
+        The head-to-head against rapidyaml is run interleaved with a
+        fair-order referee and reports the median of rounds. The yeptris
+        performance ledger records the engine-dispatch work behind these
+        rows, together with every measured dead end, in the
+        <a href={`${SITE.githubYaml}/blob/main/benchmarks/PERF-LEDGER.md`}>yeptris ledger</a>.
+      </p>
+
+      <h3>Versus simdjson, the JSON-native reference</h3>
+      <ResultsTable
+        rows={jsonC.results
+          .filter((r) => r.competitor === 'simdjson')
+          .map((result) => ({ result, campaign: jsonC }))}
+        competitorHead="simdjson 4.6.1"
+      />
+      <p>
+        simdjson parses JSON into a linear tape with SIMD structure
+        indexing and no document model, which is a fundamentally cheaper
+        contract than building a navigable DOM. yeptris is far behind on
+        raw parse throughput and that deficit is stated here rather than
+        omitted: the staged JSON work recorded in the ledger, whose end
+        state is a tape mode for pure-JSON consumption, is the plan that
+        closes it. Applications that need a DOM, pull events, or emission
+        in the same library are the audience these pages measure for.
+      </p>
+
+      <p class="docs-canonical">
+        To reproduce: configure yeptris with
+        <code>-DYEPTRIS_BUILD_BENCHMARKS=ON -DYEPTRIS_BENCH_LIBYAML_ROOT=…</code>
+        (and <code>-DYEPTRIS_BENCH_RYML_ROOT=…</code> for the
+        head-to-head), then run <code>bench_matrix --full</code>. The
+        harness is committed at
+        <a href={`${SITE.githubYaml}/tree/main/benchmarks`}>benchmarks</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" id="deficits">
+    <div class="wrap">
+      <p class="sec-label">JSON</p>
+      <h2 class="sec-title">Measured <em>deficits</em></h2>
+      <p class="sec-lede">
+        Every JSON operation in the result data that remains behind its
+        competitor, ordered from the weakest ratio. This section is
+        generated from the same result files as the tables above.
+      </p>
+      {deficits.length > 0 && <ResultsTable rows={deficits} competitorHead="versus" />}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .lang-sec {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+</style>
