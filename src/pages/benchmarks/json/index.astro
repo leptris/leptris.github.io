@@ -12,7 +12,7 @@ const campaign = (id: string): Campaign => {
   return found;
 };
 
-const jsonC = campaign('json-c-2026-09-13');
+const jsonC = campaign('json-c-2026-09-14');
 const deficits = frontierFor({ only: ['json'] });
 ---
 
@@ -32,11 +32,13 @@ const deficits = frontierFor({ only: ['json'] });
         accepts all 95 valid inputs and rejects all 188 invalid inputs.
         The measurements below race the JSON-shaped corpora through the
         committed benchmark matrix against the YAML incumbents and against
-        simdjson, the reference JSON parser, in the same run. The simdjson
-        comparison is the honest centerpiece of this page: simdjson is a
-        JSON-only engine with a tape design, and closing that gap is the
-        recorded objective of the staged JSON work in the yeptris
-        performance ledger.
+        simdjson, the reference JSON parser, in the same run. Two
+        consumption routes are measured against simdjson: DOM
+        construction, which builds a navigable document, and the tape
+        route introduced in yeptris 0.2.2, which validates into compact
+        parallel columns with no document model. The simdjson comparison
+        is stated with both numbers and is the honest centerpiece of this
+        page.
       </p>
     </div>
   </section>
@@ -90,14 +92,17 @@ const deficits = frontierFor({ only: ['json'] });
         competitorHead="simdjson 4.6.1"
       />
       <p>
-        simdjson parses JSON into a linear tape with SIMD structure
+        simdjson validates JSON into a linear tape with SIMD structural
         indexing and no document model, which is a fundamentally cheaper
-        contract than building a navigable DOM. yeptris is far behind on
-        raw parse throughput and that deficit is stated here rather than
-        omitted: the staged JSON work recorded in the ledger, whose end
-        state is a tape mode for pure-JSON consumption, is the plan that
-        closes it. Applications that need a DOM, pull events, or emission
-        in the same library are the audience these pages measure for.
+        contract than anything that also serves YAML. Through the DOM
+        route yeptris measures at 0.22× simdjson; through the tape route,
+        which dropped document construction the same way simdjson does,
+        it measures at 0.36×. These deficits are stated rather than
+        omitted, and the remaining gap on the tape route is the
+        validation walk itself, which is the recorded objective of the
+        continuing JSON work in the yeptris performance ledger.
+        Applications that need a DOM, pull events, or emission in the
+        same library are the audience these pages measure for.
       </p>
 
       <p class="docs-canonical">

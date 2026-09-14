@@ -3,16 +3,16 @@
   "language": "c",
   "subject": {
     "name": "yeptris",
-    "version": "0.1.32 (main 39508ea)"
+    "version": "0.2.4 (main 9674b80)"
   },
   "harness": {
     "label": "bench_matrix --full — same corpus both engines, same run; vs ryml: interleaved head-to-head",
     "url": "https://github.com/leptris/yeptris/tree/main/benchmarks/matrix"
   },
   "machine": "Apple M1 Max, macOS 14.1.1, arm64",
-  "date": "2026-09-13",
+  "date": "2026-09-14",
   "stat": "min-of-iters (--full); ryml rows: interleaved, median of rounds",
-  "id": "yaml-c-2026-09-13",
+  "id": "yaml-c-2026-09-14",
   "results": [
     {
       "tech": "yaml",
@@ -20,10 +20,10 @@
       "operation_label": "Parse DOM — block heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 127.4,
-      "competitor_value": 52.64,
+      "leptris_value": 144.51,
+      "competitor_value": 50.96,
       "unit": "MB/s",
-      "ratio": 2.42,
+      "ratio": 2.84,
       "status": "win"
     },
     {
@@ -32,10 +32,10 @@
       "operation_label": "Parse pull — block heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 108.79,
-      "competitor_value": 52.64,
+      "leptris_value": 124.57,
+      "competitor_value": 50.96,
       "unit": "MB/s",
-      "ratio": 2.07,
+      "ratio": 2.44,
       "status": "win"
     },
     {
@@ -44,10 +44,10 @@
       "operation_label": "Parse recorder — block heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 121.82,
-      "competitor_value": 52.64,
+      "leptris_value": 139.48,
+      "competitor_value": 50.96,
       "unit": "MB/s",
-      "ratio": 2.31,
+      "ratio": 2.74,
       "status": "win"
     },
     {
@@ -56,10 +56,10 @@
       "operation_label": "Emit — block heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 150.72,
-      "competitor_value": 52.64,
+      "leptris_value": 141.52,
+      "competitor_value": 50.96,
       "unit": "MB/s",
-      "ratio": 2.86,
+      "ratio": 2.78,
       "status": "win"
     },
     {
@@ -68,10 +68,10 @@
       "operation_label": "Parse DOM — scalar heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 346.29,
-      "competitor_value": 85.21,
+      "leptris_value": 336.23,
+      "competitor_value": 79.43,
       "unit": "MB/s",
-      "ratio": 4.06,
+      "ratio": 4.23,
       "status": "win"
     },
     {
@@ -80,10 +80,10 @@
       "operation_label": "Parse pull — scalar heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 287.35,
-      "competitor_value": 85.21,
+      "leptris_value": 269.53,
+      "competitor_value": 79.43,
       "unit": "MB/s",
-      "ratio": 3.37,
+      "ratio": 3.39,
       "status": "win"
     },
     {
@@ -92,10 +92,10 @@
       "operation_label": "Parse recorder — scalar heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 312.18,
-      "competitor_value": 85.21,
+      "leptris_value": 306.36,
+      "competitor_value": 79.43,
       "unit": "MB/s",
-      "ratio": 3.66,
+      "ratio": 3.86,
       "status": "win"
     },
     {
@@ -104,10 +104,10 @@
       "operation_label": "Emit — scalar heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 240.64,
-      "competitor_value": 85.21,
+      "leptris_value": 220.54,
+      "competitor_value": 79.43,
       "unit": "MB/s",
-      "ratio": 2.82,
+      "ratio": 2.78,
       "status": "win"
     },
     {
@@ -116,10 +116,10 @@
       "operation_label": "Parse DOM — anchor heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 108.81,
-      "competitor_value": 56.19,
+      "leptris_value": 109.28,
+      "competitor_value": 53.49,
       "unit": "MB/s",
-      "ratio": 1.94,
+      "ratio": 2.04,
       "status": "win"
     },
     {
@@ -128,10 +128,10 @@
       "operation_label": "Parse pull — anchor heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 97.74,
-      "competitor_value": 56.19,
+      "leptris_value": 94.24,
+      "competitor_value": 53.49,
       "unit": "MB/s",
-      "ratio": 1.74,
+      "ratio": 1.76,
       "status": "win"
     },
     {
@@ -140,10 +140,10 @@
       "operation_label": "Parse recorder — anchor heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 104.02,
-      "competitor_value": 56.19,
+      "leptris_value": 102.75,
+      "competitor_value": 53.49,
       "unit": "MB/s",
-      "ratio": 1.85,
+      "ratio": 1.92,
       "status": "win"
     },
     {
@@ -152,10 +152,10 @@
       "operation_label": "Emit — anchor heavy",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 170.9,
-      "competitor_value": 56.19,
+      "leptris_value": 165.62,
+      "competitor_value": 53.49,
       "unit": "MB/s",
-      "ratio": 3.04,
+      "ratio": 3.1,
       "status": "win"
     },
     {
@@ -164,10 +164,10 @@
       "operation_label": "Parse DOM — deep nesting",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 376.72,
-      "competitor_value": 154.13,
+      "leptris_value": 479.98,
+      "competitor_value": 152.02,
       "unit": "MB/s",
-      "ratio": 2.44,
+      "ratio": 3.16,
       "status": "win"
     },
     {
@@ -176,10 +176,10 @@
       "operation_label": "Parse pull — deep nesting",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 313.97,
-      "competitor_value": 154.13,
+      "leptris_value": 381.43,
+      "competitor_value": 152.02,
       "unit": "MB/s",
-      "ratio": 2.04,
+      "ratio": 2.51,
       "status": "win"
     },
     {
@@ -188,10 +188,10 @@
       "operation_label": "Parse recorder — deep nesting",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 345.13,
-      "competitor_value": 154.13,
+      "leptris_value": 443.92,
+      "competitor_value": 152.02,
       "unit": "MB/s",
-      "ratio": 2.24,
+      "ratio": 2.92,
       "status": "win"
     },
     {
@@ -200,10 +200,10 @@
       "operation_label": "Emit — deep nesting",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 649.53,
-      "competitor_value": 154.13,
+      "leptris_value": 637.1,
+      "competitor_value": 152.02,
       "unit": "MB/s",
-      "ratio": 4.21,
+      "ratio": 4.19,
       "status": "win"
     },
     {
@@ -212,10 +212,10 @@
       "operation_label": "Parse DOM — wide mapping",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 181.44,
-      "competitor_value": 60.9,
+      "leptris_value": 191.46,
+      "competitor_value": 58.56,
       "unit": "MB/s",
-      "ratio": 2.98,
+      "ratio": 3.27,
       "status": "win"
     },
     {
@@ -224,10 +224,10 @@
       "operation_label": "Parse pull — wide mapping",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 149.43,
-      "competitor_value": 60.9,
+      "leptris_value": 157.46,
+      "competitor_value": 58.56,
       "unit": "MB/s",
-      "ratio": 2.45,
+      "ratio": 2.69,
       "status": "win"
     },
     {
@@ -236,10 +236,10 @@
       "operation_label": "Parse recorder — wide mapping",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 164.09,
-      "competitor_value": 60.9,
+      "leptris_value": 177.15,
+      "competitor_value": 58.56,
       "unit": "MB/s",
-      "ratio": 2.69,
+      "ratio": 3.02,
       "status": "win"
     },
     {
@@ -248,10 +248,10 @@
       "operation_label": "Emit — wide mapping",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 167.92,
-      "competitor_value": 60.9,
+      "leptris_value": 160.29,
+      "competitor_value": 58.56,
       "unit": "MB/s",
-      "ratio": 2.76,
+      "ratio": 2.74,
       "status": "win"
     },
     {
@@ -260,10 +260,10 @@
       "operation_label": "Parse DOM — realworld suite",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 73.25,
-      "competitor_value": 44.21,
+      "leptris_value": 88.42,
+      "competitor_value": 42.43,
       "unit": "MB/s",
-      "ratio": 1.66,
+      "ratio": 2.08,
       "status": "win"
     },
     {
@@ -272,10 +272,10 @@
       "operation_label": "Parse pull — realworld suite",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 65.35,
-      "competitor_value": 44.21,
+      "leptris_value": 77.5,
+      "competitor_value": 42.43,
       "unit": "MB/s",
-      "ratio": 1.48,
+      "ratio": 1.83,
       "status": "win"
     },
     {
@@ -284,10 +284,10 @@
       "operation_label": "Parse recorder — realworld suite",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 74.97,
-      "competitor_value": 44.21,
+      "leptris_value": 89.32,
+      "competitor_value": 42.43,
       "unit": "MB/s",
-      "ratio": 1.7,
+      "ratio": 2.11,
       "status": "win"
     },
     {
@@ -296,10 +296,10 @@
       "operation_label": "Emit — realworld suite",
       "competitor": "libyaml",
       "competitor_version": "0.2.5 (90a56d4)",
-      "leptris_value": 141.64,
-      "competitor_value": 44.21,
+      "leptris_value": 140.17,
+      "competitor_value": 42.43,
       "unit": "MB/s",
-      "ratio": 3.2,
+      "ratio": 3.3,
       "status": "win"
     },
     {
@@ -308,7 +308,7 @@
       "operation_label": "Head-to-head DOM — block heavy",
       "competitor": "ryml",
       "competitor_version": "0.16.0 (f8ac8dd)",
-      "ratio": 0.66,
+      "ratio": 0.73,
       "status": "loss"
     },
     {
@@ -317,7 +317,7 @@
       "operation_label": "Head-to-head DOM — scalar heavy",
       "competitor": "ryml",
       "competitor_version": "0.16.0 (f8ac8dd)",
-      "ratio": 0.82,
+      "ratio": 0.84,
       "status": "loss"
     },
     {
@@ -326,7 +326,7 @@
       "operation_label": "Head-to-head DOM — anchor heavy",
       "competitor": "ryml",
       "competitor_version": "0.16.0 (f8ac8dd)",
-      "ratio": 0.52,
+      "ratio": 0.62,
       "status": "loss"
     },
     {
@@ -335,8 +335,8 @@
       "operation_label": "Head-to-head DOM — deep nesting",
       "competitor": "ryml",
       "competitor_version": "0.16.0 (f8ac8dd)",
-      "ratio": 0.75,
-      "status": "loss"
+      "ratio": 1.05,
+      "status": "parity"
     },
     {
       "tech": "yaml",
@@ -344,7 +344,7 @@
       "operation_label": "Head-to-head DOM — wide mapping",
       "competitor": "ryml",
       "competitor_version": "0.16.0 (f8ac8dd)",
-      "ratio": 0.94,
+      "ratio": 1.01,
       "status": "parity"
     }
   ]
