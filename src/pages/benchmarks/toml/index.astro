@@ -27,8 +27,8 @@ const deficits = frontierFor({ only: ['toml'] });
       <p class="sec-label"><a href="/benchmarks/">Benchmarks</a> · TOML</p>
       <h1 class="sec-title">teptris, the TOML <em>engine</em></h1>
       <p class="sec-lede">
-        teptris is the TOML counterpart in the leptris ecosystem: a TOML 1.0
-        parser and writer in pure C11 with zero required runtime
+        teptris is the TOML counterpart in the leptris ecosystem: a TOML
+        1.0/1.1 parser and writer in pure C99 with zero required runtime
         dependencies and a stable C ABI. The benchmark below races it
         against five widely used C and C++ TOML parsers on a deterministic,
         seeded corpus of nine document shapes, with parsing measured from
@@ -129,15 +129,17 @@ const deficits = frontierFor({ only: ['toml'] });
   <section class="sec sec-tint-sage lang-sec" id="python">
     <div class="wrap">
       <p class="sec-label">Python</p>
-      <h2 class="sec-title">The teptris package versus <em>tomli</em></h2>
+      <h2 class="sec-title">The teptris package versus <em>tomllib, tomlkit and rtoml</em></h2>
       <p class="sec-lede">
         The Python binding mirrors the standard library&rsquo;s tomllib
-        interface and is measured against tomli, the parser that
-        tomllib itself wraps, under the same protocol as the Ruby tier.
+        interface and is measured under the same protocol as the Ruby
+        tier against the three libraries users actually choose between:
+        tomllib (the stdlib), tomlkit (pure-Python, materializing a
+        mutable document model), and rtoml (a Rust-backed binding).
       </p>
       <ResultsTable
         rows={tomlPython.results.map((result) => ({ result, campaign: tomlPython }))}
-        competitorHead="tomli 2.4.1"
+        competitorHead="tomllib / tomlkit / rtoml"
       />
       <Provenance campaign={tomlPython} />
 
