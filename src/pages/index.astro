@@ -434,6 +434,59 @@ print(root.tag)    # => "greet"`}</pre>
     </div>
   </section>
 
+  <!-- ————— yeptris: the YAML sibling ————— -->
+  <section class="sec-alt sec-tint-periwinkle" id="yeptris">
+    <div class="wrap">
+      <p class="sec-label reveal" data-num="08">The family — YAML</p>
+      <h2 class="sec-title reveal">yeptris: YAML at <em>library speed</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        The YAML sibling of libleptris — a YAML 1.2 parser, writer and
+        streamer in pure C11, zero required dependencies, stable ABI.
+        395/395 on the yaml-test-suite, 279 libyaml emission goldens at
+        zero divergences, up to 3.36× libyaml same-binary — and the packed
+        record tape as the default parse route, so parse-only workloads
+        never build nodes.
+      </p>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-tag">C11 engine</span>
+          <h3>libyeptris <span class="arrow">→</span></h3>
+          <p>
+            YAML 1.2 with a libyaml/Psych-compatible 1.1 lenient mode,
+            DOM / push / pull / record-tape consumption models over one
+            engine, zero-copy views, plans and schemas — with
+            <code>pkg-config</code> on <code>cmake --install</code>.
+          </p>
+        </div>
+        <div class="card">
+          <span class="card-tag">Ruby gem</span>
+          <h3>yeptris <span class="arrow">→</span></h3>
+          <p>
+            Psych-shaped: YAML 1.1 typing by default,
+            <code>schema: :core_12</code> for 1.2 core, a strict-JSON twin,
+            the Document node API — FFI platform gems, 14 release legs.
+          </p>
+        </div>
+        <div class="card">
+          <span class="card-tag">Python</span>
+          <h3>yeptris <span class="arrow">→</span></h3>
+          <p>
+            PyYAML-shaped: <code>safe_load</code>/<code>safe_dump</code>
+            with PyYAML&rsquo;s SafeLoader typing — ctypes FFI, one bulk
+            drain per document, self-contained <code>abi3</code> wheels.
+          </p>
+        </div>
+      </div>
+
+      <p class="reveal" data-d="2" style="margin-top:1.8rem">
+        <a href="/yeptris">Meet yeptris — the dedicated section&nbsp;→</a>
+        &nbsp;·&nbsp;
+        <a href="/benchmarks/yaml">The YAML race, per shape&nbsp;→</a>
+      </p>
+    </div>
+  </section>
+
   <!-- ————— CTA ————— -->
   <section class="cta">
     <div class="cta-inner">
