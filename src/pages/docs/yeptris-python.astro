@@ -1,0 +1,96 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Yeptris Python — YAML docs"
+  description="The yeptris package: PyYAML-compatible YAML for Python over libyeptris — ctypes FFI, no C extension, zero compilation at install, one bulk drain per document."
+>
+  <DocsShell
+    crumb="Yeptris — Python"
+    title={`Yeptris — the YAML package v${VERSIONS.yamlPy}`}
+    lede={`An FFI-based (no C extension) YAML library over libyeptris v${VERSIONS.yaml}. PyYAML-compatible semantics through ctypes — one shared library, zero compilation at install.`}
+  >
+    <h2 id="install">Installation</h2>
+    <CodeBlock lang="bash" code={`pip install yeptris`} />
+    <p>
+      Self-contained wheels over ctypes: the package binds the shared
+      <code>libyeptris</code> at runtime — no compiler involved, on any
+      platform. A vendored per-platform library copy ships beside the
+      loader; <code>YEPTRIS_LIB_PATH</code> overrides it.
+    </p>
+
+    <h2 id="usage">Usage</h2>
+    <CodeBlock
+      lang="python"
+      code={`import yeptris
+from yeptris import yaml   # the PyYAML-compatible surface
+
+yaml.safe_load("name: yeptris\\nrating: 10\\n")
+# {'name': 'yeptris', 'rating': 10}
+
+yaml.safe_load_all("--- 1\\n--- two\\n")   # [1, 'two']
+yaml.safe_dump({"b": 2, "a": [1, "x"]})  # 'a:\\n  - 1\\n  - x\\nb: 2\\n'
+
+yeptris.load("k: v")        # the neutral surface
+yeptris.dump({"k": [1, 2]})`}
+    />
+    <p>
+      Typing follows PyYAML&rsquo;s SafeLoader (YAML 1.1 implicit typing):
+      <code>yes/no/on/off</code> booleans, <code>0x</code>/leading-0
+      integers, dot-required floats, timestamps with offsets, merge keys,
+      anchor identity. Constructors are ported function-for-function; every
+      deliberate divergence is pinned by a test.
+    </p>
+
+    <h2 id="design">One parse, one bulk drain</h2>
+    <p>
+      The FFI tax is O(1) per document, never per event: the record array
+      and string arena are read in two ctypes calls, then a pure-Python
+      walk over the unpacked records. The record layout is ABI-pinned in
+      the C header and mirrored in the package — the same seam the Ruby gem
+      rides.
+    </p>
+    <CodeBlock
+      lang="python"
+      code={`docs = yeptris.load_all(stream)      # multi-document streams
+                                     # [1, 'two'] for "--- 1\\n--- two\\n"
+
+yeptris.dump({"k": [1, 2]})          # the DOM-mutation dumper:
+                                     # the C emitter's sizing, style
+                                     # chooser and escapes on Python trees`}
+    />
+    <Callout kind="note">
+      <p>
+        <strong>Honest perf shape:</strong> load is 28–39× pure PyYAML and
+        3.8–6.1× CSafeLoader per shape. Dump is ~1.7× pure PyYAML and ~2×
+        behind libyaml&rsquo;s CDumper — which walks the tree entirely in C;
+        a no-C-extension design&rsquo;s ceiling is the Python walk itself.
+      </p>
+    </Callout>
+
+    <h2 id="errors">Errors</h2>
+    <CodeBlock
+      lang="python"
+      code={`try:
+    yaml.safe_load("a: [1,")
+except yeptris.ParseError as e:
+    ...   # the C parser's message with line/column detail`}
+    />
+
+    <h2 id="links">Where to go next</h2>
+    <ul>
+      <li>
+        <a href={`${SITE.githubYamlPy}`}>leptris/yeptris-py</a> — the
+        canonical repository.
+      </li>
+      <li><a href="/docs/yeptris-getting-started">The C engine under the package</a></li>
+      <li><a href="/docs/yeptris-ruby">The Ruby sibling gem</a></li>
+      <li><a href="/benchmarks/yaml">The YAML benchmark campaigns</a></li>
+    </ul>
+  </DocsShell>
+</BaseLayout>

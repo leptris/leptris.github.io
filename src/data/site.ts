@@ -15,6 +15,10 @@ export const SITE = {
   githubTomlPy: 'https://github.com/leptris/teptris-py',
   rubygemsTeptris: 'https://rubygems.org/gems/teptris',
   pypiTeptris: 'https://pypi.org/project/teptris/',
+  githubYamlRuby: 'https://github.com/leptris/yeptris-ruby',
+  githubYamlPy: 'https://github.com/leptris/yeptris-py',
+  rubygemsYeptris: 'https://rubygems.org/gems/yeptris',
+  pypiYeptris: 'https://pypi.org/project/yeptris/',
 } as const;
 
 export const VERSIONS = {
@@ -30,6 +34,12 @@ export const VERSIONS = {
   tomlRubyDate: '2026-09-23',
   tomlPy: '0.2.23',
   tomlPyDate: '2026-09-23',
+  yaml: '0.6.22',
+  yamlDate: '2026-09-25',
+  yamlRuby: '0.6.22.1',
+  yamlRubyDate: '2026-09-25',
+  yamlPy: '0.6.22.1',
+  yamlPyDate: '2026-09-25',
 } as const;
 
 export interface NavEntry {
@@ -40,6 +50,7 @@ export interface NavEntry {
 export const NAV: NavEntry[] = [
   { href: '/', label: 'Home' },
   { href: '/teptris', label: 'Teptris' },
+  { href: '/yeptris', label: 'Yeptris' },
   { href: '/docs', label: 'Docs' },
   { href: '/benchmarks', label: 'Benchmarks' },
   { href: '/blog', label: 'Blog' },
@@ -105,5 +116,21 @@ export const DOCS_NAV: DocsEntry[] = [
     href: '/docs/teptris-python',
     label: 'Teptris — Python',
     blurb: 'The teptris package — tomllib-shaped loads/dumps, abi3 wheels, batch and lazy paths.',
+  },
+
+  {
+    href: '/docs/yeptris-getting-started',
+    label: 'Yeptris — getting started (C)',
+    blurb: 'Build libyeptris, install it via CMake or pkg-config, parse and emit YAML from C.',
+  },
+  {
+    href: '/docs/yeptris-ruby',
+    label: 'Yeptris — Ruby',
+    blurb: 'The yeptris gem — Psych-compatible YAML, strict JSON, Document node API, platform gems.',
+  },
+  {
+    href: '/docs/yeptris-python',
+    label: 'Yeptris — Python',
+    blurb: 'The yeptris package — PyYAML-shaped safe_load/safe_dump, ctypes FFI, no compilation.',
   },
 ];
