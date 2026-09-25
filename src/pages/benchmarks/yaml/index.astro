@@ -12,7 +12,7 @@ const campaign = (id: string): Campaign => {
   return found;
 };
 
-const yamlC = campaign('yaml-c-2026-09-14');
+const yamlC = campaign('yaml-c-2026-09-25');
 const deficits = frontierFor({ only: ['yaml'] });
 ---
 
@@ -67,14 +67,15 @@ const deficits = frontierFor({ only: ['yaml'] });
         rapidyaml is a C++ YAML parser with a substantially different
         internal design, and the comparison against it is run as an
         interleaved head-to-head with a fair ordering referee, reporting
-        the median of rounds. On this machine, whose ARM cores run the
-        NEON kernels, the standing is mixed; the performance ledger
-        records that on the Linux CI runners, where the AVX2 kernels now
-        dispatch correctly, six of the eight shapes are ahead, block
-        parsing sits at parity, and anchor-heavy remains the open target.
-        Every optimization attempt against this gap is recorded in the
-        ledger with before-and-after numbers, including the attempts
-        that measured flat and were reverted.
+        the median of rounds. The numbers on this page come from the
+        Linux CI runner, where the AVX2 kernels dispatch: all five YAML
+        shapes are ahead — block-heavy 1.61×, wide-mapping 1.80×,
+        anchor-heavy 1.44× (the shape the ledger once named the open
+        target), scalar-heavy 1.23×, deep-nesting 1.18×. The ARM macOS
+        leg is the mixed read, and it is tracked with the same
+        discipline. Every optimization attempt on these rows is recorded
+        in the ledger with before-and-after numbers, including the
+        attempts that measured flat and were reverted.
       </p>
       <ResultsTable
         rows={yamlC.results
@@ -83,9 +84,10 @@ const deficits = frontierFor({ only: ['yaml'] });
         competitorHead="ryml 0.16.0"
       />
       <p>
-        The recorded residual against rapidyaml concentrates in
-        anchor-and-alias machinery and block-structure construction,
-        where rapidyaml builds leaner nodes with a lazier strategy. The
+        The recorded residual is leg-specific: the NEON macOS runner reads
+        closer to parity on several shapes than the AVX2 leg above, and
+        that difference is tracked rather than smoothed over — the
+        campaign logs treat an unexplained ISA gap as a defect. The
         discipline file for this work is the
         <a href={`${SITE.githubYaml}/blob/main/benchmarks/PERF-LEDGER.md`}>yeptris performance ledger</a>.
         The JSON-shaped corpora in the same matrix are presented on the
@@ -109,10 +111,12 @@ const deficits = frontierFor({ only: ['yaml'] });
       <h2 class="sec-title">Measured <em>deficits</em></h2>
       <p class="sec-lede">
         Every YAML operation in the result data that remains behind its
-        competitor, ordered from the weakest ratio. All of the current
-        deficits are in the interleaved head-to-head against rapidyaml.
+        competitor, ordered from the weakest ratio. The current campaign
+        carries none — the first refresh in the page's history where that
+        is true — and the ARM-leg parity reads closest to the line stay
+        tracked in the ledger rather than celebrated here.
       </p>
-      <ResultsTable rows={deficits} competitorHead="versus" />
+      {deficits.length > 0 && <ResultsTable rows={deficits} competitorHead="versus" />}
     </div>
   </section>
 </BaseLayout>

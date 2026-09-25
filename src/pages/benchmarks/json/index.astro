@@ -12,7 +12,7 @@ const campaign = (id: string): Campaign => {
   return found;
 };
 
-const jsonC = campaign('json-c-2026-09-14');
+const jsonC = campaign('json-c-2026-09-25');
 const deficits = frontierFor({ only: ['json'] });
 ---
 
@@ -54,11 +54,12 @@ const deficits = frontierFor({ only: ['json'] });
       <p class="sec-label">C</p>
       <h2 class="sec-title">yeptris versus <em>the YAML incumbents</em></h2>
       <p class="sec-lede">
-        The matrix generates two JSON-shaped corpora: a multi-document
-        flow-json corpus and a single-document flow corpus. Both are
-        measured through DOM construction, pull parsing and event
-        recording, in addition to emission, in the same run against the
-        same-build reference libraries.
+        The matrix generates four JSON-shaped corpora: a multi-document
+        flow corpus, a single-document flow corpus, one large flat
+        document, and a record-heavy users corpus. Each is measured
+        through DOM construction, pull parsing and event recording, in
+        addition to emission, in the same run against the same-build
+        reference libraries.
       </p>
 
       <ResultsTable
@@ -89,20 +90,21 @@ const deficits = frontierFor({ only: ['json'] });
         rows={jsonC.results
           .filter((r) => r.competitor === 'simdjson')
           .map((result) => ({ result, campaign: jsonC }))}
-        competitorHead="simdjson 4.6.1"
+        competitorHead="simdjson 3.13.0"
       />
       <p>
         simdjson validates JSON into a linear tape with SIMD structural
-        indexing and no document model, which is a fundamentally cheaper
-        contract than anything that also serves YAML. Through the DOM
-        route yeptris measures at 0.22× simdjson; through the tape route,
-        which dropped document construction the same way simdjson does,
-        it measures at 0.36×. These deficits are stated rather than
-        omitted, and the remaining gap on the tape route is the
-        validation walk itself, which is the recorded objective of the
-        continuing JSON work in the yeptris performance ledger.
-        Applications that need a DOM, pull events, or emission in the
-        same library are the audience these pages measure for.
+        indexing and no document model — a fundamentally cheaper contract
+        than anything that also serves YAML. The referee is calibrated to
+        simdjson&rsquo;s own harness idiom: it parses a pre-built padded
+        string, so no input-copy tax sits in its timed loop (the
+        calibration itself is ledger history — an earlier version of this
+        table flattered us). Calibrated, the DOM route measures 0.70×
+        simdjson on the flat document shape and 0.95× on the record-heavy
+        shape — the bracket of per-member overhead the ledger&rsquo;s
+        slices have been cutting — while the packed-record tape route
+        trades tree materialization for bulk access. The walk is the
+        residual, recorded slice by slice in the ledger.
       </p>
 
       <p class="docs-canonical">
