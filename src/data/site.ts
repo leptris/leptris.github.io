@@ -11,6 +11,10 @@ export const SITE = {
   githubRuby: 'https://github.com/leptris/leptris-ruby',
   githubPy: 'https://github.com/leptris/leptris-py',
   rubygems: 'https://rubygems.org/gems/leptris',
+  githubTomlRuby: 'https://github.com/leptris/teptris-ruby',
+  githubTomlPy: 'https://github.com/leptris/teptris-py',
+  rubygemsTeptris: 'https://rubygems.org/gems/teptris',
+  pypiTeptris: 'https://pypi.org/project/teptris/',
 } as const;
 
 export const VERSIONS = {
@@ -20,6 +24,12 @@ export const VERSIONS = {
   gemDate: '2026-09-13',
   py: '1.9.156.0',
   pyDate: '2026-09-13',
+  toml: '0.1.27',
+  tomlDate: '2026-09-22',
+  tomlRuby: '0.2.47',
+  tomlRubyDate: '2026-09-23',
+  tomlPy: '0.2.23',
+  tomlPyDate: '2026-09-23',
 } as const;
 
 export interface NavEntry {
@@ -29,6 +39,7 @@ export interface NavEntry {
 
 export const NAV: NavEntry[] = [
   { href: '/', label: 'Home' },
+  { href: '/teptris', label: 'Teptris' },
   { href: '/docs', label: 'Docs' },
   { href: '/benchmarks', label: 'Benchmarks' },
   { href: '/blog', label: 'Blog' },
@@ -78,5 +89,21 @@ export const DOCS_NAV: DocsEntry[] = [
     href: '/docs/parsing',
     label: 'Parsing models',
     blurb: 'DOM, SAX, StAX-style pull, iterparse — when to pick each.',
+  },
+
+  {
+    href: '/docs/teptris-getting-started',
+    label: 'Teptris — getting started (C)',
+    blurb: 'Build libteptris, install it via CMake or pkg-config, parse and emit TOML from C.',
+  },
+  {
+    href: '/docs/teptris-ruby',
+    label: 'Teptris — Ruby',
+    blurb: 'The teptris gem — tomlib-shaped TOML with Time/Date datetimes, batch, lazy, schema plans.',
+  },
+  {
+    href: '/docs/teptris-python',
+    label: 'Teptris — Python',
+    blurb: 'The teptris package — tomllib-shaped loads/dumps, abi3 wheels, batch and lazy paths.',
   },
 ];

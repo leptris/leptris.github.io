@@ -381,6 +381,59 @@ print(root.tag)    # => "greet"`}</pre>
     </div>
   </section>
 
+  <!-- ————— teptris: the TOML sibling ————— -->
+  <section class="sec" id="teptris">
+    <div class="wrap">
+      <p class="sec-label reveal" data-num="07">The family — TOML</p>
+      <h2 class="sec-title reveal">teptris: TOML at <em>library speed</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        The TOML sibling of libleptris — a parser and writer in pure C99,
+        zero required dependencies, stable ABI. 714/714 on BurntSushi&rsquo;s
+        toml-test; the 4×-mandate gate shapes confirmed on developer
+        hardware (mixed 4.13×, cargo 4.67×, deep 4.97×, table 5.84× against
+        the best C/C++ competitor).
+      </p>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-tag">C99 engine</span>
+          <h3>libteptris <span class="arrow">→</span></h3>
+          <p>
+            TOML 1.0 + the 1.1 draft, canonical emit, zero-copy views,
+            batch parsing, and a schema-descriptor ABI — with
+            <code>pkg-config</code> and a <code>teptris::</code> CMake
+            export on <code>cmake --install</code>.
+          </p>
+        </div>
+        <div class="card">
+          <span class="card-tag">Ruby gem</span>
+          <h3>teptris <span class="arrow">→</span></h3>
+          <p>
+            tomlib-shaped: datetimes become <code>Time</code>/<code>Date</code>,
+            batch and lazy paths, schema plans — fat platform gems with one
+            extension per Ruby minor, 3.0–4.0.
+          </p>
+        </div>
+        <div class="card">
+          <span class="card-tag">Python</span>
+          <h3>teptris <span class="arrow">→</span></h3>
+          <p>
+            tomllib-shaped: <code>loads</code>/<code>dumps</code> with the
+            tomllib error contract, <code>loads_batch</code>,
+            <code>loads_lazy</code> — self-contained <code>abi3</code>
+            wheels for CPython ≥ 3.9.
+          </p>
+        </div>
+      </div>
+
+      <p class="reveal" data-d="2" style="margin-top:1.8rem">
+        <a href="/teptris">Meet teptris — the dedicated section&nbsp;→</a>
+        &nbsp;·&nbsp;
+        <a href="/benchmarks/toml">The TOML race, per shape&nbsp;→</a>
+      </p>
+    </div>
+  </section>
+
   <!-- ————— CTA ————— -->
   <section class="cta">
     <div class="cta-inner">

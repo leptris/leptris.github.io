@@ -1,0 +1,129 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Teptris Python — TOML docs"
+  description="The teptris package: tomllib-shaped TOML for Python over libteptris — loads/dumps, TOMLDecodeError with positions, abi3 wheels, loads_batch, loads_lazy with LazyNode."
+>
+  <DocsShell
+    crumb="Teptris — Python"
+    title={`Teptris — the TOML package v${VERSIONS.tomlPy}`}
+    lede={`A native C-extension binding (no ctypes, no fallback) over libteptris v${VERSIONS.toml}. The API shape mirrors tomllib/tomli — loads/load raising TOMLDecodeError — plus a dumps writer in the tomli_w spirit. Datetimes follow the tomllib mapping.`}
+  >
+    <h2 id="install">Installation</h2>
+    <CodeBlock lang="bash" code={`pip install teptris`} />
+    <p>
+      <code>pip</code> resolves one of the <code>cp39-abi3</code> wheels —
+      manylinux/musllinux x86_64, aarch64 and armv7l (32-bit ARM, built
+      under qemu), macOS arm64 and x86_64, Windows AMD64 and ARM64 —
+      covering every CPython ≥ 3.9 including future minors. The extension
+      statically links the engine, so each wheel is a single
+      self-contained module. Every other platform installs the sdist, which
+      vendors the engine and compiles it with the installing
+      interpreter&rsquo;s compiler — a C compiler is required, and the
+      build fails loudly without one.
+    </p>
+    <Callout kind="note">
+      <p>
+        Every wheel also carries the engine C source at
+        <code>teptris/_engine</code> beside the compiled extension — the
+        recompile path for exotic environments.
+      </p>
+    </Callout>
+
+    <h2 id="usage">Usage</h2>
+    <CodeBlock
+      lang="python"
+      code={`import teptris
+
+doc = teptris.loads('title = "teptris"\\n[owner]\\nname = "t"\\n')
+# => {'title': 'teptris', 'owner': {'name': 't'}}
+
+teptris.dumps(doc)   # canonical TOML — the engine emitter is the
+                     # single formatting source (3.5-14.2x tomli_w)
+
+try:
+    teptris.loads("a = [1,")
+except teptris.TOMLDecodeError as e:
+    e.lineno, e.colno   # the tomllib error attributes`}
+    />
+    <p>
+      Both directions are native. End to end (parse + materialize into
+      Python objects) teptris is <strong>4.8–6× rtoml</strong> (the
+      rust-backed incumbent), <strong>19–42× the stdlib&rsquo;s
+      tomllib</strong>, and hundreds of times tomlkit per shape.
+    </p>
+
+    <h2 id="values">The value contract</h2>
+    <table class="doc-table">
+      <tr><th>TOML</th><th>Python</th></tr>
+      <tr><td>offset datetime</td><td><code>datetime.datetime</code> (aware)</td></tr>
+      <tr><td>local datetime</td><td><code>datetime.datetime</code> (naive)</td></tr>
+      <tr><td>local date</td><td><code>datetime.date</code></td></tr>
+      <tr><td>local time</td><td><code>datetime.time</code></td></tr>
+      <tr><td>integer / float / string / bool / array / table</td><td>the obvious Python types</td></tr>
+    </table>
+
+    <h2 id="batch">Many documents — loads_batch</h2>
+    <CodeBlock
+      lang="python"
+      code={`docs = teptris.loads_batch([toml_a, toml_b, toml_c])
+# => [dict, dict, dict] — same datetime contract as loads()
+
+# the first failing document raises TOMLDecodeError
+# carrying its line/column`}
+    />
+    <Callout kind="warn">
+      <p>
+        <strong>Honest perf shape:</strong> per-doc <code>loads</code> in a
+        tight loop is faster than the batch on small and medium corpora
+        (CPython&rsquo;s per-call overhead amortizes better than the
+        batch&rsquo;s scratch and object pressure). Use
+        <code>loads_batch</code> for the single API surface, the one C
+        crossing, and the per-doc error report — not for speed.
+      </p>
+    </Callout>
+
+    <h2 id="lazy">Lazy loading — loads_lazy</h2>
+    <p>
+      When most of the parsed tree is going to be ignored,
+      <code>loads_lazy</code> returns a <code>LazyNode</code> wrapper that
+      materializes host objects only along the paths actually accessed:
+    </p>
+    <CodeBlock
+      lang="python"
+      code={`doc = teptris.loads_lazy(big_toml)
+# one parse, no dicts/lists materialized yet
+sku = doc["items"][0]["sku"].value()   # scalars materialize at .value()
+
+for item in doc["items"]:              # arrays yield LazyNodes
+    print(item["sku"].value())
+
+flat = doc.to_dict()                   # flatten eagerly, loads()-shaped`}
+    />
+    <p>
+      <code>LazyNode</code> exposes <code>kind()</code>,
+      <code>value()</code> (scalars only), <code>len()</code>, iteration
+      (tables yield <code>(key, LazyNode)</code> pairs), subscripting, and
+      <code>to_dict()</code>/<code>to_list()</code> for eager flattening.
+      Datetimes materialize under the same contract as <code>loads</code>.
+      The eager path is the floor for flatten-everything workloads; the
+      lazy path wins for parse-once-touch-a-subset.
+    </p>
+
+    <h2 id="links">Where to go next</h2>
+    <ul>
+      <li>
+        <a href={`${SITE.githubTomlPy}`}>leptris/teptris-py</a> — the
+        canonical repository, with the per-shape language-tier tables.
+      </li>
+      <li><a href="/docs/teptris-getting-started">The C engine under the package</a></li>
+      <li><a href="/docs/teptris-ruby">The Ruby sibling gem</a></li>
+    </ul>
+  </DocsShell>
+</BaseLayout>

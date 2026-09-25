@@ -1,0 +1,250 @@
+---
+import { codeToHtml } from 'shiki';
+import BaseLayout from '~/components/BaseLayout.astro';
+import CodeTabs from '~/components/CodeTabs.vue';
+import { SITE, VERSIONS } from '~/data/site';
+
+const hl = async (code: string, lang: string) =>
+  codeToHtml(code, { lang, theme: 'github-dark' });
+
+const tabs = [
+  {
+    label: 'C',
+    html: await hl(
+      `#include <teptris/teptris.h>
+
+teptris_document *doc = NULL;
+if (teptris_parse(data, len, NULL, &doc) != TEPTRIS_OK) {
+    const teptris_error *e = teptris_document_error(doc);
+    /* e->line, e->column (1-based), e->message */
+}
+const teptris_node *v = teptris_node_table_get(
+    teptris_document_root(doc), "key", 3);   /* zero-copy view */
+char *out = NULL; size_t out_len = 0;
+teptris_document_emit(doc, &out, &out_len);  /* canonical TOML */
+teptris_document_free(doc);`,
+      'c',
+    ),
+  },
+  {
+    label: 'Ruby',
+    html: await hl(
+      `require "teptris"
+
+doc = Teptris::TOML.load(<<~TOML)
+  title = "teptris"
+  [owner]
+  name = "t"
+TOML
+# => {"title" => "teptris", "owner" => {"name" => "t"}}
+
+Teptris::TOML.dump(doc)               # canonical TOML, through the C emitter
+
+begin
+  Teptris::TOML.load("a = [1,")
+rescue Teptris::ParseError => e
+  [e.line, e.column]                  # [1, 8]
+end`,
+      'ruby',
+    ),
+  },
+  {
+    label: 'Python',
+    html: await hl(
+      `import teptris
+
+doc = teptris.loads('title = "teptris"\\n[owner]\\nname = "t"\\n')
+# => {'title': 'teptris', 'owner': {'name': 't'}}  — tomllib contract
+
+teptris.dumps(doc)                    # canonical TOML, 3.5-14.2x tomli_w
+
+try:
+    teptris.loads("a = [1,")
+except teptris.TOMLDecodeError as e:
+    e.lineno, e.colno                 # the tomllib attributes`,
+      'python',
+    ),
+  },
+  {
+    label: 'CLI',
+    html: await hl(
+      `$ teptris parse config.toml        # typed-JSON tree (toml-test wire shape)
+$ teptris to-json config.toml
+$ teptris format config.toml       # canonical TOML
+$ teptris validate broken.toml     # exit 1 with line:col on error`,
+      'shell',
+    ),
+  },
+];
+---
+
+<BaseLayout
+  title="Teptris — TOML at library speed"
+  description="teptris: a TOML 1.0/1.1 parser and writer in pure C99 with zero required dependencies and a stable C ABI — 714/714 toml-test, 4x the best competitor on every gate shape, with first-class Ruby and Python bindings."
+>
+  <!-- ————— hero ————— -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="etym">TOML · Opinions Minimal — told at <strong>library speed</strong></span>
+        <h1 class="hero-title">
+          TOML, told at<br /><em>library speed.</em>
+        </h1>
+        <p class="hero-lede">
+          <strong>teptris</strong> is the TOML sibling of libleptris: a
+          parser and writer in pure C99 — zero required dependencies, a
+          stable C ABI, opaque handles — with first-class Ruby and Python
+          bindings shaped like <code>tomlib</code> and <code>tomllib</code>.
+        </p>
+        <div class="hero-actions">
+          <a class="btn solid" href="/docs/teptris-getting-started">Get started</a>
+          <a class="btn" href="/benchmarks/toml">See the race</a>
+        </div>
+        <ul class="hero-points">
+          <li><strong>Speed with a referee</strong> — every figure comes from the open benchmark lane: interleaved runs, pinned competitors, medians, ledger kept in the repository.</li>
+          <li><strong>Conformance first</strong> — 714/714 on BurntSushi&rsquo;s toml-test (1.1 view), the round-trip property, ASan/UBSan/TSan suites, and a nightly libFuzzer lane.</li>
+          <li><strong>One core, three surfaces</strong> — the same C99 engine from C, Ruby, and Python; a typed-JSON CLI thrown in.</li>
+        </ul>
+      </div>
+      <div class="hero-mark">
+        <div class="medallion-caption">the third hare joins the chase</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— stats band ————— -->
+  <div class="stats">
+    <div class="wrap">
+      <div class="stat"><span class="n" data-count="714" data-suffix="/714">0/714</span><span class="l">toml-test, the 1.1 view</span></div>
+      <div class="stat"><span class="n" data-count="4.13" data-suffix="×">0×</span><span class="l">mixed shape vs tomlc17, dev hardware</span></div>
+      <div class="stat"><span class="n" data-count="5.84" data-suffix="×">0×</span><span class="l">table-heavy vs cpptoml, dev hardware</span></div>
+      <div class="stat"><span class="n" data-count="10" data-suffix="+">0+</span><span class="l">prebuilt platform gems, per Ruby minor</span></div>
+      <div class="stat"><span class="n" data-raw="zero">zero</span><span class="l">required runtime dependencies</span></div>
+    </div>
+  </div>
+
+  <!-- ————— what it is ————— -->
+  <section class="sec-alt sec-tint-periwinkle" id="features">
+    <div class="wrap">
+      <p class="sec-label reveal" data-num="01">What it is</p>
+      <h2 class="sec-title reveal">An engine built like a <em>ledger</em>, not a claim</h2>
+      <p class="sec-lede reveal" data-d="1">
+        Every performance statement in teptris reproduces from the benchmark
+        lane — interleaved A/B rounds, pinned competitor commits, medians
+        because runner minimums wobble. The 4×-mandate gate shapes were
+        confirmed on developer hardware: mixed 4.13×, cargo 4.67×,
+        deep 4.97×, table 5.84×.
+      </p>
+
+      <div class="feat-grid">
+        <div class="feat feat-speed reveal">
+          <span class="big">2.9–10.2×<small> / best competitor, per shape</small></span>
+          <h3>The race, in the open</h3>
+          <p>
+            The CI lane rebuilds tomlc99, tomlc17, cpptoml, toml11 and
+            tomlplusplus at pinned commits on every push and races nine
+            document shapes: 223–386 MB/s parse on the ubuntu cell. The
+            harness, the corpus seed and the ledger
+            (<code>benchmarks/LEDGER.md</code>) ship in the repository.
+          </p>
+        </div>
+        <div class="feat feat-bound sage reveal" data-d="1">
+          <span class="big">714/714<small> toml-test, 1.1 view</small></span>
+          <h3>Conformant where it counts</h3>
+          <p>
+            The TOML 1.1 draft grammar as a strict superset of 1.0 —
+            <code>\e</code> and <code>\xNN</code> escapes, optional seconds,
+            inline-table newlines, trailing commas. Parse → emit → parse
+            tree-equality, byte-stable emit, ASan/UBSan/TSan suites and a
+            nightly libFuzzer lane standing guard.
+          </p>
+        </div>
+        <div class="feat feat-conform reveal" data-d="2">
+          <span class="big">1<small> pass for planned keys</small></span>
+          <h3>Beyond the DOM</h3>
+          <p>
+            Compile a schema descriptor once, walk a document once,
+            materialize only the planned keys — the descriptor plan ABI
+            (<code>teptris/plan.h</code>, <code>Teptris::TOML.load_schema</code>)
+            for framework adapters. Batch and lazy paths for many-document
+            corpora; zero-copy key views in C.
+          </p>
+        </div>
+        <div class="feat feat-speed reveal" data-d="3">
+          <span class="big">10+<small> prebuilt gem rows · 12 abi3 wheels</small></span>
+          <h3>Packaging that installs</h3>
+          <p>
+            Ruby: fat platform gems with one extension per Ruby minor
+            (3.0–4.0), qemu-built 32-bit ARM, big-endian s390x and ppc64le —
+            the engine source rides every gem. Python: <code>cp39-abi3</code>
+            wheels for every CPython ≥ 3.9. C: <code>cmake --install</code>,
+            pkg-config and a <code>teptris::</code> CMake export.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— code ————— -->
+  <section class="sec" id="code">
+    <div class="wrap">
+      <p class="sec-label reveal" data-num="02">The surface</p>
+      <h2 class="sec-title reveal">Shaped like the <em>incumbents</em></h2>
+      <p class="sec-lede reveal" data-d="1">
+        Ruby mirrors <code>tomlib</code> (offset datetimes become
+        <code>Time</code>, dates become <code>Date</code>); Python mirrors
+        <code>tomllib</code> (<code>TOMLDecodeError</code> and its
+        <code>lineno</code>/<code>colno</code> included). Switching is a
+        require away.
+      </p>
+      <div class="reveal" data-d="1">
+        <CodeTabs client:visible tabs={tabs} />
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— install ————— -->
+  <section class="sec-alt sec-tint-rose" id="install">
+    <div class="wrap">
+      <p class="sec-label reveal" data-num="03">The chase begins</p>
+      <h2 class="sec-title reveal">Install, <em>three ways</em></h2>
+      <div class="reveal" data-d="1">
+        <table class="doc-table">
+          <tr><th>surface</th><th>command</th><th>what you get</th></tr>
+          <tr>
+            <td>Ruby</td>
+            <td><code>gem install teptris</code></td>
+            <td class="note">a prebuilt platform gem where one exists — otherwise the source gem compiles the vendored engine loudly</td>
+          </tr>
+          <tr>
+            <td>Python</td>
+            <td><code>pip install teptris</code></td>
+            <td class="note">a self-contained <code>cp39-abi3</code> wheel — engine statically linked, CPython ≥ 3.9</td>
+          </tr>
+          <tr>
+            <td>C</td>
+            <td><code>cmake -B build -S . &amp;&amp; cmake --build build</code></td>
+            <td class="note">LTO on by default; <code>cmake --install</code> carries headers, pkg-config and the CMake export</td>
+          </tr>
+        </table>
+      </div>
+      <p class="reveal" data-d="2" style="margin-top:1.8rem">
+        <a href="/docs/teptris-getting-started">The teptris docs — C, Ruby and Python guides&nbsp;→</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ————— cta ————— -->
+  <section class="cta">
+    <div class="wrap">
+      <h2 class="reveal">Fast as hares.<br /><em>Told at library speed.</em></h2>
+      <p class="reveal" data-d="1">
+        teptris v{VERSIONS.toml} — libteptris v{VERSIONS.toml}, the teptris
+        gem v{VERSIONS.tomlRuby}, the teptris package v{VERSIONS.tomlPy}.
+        Repos canonical: <a href={`${SITE.githubToml}`}>teptris</a>,
+        <a href={`${SITE.githubTomlRuby}`}> teptris-ruby</a>,
+        <a href={`${SITE.githubTomlPy}`}> teptris-py</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,131 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Teptris getting started — C"
+  description="Build libteptris from source, install it via CMake or pkg-config, parse and emit TOML from C — the API shape, error handling, batch parsing and the CLI."
+>
+  <DocsShell
+    crumb="Teptris — getting started (C)"
+    title={`libteptris v${VERSIONS.toml} — TOML from C`}
+    lede={`A TOML 1.0/1.1 parser and writer in pure C99 — zero required runtime dependencies, a stable ABI, opaque handles. The grammar is the TOML 1.1 draft as a strict superset of 1.0; the emitter is canonical: parse(emit(d)) == d, and emit is idempotent.`}
+  >
+    <h2 id="build">Build and test</h2>
+    <CodeBlock
+      lang="bash"
+      title="from a checkout"
+      code={`cmake -B build -S . -DCMAKE_BUILD_TYPE=Release   # LTO on by default
+cmake --build build
+ctest --test-dir build --output-on-failure`}
+    />
+    <p>
+      <code>scripts/validate.sh</code> is the project&rsquo;s pre-completion
+      gate: a clean warnings-as-errors build, the full test suite, a CLI
+      smoke, and a leak check. Sanitizer presets exist alongside the default
+      build dir — <code>build-asan</code>, <code>build-ubsan</code>,
+      <code>build-tsan</code> — and the nightly CI lane runs libFuzzer
+      (parse → emit → re-parse) under ASan/UBSan.
+    </p>
+
+    <h2 id="install">Install and link</h2>
+    <p>
+      The install rule ships the public headers, the compiled library, a
+      pkg-config manifest, and a CMake package with a
+      <code>teptris::</code> namespace:
+    </p>
+    <CodeBlock
+      lang="bash"
+      title="cmake --install"
+      code={`cmake --install build --prefix /usr/local
+# headers:   /usr/local/include/teptris/*.h
+# library:   /usr/local/lib/libteptris.*
+# pkg-config: /usr/local/lib/pkgconfig/teptris.pc
+# cmake:     /usr/local/lib/cmake/teptris/  (teptris::teptris)`}
+    />
+    <CodeBlock
+      lang="bash"
+      title="pkg-config consumers"
+      code={`cc my.c $(pkg-config --cflags --libs teptris)`}
+    />
+    <CodeBlock
+      lang="cmake"
+      title="CMake consumers"
+      code={`find_package(teptris REQUIRED CONFIG)
+target_link_libraries(my_app PRIVATE teptris::teptris)`}
+    />
+
+    <h2 id="api">The API shape</h2>
+    <CodeBlock
+      lang="c"
+      title="parse, walk, emit"
+      code={`#include <teptris/teptris.h>
+
+teptris_document *doc = NULL;
+if (teptris_parse(data, len, NULL, &doc) != TEPTRIS_OK) {
+    const teptris_error *e = teptris_document_error(doc);
+    fprintf(stderr, "%s at %zu:%zu\\n", e->message, e->line, e->column);
+    teptris_document_free(doc);
+    return 1;
+}
+const teptris_node *root = teptris_document_root(doc);
+const teptris_node *v = teptris_node_table_get(root, "key", 3);
+
+char *out = NULL; size_t out_len = 0;
+if (teptris_document_emit(doc, &out, &out_len) == TEPTRIS_OK) {
+    /* out is canonical TOML — free(out) when done */
+}
+teptris_document_free(doc);`}
+    />
+    <Callout kind="note">
+      <p>
+        Key views point <strong>into the parse input</strong> (zero-copy):
+        keep the input buffer alive for the document&rsquo;s lifetime.
+      </p>
+    </Callout>
+
+    <h2 id="batch">Many documents, one call</h2>
+    <p>
+      <code>teptris_parse_batch</code> parses N documents in a single C
+      crossing and reports per-document status — the surface the Ruby
+      <code>load_batch</code> and Python <code>loads_batch</code> bindings
+      ride:
+    </p>
+    <CodeBlock
+      lang="c"
+      title="teptris_parse_batch"
+      code={`const char *docs[] = { doc_a, doc_b, doc_c };
+const size_t lens[] = { len_a, len_b, len_c };
+teptris_document *out[3] = {0};
+teptris_status st[3];
+teptris_parse_batch(docs, lens, 3, NULL, out, st);
+/* st[i] == TEPTRIS_OK, out[i] owned — free each */`}
+    />
+
+    <h2 id="cli">The CLI</h2>
+    <CodeBlock
+      lang="bash"
+      code={`teptris parse config.toml     # typed-JSON tree (the toml-test wire shape)
+teptris to-json config.toml   # same tree, explicit
+teptris format config.toml    # canonical TOML
+teptris validate broken.toml  # exit 1, line:col on stderr
+teptris version`}
+    />
+
+    <h2 id="links">Where to go next</h2>
+    <ul>
+      <li>
+        <a href={`${SITE.githubToml}`}>leptris/teptris</a> — the canonical
+        repository: <code>benchmarks/LEDGER.md</code> carries the measured
+        story, <code>DESCRIPTOR_ABI.md</code> the schema-descriptor ABI.
+      </li>
+      <li><a href="/docs/teptris-ruby">The teptris gem for Ruby</a></li>
+      <li><a href="/docs/teptris-python">The teptris package for Python</a></li>
+      <li><a href="/benchmarks/toml">The TOML benchmark campaigns</a></li>
+    </ul>
+  </DocsShell>
+</BaseLayout>
