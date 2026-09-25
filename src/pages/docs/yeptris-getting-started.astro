@@ -1,0 +1,141 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Yeptris getting started — C"
+  description="Build libyeptris from source, install it via CMake or pkg-config, parse and emit YAML from C — the API shape, error handling, the schema modes and the three consumption models."
+>
+  <DocsShell
+    crumb="Yeptris — getting started (C)"
+    title={`libyeptris v${VERSIONS.yaml} — YAML from C`}
+    lede={`A YAML 1.2 parser, writer and streamer in pure C11 — zero required runtime dependencies, a stable ABI, opaque handles. The conformance bar is the yaml-test-suite (395/395); a libyaml/Psych-compatible YAML 1.1 lenient mode covers the real world.`}
+  >
+    <h2 id="build">Build and test</h2>
+    <CodeBlock
+      lang="bash"
+      title="from a checkout"
+      code={`cmake -B build -S . -DCMAKE_BUILD_TYPE=Release   # LTO on by default
+cmake --build build
+ctest --test-dir build --output-on-failure`}
+    />
+    <p>
+      <code>scripts/validate.sh</code> is the project&rsquo;s pre-completion
+      gate: a clean warnings-as-errors build, the full test suite, a CLI
+      smoke, and a leak check. Sanitizer presets exist alongside the default
+      build dir — <code>build-asan</code>, <code>build-ubsan</code>,
+      <code>build-tsan</code> — and a nightly CI lane runs libFuzzer.
+    </p>
+
+    <h2 id="install">Install and link</h2>
+    <p>
+      The install rule ships the public headers (one canonical types header
+      behind <code>yeptris/</code>), the compiled library, and pkg-config +
+      CMake package metadata:
+    </p>
+    <CodeBlock
+      lang="bash"
+      title="cmake --install"
+      code={`cmake --install build --prefix /usr/local
+# headers:   /usr/local/include/yeptris/*.h
+# library:   /usr/local/lib/libyeptris.{a,dylib,so}`}
+    />
+    <CodeBlock
+      lang="bash"
+      title="pkg-config consumers"
+      code={`cc my.c $(pkg-config --cflags --libs yeptris)`}
+    />
+
+    <h2 id="api">The API shape</h2>
+    <CodeBlock
+      lang="c"
+      title="parse, walk, emit"
+      code={`#include <yeptris/yeptris.h>
+
+YeptrisStatus st;
+YeptrisDocument doc = yeptris_parse(data, len, &st);
+if (!doc) {
+    uint32_t line, col;
+    fprintf(stderr, "%s at %u:%u\\n",
+            yeptris_last_error(&line, &col), line, col);  /* 1-based */
+    return 1;
+}
+size_t n = yeptris_document_count(doc);
+YeptrisNode root = yeptris_document_root(doc, 0);
+
+if (yeptris_node_kind(root) == YEPTRIS_NODE_MAPPING) {
+    YeptrisNode port = yeptris_node_map_get(root, "port", 4);
+    size_t vlen;
+    const char *val = yeptris_node_value(port, &vlen);  /* zero-copy */
+}
+
+char *out = yeptris_serialize(doc, &(size_t){0});  /* canonical YAML */
+yeptris_document_free(doc);   /* ONE call frees everything; free(out) too */`}
+    />
+    <Callout kind="note">
+      <p>
+        Value views point <strong>into the parse input</strong> (zero-copy):
+        keep the input buffer alive for the document&rsquo;s lifetime. All
+        allocations live in the document&rsquo;s arena — there is exactly
+        one free per document, and no refcounting.
+      </p>
+    </Callout>
+
+    <h2 id="schemas">Two schemas, one engine</h2>
+    <p>
+      <code>yeptris_parse</code> applies the YAML 1.2 core schema. The
+      options form switches to the libyaml/Psych-compatible YAML 1.1
+      lenient mode — <code>yes</code> is a boolean, <code>017</code> is
+      octal, sexagesimal integers resolve — for reading the world&rsquo;s
+      existing YAML:
+    </p>
+    <CodeBlock
+      lang="c"
+      title="yeptris_parse_ex"
+      code={`#include <yeptris/parse.h>
+
+yeptris_parse_options opts = {0};
+opts.schema = YEPTRIS_SCHEMA_11_COMPAT;   /* libyaml/Psych implicit typing */
+YeptrisDocument doc = yeptris_parse_ex(data, len, &opts, &st);`}
+    />
+
+    <h2 id="models">Three consumption models, one engine</h2>
+    <p>
+      The same parse engine feeds three consumption shapes — pick per
+      workload, not per library:
+    </p>
+    <ul>
+      <li>
+        <strong>DOM</strong> — the opaque node handles above; O(1) indexed
+        child access, interned mapping keys.
+      </li>
+      <li>
+        <strong>Events</strong> — libyaml-compatible push events (libyaml
+        test drivers port directly) and a StAX-style pull feed with zero
+        C→host callbacks.
+      </li>
+      <li>
+        <strong>The record tape</strong> — one packed 8-byte record per
+        token in a single arena; bulk-drain it in O(1) FFI calls. The
+        binding seam the Ruby and Python packages ride.
+      </li>
+    </ul>
+
+    <h2 id="links">Where to go next</h2>
+    <ul>
+      <li>
+        <a href={`${SITE.githubYaml}`}>leptris/yeptris</a> — the canonical
+        repository: <code>benchmarks/PERF-LEDGER.md</code> carries the
+        measured story, <code>docs/FFI.md</code> the binding contract,
+        <code>docs/ABI.md</code> the ABI pins.
+      </li>
+      <li><a href="/docs/yeptris-ruby">The yeptris gem for Ruby</a></li>
+      <li><a href="/docs/yeptris-python">The yeptris package for Python</a></li>
+      <li><a href="/benchmarks/yaml">The YAML benchmark campaigns</a></li>
+    </ul>
+  </DocsShell>
+</BaseLayout>

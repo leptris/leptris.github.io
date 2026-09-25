@@ -1,0 +1,116 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Yeptris Ruby — YAML docs"
+  description="The yeptris gem: Psych-compatible YAML for Ruby over libyeptris — FFI, no C extension, strict-JSON surface, Document node API, prebuilt platform gems."
+>
+  <DocsShell
+    crumb="Yeptris — Ruby"
+    title={`Yeptris — the YAML gem v${VERSIONS.yamlRuby}`}
+    lede={`An FFI binding (no C extension, zero compilation at install) over libyeptris v${VERSIONS.yaml}. API shape and value semantics mirror Psych: YAML 1.1 implicit typing by default, the Psych error hierarchy, and a drop-in namespace.`}
+  >
+    <h2 id="install">Installation</h2>
+    <CodeBlock lang="bash" code={`gem install yeptris`} />
+    <p>
+      RubyGems resolves a <strong>prebuilt platform gem</strong> where one
+      exists: fat gems for x86_64/aarch64 Linux (glibc and musl), macOS
+      (x86_64/arm64) and Windows (mingw and ucrt) — 14 release legs,
+      lockstep-versioned with the engine. The gem binds the shared
+      <code>libyeptris</code> through FFI: nothing compiles at install.
+    </p>
+
+    <h2 id="usage">Usage</h2>
+    <CodeBlock
+      lang="ruby"
+      code={`require "yeptris"
+
+Yeptris::YAML.load("name: yeptris\\nrating: 10\\n")
+# => {"name" => "yeptris", "rating" => 10}
+
+# Psych's YAML 1.1 implicit typing is the default (yes => true, 017 => 15);
+# pass schema: :core_12 for YAML 1.2 core semantics
+Yeptris::YAML.load(src, schema: :core_12)
+
+Yeptris::YAML.dump({"name" => "yeptris", "tags" => [:yaml, :fast]})
+
+begin
+  Yeptris::YAML.load("a: [1,")
+rescue Yeptris::ParseError => e
+  e.message   # carries the C parser's line/column detail
+end`}
+    />
+    <p>
+      Dump builds through the library&rsquo;s DOM mutation API, so the C
+      emitter&rsquo;s sizing, style-choosing and escape machinery applies
+      to synthesized trees unchanged. Handles are document-scoped:
+      <code>Document#free</code> releases everything in one C call, a GC
+      finalizer backs it up, and any use after free raises
+      <code>Yeptris::FreedError</code> — never a segfault.
+    </p>
+
+    <h2 id="json">The strict-JSON twin</h2>
+    <p>
+      <code>Yeptris::YAML.load</code> keeps the Psych contract for every
+      input — including JSON-shaped ones (<code>&#123;&quot;a&quot;: [1,]&#125;</code>{" "}
+      is legal flow YAML; <code>&quot;1e3&quot;</code> is a Psych String).
+      <code>Yeptris::JSON.load</code> is the strict RFC 8259 surface —
+      exact <code>JSON.parse</code> semantics by construction, spec-pinned
+      value-by-value and error-by-error:
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`require "yeptris/json"
+
+Yeptris::JSON.load('{"a": [1, 2], "b": null, "c": 1e3}')
+# => {"a" => [1, 2], "b" => nil, "c" => 1000.0}
+# Bignum integers, exponent-only floats, duplicate-key semantics:
+# every case shares JSON.parse's contract by test, not by claim.`}
+    />
+
+    <h2 id="document">The Document node API</h2>
+    <CodeBlock
+      lang="ruby"
+      code={`doc = Yeptris::Document.parse(config_yaml)
+doc.root["server"]["port"].to_i
+doc.serialize                    # canonical YAML through the C emitter
+doc.free                         # one C call; FreedError afterwards`}
+    />
+
+    <h2 id="psych">Psych drop-in</h2>
+    <p>
+      <code>Yeptris::Psych</code> re-implements Psych&rsquo;s surface over
+      the engine, and the error names consumers rescue are aliased at the
+      top level — <code>Yeptris::DisallowedClass</code> is
+      <code>Yeptris::Psych::DisallowedClass</code>. Informational notices
+      are opt-in (<code>YEPTRIS_DEBUG=1</code>): a successful fallback is
+      not a warning, and consumer CLIs that assert clean stderr stay clean
+      by default.
+    </p>
+    <Callout kind="note">
+      <p>
+        Typing follows Psych&rsquo;s SafeLoader (YAML 1.1 implicit typing):
+        <code>yes/no/on/off</code> booleans, <code>0x</code>/leading-0
+        integers, merge keys, anchor identity. Every deliberate divergence
+        from Psych is pinned by a spec — the conformance bar is Psych&rsquo;s
+        own suite, ported.
+      </p>
+    </Callout>
+
+    <h2 id="links">Where to go next</h2>
+    <ul>
+      <li>
+        <a href={`${SITE.githubYamlRuby}`}>leptris/yeptris-ruby</a> — the
+        canonical repository and its platform matrix.
+      </li>
+      <li><a href="/docs/yeptris-getting-started">The C engine under the gem</a></li>
+      <li><a href="/docs/yeptris-python">The Python sibling package</a></li>
+      <li><a href="/benchmarks/yaml">The YAML benchmark campaigns</a></li>
+    </ul>
+  </DocsShell>
+</BaseLayout>
