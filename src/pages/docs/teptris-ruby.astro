@@ -1,0 +1,147 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Teptris Ruby — TOML docs"
+  description="The teptris gem: tomlib-shaped TOML for Ruby over libteptris — Time/Date datetimes, load_batch, load_lazy, schema descriptor plans, prebuilt platform gems for every supported Ruby."
+>
+  <DocsShell
+    crumb="Teptris — Ruby"
+    title={`Teptris — the TOML gem v${VERSIONS.tomlRuby}`}
+    lede={`A native C-extension binding (no FFI, no fallback) over libteptris v${VERSIONS.toml}. API shape and value semantics mirror the tomlib gem: offset and local datetimes become Time, dates become Date, local times stay String.`}
+  >
+    <h2 id="install">Installation</h2>
+    <CodeBlock lang="bash" code={`gem install teptris`} />
+    <p>
+      RubyGems resolves a <strong>prebuilt platform gem</strong> where one
+      exists: fat gems for x86_64/aarch64 Linux (glibc and musl), macOS
+      (x86_64/arm64) and Windows (mingw and ucrt), each carrying one
+      extension per Ruby minor (3.3–4.0); 32-bit ARM, big-endian
+      s390x/ppc64le and the msvcrt-era Ruby 3.0 tier are emulated or pinned
+      builds. Every other platform gets the source gem, which compiles the
+      vendored engine with the installing Ruby&rsquo;s own toolchain — a C
+      compiler is required, and the install fails loudly without one.
+    </p>
+    <Callout kind="note">
+      <p>
+        Every prebuilt gem also carries the <strong>full engine source</strong>
+        (at <code>ext/teptris_ext/engine</code>) beside the compiled
+        extension — rebuild against your own toolchain with
+        <code>ruby extconf.rb &amp;&amp; make</code>.
+      </p>
+    </Callout>
+
+    <h2 id="usage">Usage</h2>
+    <CodeBlock
+      lang="ruby"
+      code={`require "teptris"
+
+Teptris::TOML.load("title = \\"teptris\\"\\n[owner]\\nname = \\"t\\"\\n")
+# => {"title" => "teptris", "owner" => {"name" => "t"}}
+
+Teptris::TOML.dump({"title" => "teptris", "owner" => {"name" => "t"}})
+
+begin
+  Teptris::TOML.load("a = [1,")
+rescue Teptris::ParseError => e
+  e.line   # 1
+  e.column # 8
+end`}
+    />
+    <p>
+      Both directions are native: <code>dump</code> walks the object tree in
+      C through the builder API, so the engine emitter is the single
+      formatting source (canonical output, 3–10× tomlib per shape). End to
+      end, <code>load</code> is 7–110× tomlib and 20–280× toml-rb per shape.
+    </p>
+
+    <h2 id="values">The value contract</h2>
+    <table class="doc-table">
+      <tr><th>TOML</th><th>Ruby</th></tr>
+      <tr><td>offset datetime</td><td><code>Time</code> (fixed offset)</td></tr>
+      <tr><td>local datetime</td><td><code>Time</code></td></tr>
+      <tr><td>local date</td><td><code>Date</code></td></tr>
+      <tr><td>local time</td><td><code>String</code> (the tomlib contract)</td></tr>
+      <tr><td>integer / float / string / bool / array / table</td><td>the obvious Ruby types</td></tr>
+    </table>
+
+    <h2 id="batch">Many documents — batch and lazy</h2>
+    <CodeBlock
+      lang="ruby"
+      code={`# Eager: one Array of Hashes, same datetime contract as TOML.load
+docs = Teptris::TOML.load_batch(toml_strings,
+                                safe_load: [Time, Date],
+                                datetime_policy: :native)
+
+# File paths
+docs = Teptris::TOML.load_files(["a.toml", "b.toml", "c.toml"])
+
+# Lazy twin: parse N eagerly, materialize only along touched paths
+arr = Teptris::TOML.load_lazy_batch(toml_strings)
+arr.each { |doc| doc["x"].value }`}
+    />
+    <Callout kind="warn">
+      <p>
+        <strong>Honest perf shape:</strong> eager <code>load_batch</code> is
+        a wash or slower than per-doc <code>load</code> for tiny/medium docs
+        (Ruby&rsquo;s per-doc dispatch is amortized by the JIT) and a clear
+        win for large ones. Use it for the single API surface and the
+        per-doc error report — <code>load_lazy_batch</code> is the real
+        many-small speedup.
+      </p>
+    </Callout>
+
+    <h2 id="lazy">Lazy loading</h2>
+    <p>
+      <code>Teptris::TOML.load_lazy</code> parses once and materializes host
+      objects only along the paths actually touched — the complementary path
+      when the schema is not known up front.
+    </p>
+
+    <h2 id="schema">Schema descriptor plans</h2>
+    <p>
+      Compile a plan once, materialize only the planned keys in one native
+      pass — <code>Teptris::Descriptor</code> /
+      <code>Teptris::TOML.load_schema</code> (shipped since 0.2.29; the C ABI
+      lives in libteptris <code>teptris/plan.h</code>). The walk returns a
+      nested Hash with String keys and already-cast Ruby values:
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`DESC = Teptris::Descriptor.build(
+  children: [
+    { name: "id",    kind: :scalar },
+    { name: "tags",  kind: :collection },          # array of scalars
+    { name: "items", kind: :nested, plan: {        # table or [[aot]]
+      children: [{ name: "sku", kind: :scalar }] } },
+    { name: "extra", kind: :raw },                 # escape hatch: full subtree
+  ])
+
+Teptris::TOML.load_schema(toml_string, DESC)
+# => {"id"=>1, "tags"=>["a","b"], "items"=>[{"sku"=>"x"}], "extra"=>{...}}
+# unplanned keys never appear`}
+    />
+    <p>
+      Row kinds: <code>:scalar</code> (any TOML value),
+      <code>:collection</code> (array of scalars), <code>:nested</code>
+      (recurse via <code>plan:</code>; spans arrays of tables),
+      <code>:raw</code> (the untouched subtree). Absent planned keys read as
+      <code>nil</code>.
+    </p>
+
+    <h2 id="links">Where to go next</h2>
+    <ul>
+      <li>
+        <a href={`${SITE.githubTomlRuby}`}>leptris/teptris-ruby</a> — the
+        canonical repository and its full platform matrix.
+      </li>
+      <li><a href="/docs/teptris-getting-started">The C engine under the gem</a></li>
+      <li><a href="/docs/teptris-python">The Python sibling package</a></li>
+    </ul>
+  </DocsShell>
+</BaseLayout>

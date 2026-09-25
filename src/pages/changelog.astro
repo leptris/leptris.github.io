@@ -10,17 +10,20 @@ import { SITE } from '~/data/site';
   <section class="page-head">
     <div class="wrap">
       <p class="sec-label">Changelog</p>
-      <h1 class="sec-title">Two components, <em>one core</em></h1>
+      <h1 class="sec-title">The engines, <em>one mark</em></h1>
       <p class="sec-lede">
-        The C library and the Ruby gem release on their own cadence, in
-        lockstep when the gem rides a core release. This page carries the
-        headlines; the repositories carry the full history.
+        The C engines and their bindings release on their own cadence, in
+        lockstep when a binding rides an engine release. This page carries
+        the headlines; the repositories carry the full history.
       </p>
     </div>
   </section>
 
   <section class="sec" style="padding-top:3rem">
     <div class="wrap prose" style="max-width:60rem">
+      <h2>libteptris + teptris bindings <span class="pill">v0.1.27 / v0.2.47 / v0.2.23</span> — the TOML family</h2>
+      <p><span class="pill sage">2026-09-23</span> — teptris is the TOML engine of the leptris program: a TOML 1.0/1.1 parser and writer in pure C99. <strong>libteptris v0.1.27</strong> stands at 714/714 on BurntSushi&rsquo;s toml-test (1.1 view) with the round-trip property, ASan/UBSan/TSan suites and a nightly libFuzzer lane; the CI benchmark lane races five pinned C/C++ competitors on every push (2.9–10.2× the best competitor per shape), and the 4×-mandate gate shapes are confirmed on developer hardware — mixed 4.13×, cargo 4.67×, deep 4.97×, table 5.84× (see the <a href="/benchmarks/toml/">TOML benchmarks</a>). Surfaces: batch parsing, lazy loading, and a schema-descriptor ABI (<code>teptris/plan.h</code>) for framework adapters. <strong>teptris-ruby v0.2.47</strong> (tomlib-shaped; 7–110× tomlib end to end) fixed a 32-bit ARM timespec ABI mismatch — the affected arm-linux gems 0.2.43–0.2.46 were yanked and replaced — and added per-PR value gates for the emulated tiers. <strong>teptris-py v0.2.23</strong> (tomllib-shaped; 4.8–6× rtoml end to end) ships self-contained <code>abi3</code> wheels for CPython ≥ 3.9. Docs: the <a href="/teptris">teptris section</a> and its <a href="/docs/teptris-getting-started">C</a>, <a href="/docs/teptris-ruby">Ruby</a>, <a href="/docs/teptris-python">Python</a> guides.</p>
+
       <h2>libleptris <span class="pill">v1.9.3 – v1.9.145</span> — the September engines</h2>
       <p><span class="pill periwinkle">2026-09-12</span> — four engines landed on one core, each gated by an external corpus: <strong>XSLT</strong> closed to <strong>205/205 byte-identical</strong> against the libxslt suite (v1.9.19) and grew the 2.0/3.0 working set (tunnel params, maps/arrays, accumulators, <code>xsl:evaluate</code>/<code>merge</code>/<code>result-document</code>, character maps, inline + higher-order functions), with the in-process scorecard vs libxslt now measured fixture-by-fixture (predicate dispatch 1.7× and subtree copy 2.05× ahead, value-of at parity, dispatch shapes behind — the full table and its ceiling analysis on the <a href="/benchmarks/xslt/">benchmarks page</a>); <strong>XQuery</strong> (FLWOR, constructors, try/catch, external variables) with W3C QT3 function sets adopted exact-N; <strong>HTML</strong> as two entries — the WHATWG tree-construction engine (adoption agency, formatting reconstruction, script-data escaped states, RCDATA family, foreign integration points; html5lib corpus 933 → 1169 across v1.9.137–.143, entities01.dat fully green; numeric-reference end states in v1.9.143) and the Nokogiri-parity entry byte-pinned to a 1555-case reference; and <strong>validation without a JVM</strong> — native RELAX NG (Jing-parity gate, <code>&lt;include&gt;</code>, params) plus native Schematron (SVRL, abstract patterns, phases, corpus 50/50) behind one <code>leptris validate</code> CLI, with a native XML diff lane alongside. XPath stayed 438/438. v1.9.144 adds <code>leptris_element_expanded_name</code> — local name, prefix, and resolved namespace URI through one call, for FFI adapters that fan out per-element reads. v1.9.145 is a maintenance release: the public version macros are corrected and kept in sync by the release tooling, the XSLT scorecard gains committed in-process libxslt reference twins, and the benchmark matrix harness reports the library versions it actually links. Full per-release notes in the <a href="https://github.com/leptris/leptris/releases">GitHub releases</a>.</p>
 
