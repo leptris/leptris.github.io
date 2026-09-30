@@ -71,7 +71,7 @@ except teptris.TOMLDecodeError as e:
       <tr><td>integer / float / string / bool / array / table</td><td>the obvious Python types</td></tr>
     </table>
     <p>
-      On the version-specific wheels (CPython 3.10+) datetimes
+      On the version-specific wheels (CPython 3.10–3.14) datetimes
       materialize through the C datetime API directly — no generic-call
       machinery — with one cached <code>timezone</code> per offset;
       measured <strong>&minus;56%</strong> on datetime-heavy loads and
