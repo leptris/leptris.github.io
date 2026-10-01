@@ -21,7 +21,7 @@ import { SITE, VERSIONS } from '~/data/site';
       <code>pip</code> resolves a wheel for your platform —
       manylinux/musllinux x86_64, aarch64 and armv7l (32-bit ARM, built
       under qemu), macOS arm64 and x86_64, Windows AMD64 and ARM64.
-      CPython 3.10–3.13 gets a version-specific wheel (PGO-built, with
+      CPython 3.10–3.14 gets a version-specific wheel (PGO-built, with
       the datetime C-API fast paths); everything else resolves the
       <code>cp39-abi3</code> wheel, which covers every CPython ≥ 3.9
       including future minors. The extension statically links the
@@ -71,7 +71,8 @@ except teptris.TOMLDecodeError as e:
       <tr><td>integer / float / string / bool / array / table</td><td>the obvious Python types</td></tr>
     </table>
     <p>
-      On the version-specific wheels (CPython 3.10–3.14) datetimes
+      On the version-specific wheels (CPython 3.10–3.14, and the
+      free-threaded cp314t wheels) datetimes
       materialize through the C datetime API directly — no generic-call
       machinery — with one cached <code>timezone</code> per offset;
       measured <strong>&minus;56%</strong> on datetime-heavy loads and

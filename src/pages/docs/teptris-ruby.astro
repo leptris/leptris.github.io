@@ -83,7 +83,11 @@ docs = Teptris::TOML.load_files(["a.toml", "b.toml", "c.toml"])
 
 # Lazy twin: parse N eagerly, materialize only along touched paths
 arr = Teptris::TOML.load_lazy_batch(toml_strings)
-arr.each { |doc| doc["x"].value }`}
+arr.each { |doc | doc["x"].value }
+
+# Threaded (0.2.52+): the C parse releases the GVL — parses overlap
+# across Ruby threads; materialization serializes. Opt-in, 1 = default.
+docs = Teptris::TOML.load_batch(toml_strings, threads: 4)`}
     />
     <Callout kind="warn">
       <p>
@@ -93,6 +97,20 @@ arr.each { |doc| doc["x"].value }`}
         win for large ones. Use it for the single API surface and the
         per-doc error report — <code>load_lazy_batch</code> is the real
         many-small speedup.
+      </p>
+    </Callout>
+    <Callout kind="note">
+      <p>
+        <strong>Parallelism (0.2.52+):</strong> the parse runs
+        GVL-free — a long single-document load no longer blocks other
+        threads, and <code>threads:</code> overlaps parses across real
+        cores (bounded by GVL-serialized materialization; measured
+        noise-bounded on contended CI runners, up to ~1.3–1.5&times; on
+        dedicated cores). The gem is also
+        <a href="https://docs.ruby-lang.org/en/master/Ractor.html">Ractor</a>-safe
+        (0.2.51+): load/dump run inside non-main Ractors — though
+        transferring the materialized document graphs across Ractor
+        boundaries is VM-broken on current CRuby, so prefer threads.
       </p>
     </Callout>
 
