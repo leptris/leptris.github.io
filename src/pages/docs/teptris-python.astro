@@ -8,7 +8,7 @@ import { SITE, VERSIONS } from '~/data/site';
 
 <BaseLayout
   title="Teptris Python — TOML docs"
-  description="The teptris package: tomllib-shaped TOML for Python over libteptris — loads/dumps, TOMLDecodeError with positions, abi3 wheels, loads_batch, loads_lazy with LazyNode."
+  description="The teptris package: tomllib-shaped TOML for Python over libteptris — loads/dumps, TOMLDecodeError with positions, abi3 wheels, loads_batch, loads_lazy with LazyNode, typed (PEP 561), Descriptor planned-key materialization."
 >
   <DocsShell
     crumb="Teptris — Python"
@@ -124,6 +124,42 @@ flat = doc.to_dict()                   # flatten eagerly, loads()-shaped`}
       Datetimes materialize under the same contract as <code>loads</code>.
       The eager path is the floor for flatten-everything workloads; the
       lazy path wins for parse-once-touch-a-subset.
+    </p>
+
+    <h2 id="descriptor">Planned-key materialization — Descriptor</h2>
+    <p>
+      <code>teptris.Descriptor</code> compiles a plan tree once, then
+      materializes a whole document against it in one native pass —
+      unplanned keys are never materialized (the twin of
+      teptris-ruby's <code>Teptris::Descriptor</code>):
+    </p>
+    <CodeBlock
+      lang="python"
+      code={`desc = teptris.Descriptor.build({"children": [
+    {"name": "name", "kind": "scalar"},
+    {"name": "port", "kind": "scalar"},
+    {"name": "hosts", "kind": "collection"},          # array of scalars
+    {"name": "items", "kind": "nested", "plan": {     # recurses; spans
+        "children": [{"name": "id", "kind": "scalar"}]},  # arrays of tables
+    {"name": "everything_else", "kind": "raw"},       # untouched subtree
+]})
+doc = desc.walk(toml_string)   # rows absent from the doc read as None`}
+    />
+    <p>
+      Keys not in the plan never appear;
+      <code>walk</code> raises <code>TOMLDecodeError</code> with
+      <code>line</code>/<code>column</code> like every other public path.
+    </p>
+
+    <h2 id="typing">Typed from 0.2.26</h2>
+    <p>
+      The package ships <code>py.typed</code> (PEP 561) with a
+      <code>_native.pyi</code> stub for the C surface — strict
+      mypy/pyright consumers type-check out of the box, and a mypy gate
+      runs in CI. <code>teptris.engine_version()</code> reports the
+      linked libteptris version; <code>teptris.loads_lazy_batch([...])</code>
+      is the lazy twin of <code>loads_batch</code>. The Ruby gem carries
+      the matching contract as RBS signatures with a steep gate.
     </p>
 
     <h2 id="links">Where to go next</h2>
