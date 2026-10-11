@@ -49,6 +49,11 @@ doc = teptris.loads('title = "teptris"\\n[owner]\\nname = "t"\\n')
 teptris.dumps(doc)   # canonical TOML — the engine emitter is the
                      # single formatting source (3.5-14.2x tomli_w)
 
+import json
+json.loads(teptris.dumps_json_natural(doc))
+# the host JSON view: real numbers, booleans, RFC 3339 datetime
+# strings, non-finite floats as None (nan/inf -> null)
+
 try:
     teptris.loads("a = [1,")
 except teptris.TOMLDecodeError as e:
