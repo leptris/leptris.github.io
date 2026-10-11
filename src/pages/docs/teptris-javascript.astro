@@ -1,0 +1,85 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Teptris JavaScript/TypeScript — TOML docs"
+  description="The teptris npm package: libteptris compiled to WebAssembly — loads/dump/dumpJson with first-class TypeScript types, RFC 3339 datetimes, the full TOML 1.1 draft grammar, no fallback."
+>
+  <DocsShell
+    crumb="Teptris — JavaScript/TypeScript"
+    title={`Teptris — the npm package v${VERSIONS.tomlJs}`}
+    lede={`libteptris v${VERSIONS.toml} compiled to WebAssembly (emscripten, ES module). One async init, three operations, first-class TypeScript declarations — and the same parse/emit behavior as the ruby, python and rust bindings.`}
+  >
+    <h2 id="install">Installation</h2>
+    <CodeBlock lang="bash" code={`npm install teptris`} />
+    <p>
+      The package is ESM-only (<code>&quot;type&quot;: &quot;module&quot;</code>,
+      Node ≥ 20, browsers, bundlers). It ships the wasm binary, the JS
+      wrapper and the type declarations — a single self-contained
+      package, no postinstall, no native modules.
+    </p>
+
+    <h2 id="usage">Usage</h2>
+    <CodeBlock
+      lang="ts"
+      code={`import { init } from "teptris";
+
+const teptris = await init();
+
+const doc = teptris.loads('title = "demo"\\npi = 3.5\\nat = 2026-10-09T12:00:00Z\\n');
+// => { title: "demo", pi: 3.5, at: "2026-10-09T12:00:00Z" }
+
+teptris.dump(doc);      // canonical TOML (RFC 3339 strings re-enter as datetimes)
+teptris.dumpJson(doc);  // natural JSON — the string a host hands to JSON consumers
+teptris.engineVersion();`}
+    />
+    <p>
+      <code>loads</code> returns the natural-JSON view: real numbers,
+      booleans, and RFC 3339 strings for datetimes; non-finite floats
+      (nan/inf) become <code>null</code>. <code>dump</code> emits
+      canonical TOML through the engine builder; <code>dumpJson</code>
+      emits the same tree as natural JSON. Errors carry
+      <code>line</code>/<code>column</code>.
+    </p>
+    <Callout kind="note">
+      <p>
+        The typed contract lives in the package: <code>init</code>,
+        <code>initApi</code>, <code>TeptrisApi</code>,
+        <code>TomlTable</code>, <code>TomlValue</code> and
+        <code>TeptrisError</code>. The package&rsquo;s own test suite
+        type-checks a strict <code>tsc</code> consumer on every run.
+      </p>
+    </Callout>
+
+    <h2 id="performance">Performance</h2>
+    <p>
+      Against the JS ecosystem&rsquo;s parsers over the engine bench
+      corpus: <strong>2–4× @iarna/toml</strong> — the long-standing
+      standard, which also rejects mixed-type arrays that are legal
+      TOML 1.0 — and <strong>parity with smol-toml</strong>, the modern
+      fast pure-JS parser: teptris wins the datetime-heavy shapes
+      (1.5×) and deep tables; smol wins string-heavy inputs, where the
+      wasm→JS bridge prices every string. The tier&rsquo;s real edge
+      is correctness: the <strong>full TOML 1.1 draft grammar</strong>
+      with the same parse/emit behavior as the native bindings.
+    </p>
+
+    <h2 id="advanced">Advanced instantiation</h2>
+    <CodeBlock
+      lang="ts"
+      code={`import { initApi } from "teptris";
+import createModule from "teptris/dist/teptris.mjs";
+
+// for bundlers with their own wasm loading
+const api = initApi(await createModule({ locateFile: ... }));`}
+    />
+    <p>
+      <a href={`${SITE.githubTomlWasm}`}>Source — teptris-wasm</a>.
+    </p>
+  </DocsShell>
+</BaseLayout>

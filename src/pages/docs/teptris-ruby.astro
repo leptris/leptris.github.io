@@ -46,6 +46,11 @@ Teptris::TOML.load("title = \\"teptris\\"\\n[owner]\\nname = \\"t\\"\\n")
 
 Teptris::TOML.dump({"title" => "teptris", "owner" => {"name" => "t"}})
 
+require "json"
+JSON.parse(Teptris::TOML.dump_json_natural({"pi" => 3.5, "at" => Time.utc(2026, 10, 9)}))
+# the host JSON view: real numbers, booleans, RFC 3339 datetime
+# strings, non-finite floats as null (nan/inf -> nil-rendered null)
+
 begin
   Teptris::TOML.load("a = [1,")
 rescue Teptris::ParseError => e
