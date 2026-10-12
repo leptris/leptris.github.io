@@ -14,6 +14,7 @@ export const SITE = {
   githubTomlRuby: 'https://github.com/leptris/teptris-ruby',
   githubTomlPy: 'https://github.com/leptris/teptris-py',
   githubTomlWasm: 'https://github.com/leptris/teptris-wasm',
+  githubTomlRs: 'https://github.com/leptris/teptris-rs',
   rubygemsTeptris: 'https://rubygems.org/gems/teptris',
   pypiTeptris: 'https://pypi.org/project/teptris/',
   githubYamlRuby: 'https://github.com/leptris/yeptris-ruby',
@@ -37,6 +38,8 @@ export const VERSIONS = {
   tomlPyDate: '2026-10-09',
   tomlJs: '0.3.3',
   tomlJsDate: '2026-10-10',
+  tomlRs: '0.1.1',
+  tomlRsDate: '2026-10-06',
   yaml: '0.6.22',
   yamlDate: '2026-09-25',
   yamlRuby: '0.6.22.1',
@@ -124,6 +127,11 @@ export const DOCS_NAV: DocsEntry[] = [
     href: '/docs/teptris-javascript',
     label: 'Teptris — JavaScript/TypeScript',
     blurb: 'The teptris npm package — WebAssembly TOML with first-class types, no fallback.',
+  },
+  {
+    href: '/docs/teptris-rust',
+    label: 'Teptris — Rust',
+    blurb: 'The teptris crate — hand-maintained FFI over the C engine, 7-45x the toml crate on loads.',
   },
 
   {
