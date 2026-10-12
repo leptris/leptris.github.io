@@ -1,0 +1,80 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Teptris Rust — TOML docs"
+  description="The teptris crate: TOML 1.1 for Rust over libteptris — loads/dump/dump_json_natural, hand-maintained FFI, engine-linked, 7-45x the toml crate on loads."
+>
+  <DocsShell
+    crumb="Teptris — Rust"
+    title={`Teptris — the crate v${VERSIONS.tomlRs}`}
+    lede={`Hand-maintained FFI over libteptris v${VERSIONS.toml} — no bindgen, no fallback. The safe API materializes the whole tree into an owned Value with insertion-ordered tables and real datetime fields; the engine's margin passes through almost intact.`}
+  >
+    <h2 id="install">Installation</h2>
+    <CodeBlock lang="bash" code={`cargo add teptris`} />
+    <p>
+      The crate is source + link directives: your build needs
+      <code>libteptris</code> available and your runtime needs it
+      findable (the binding is dynamically linked — the engine is not
+      bundled). Install the engine (<code>cmake --install</code> puts
+      it on the default loader path), or point
+      <code>TEPTRIS_LIB_PATH</code> at a directory containing
+      <code>libteptris.&#123;dylib,so,dll&#125;</code>. The
+      <code>teptris-descriptor</code> companion crate ships the
+      no_std shared descriptor-plan ABI.
+    </p>
+
+    <h2 id="usage">Usage</h2>
+    <CodeBlock
+      lang="rust"
+      code={`use teptris::{loads, dump, dump_json_natural, Value};
+
+let v = loads(b"name = \\"demo\\"\\nport = 8080\\n").unwrap();
+assert_eq!(v.get("name").and_then(Value::as_str), Some("demo"));
+
+let toml = dump(&v).unwrap();        // canonical; parse(dump(v)) == v
+let json = dump_json_natural(&v).unwrap();
+// real numbers, booleans, RFC 3339 datetime strings,
+// non-finite floats as null — the host JSON view`}
+    />
+    <p>
+      <code>Document::parse</code> returns the zero-copy-managed
+      document with <code>to_toml_string</code>,
+      <code>to_json_string</code> (the toml-test conformance dialect)
+      and <code>to_json_natural_string</code>. <code>ParseError</code>
+      carries the message plus 1-based <code>line</code>/
+      <code>column</code>.
+    </p>
+    <Callout kind="note">
+      <p>
+        <code>teptris_parse</code> NUL-terminates strings in the input
+        buffer, so the safe <code>Document</code> owns a writable copy
+        of its input for its lifetime;
+        <code>Document::parse_buf(Vec&lt;u8&gt;)</code> takes ownership
+        without the extra copy.
+      </p>
+    </Callout>
+
+    <h2 id="performance">Performance</h2>
+    <p>
+      Against <strong>toml 0.8</strong> (the ecosystem standard,
+      serde-based) over the engine bench corpus:
+      <strong>7–45× faster on loads</strong> — datetime-heavy shapes
+      3.79 ms vs 168.89 ms, integer-heavy 6.25 ms vs 278.52 ms — and
+      <strong>3–8× on dumps</strong>. It is the widest gap of any tier
+      the family measures: there is no language-boundary tax
+      comparable to the wasm bridge, so the C engine&rsquo;s margin
+      passes through intact. The lane runs in CI
+      (<code>cargo bench --bench tier</code>, report-only).
+    </p>
+
+    <p>
+      <a href={`${SITE.githubTomlRs}`}>Source — teptris-rs</a>.
+    </p>
+  </DocsShell>
+</BaseLayout>
