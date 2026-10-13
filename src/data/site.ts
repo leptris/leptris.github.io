@@ -13,7 +13,7 @@ export const SITE = {
   rubygems: 'https://rubygems.org/gems/leptris',
   githubTomlRuby: 'https://github.com/leptris/teptris-ruby',
   githubTomlPy: 'https://github.com/leptris/teptris-py',
-  githubTomlWasm: 'https://github.com/leptris/teptris-wasm',
+  githubTomlTs: 'https://github.com/leptris/teptris-ts',
   githubTomlRs: 'https://github.com/leptris/teptris-rs',
   rubygemsTeptris: 'https://rubygems.org/gems/teptris',
   pypiTeptris: 'https://pypi.org/project/teptris/',
