@@ -115,6 +115,19 @@ teptris format config.toml    # canonical TOML
 teptris validate broken.toml  # exit 1, line:col on stderr
 teptris version`}
     />
+    <p>
+      <code>to-json --natural</code> emits the host view instead of the
+      conformance dialect — real numbers, booleans, RFC 3339 datetime
+      strings, non-finite floats as <code>null</code> — the engine&rsquo;s
+      fastest emit mode, pipeable straight into <code>jq</code>:
+    </p>
+    <CodeBlock
+      lang="bash"
+      code={`teptris to-json --natural config.toml | jq '.owner.name'
+# "t"
+
+cmake --install build    # installs the library AND bin/teptris`}
+    />
 
     <h2 id="links">Where to go next</h2>
     <ul>
