@@ -56,6 +56,28 @@ teptris.engineVersion();`}
       </p>
     </Callout>
 
+    <h2 id="descriptor">Descriptor plans</h2>
+    <CodeBlock
+      lang="ts"
+      code={`const plan = teptris.planBuild([
+    "title",
+    "tags",
+    { name: "owner", rows: ["name", { name: "meta", kind: "raw" }] },
+  ]);
+
+const view = teptris.planWalk(plan, toml); // only planned keys
+teptris.planFree(plan);`}
+    />
+    <p>
+      Compile a plan once, walk any number of documents: only the
+      planned keys cross the wasm boundary — unplanned keys are never
+      materialized. Rows: a string name is a scalar;
+      <code>kind: &quot;collection&quot;</code> walks an array;
+      <code>kind: &quot;raw&quot;</code> takes the untouched subtree;
+      <code>rows</code> walks a nested table. Typed as
+      <code>PlanRowSpec</code> in the package.
+    </p>
+
     <h2 id="performance">Performance</h2>
     <p>
       Against the JS ecosystem&rsquo;s parsers over the engine bench

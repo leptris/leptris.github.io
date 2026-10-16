@@ -60,6 +60,30 @@ let json = dump_json_natural(&v).unwrap();
       </p>
     </Callout>
 
+    <h2 id="descriptor">Descriptor plans</h2>
+    <CodeBlock
+      lang="rust"
+      code={`use teptris::plan::{Descriptor, PlanRow};
+
+let d = Descriptor::build(&[
+    PlanRow::scalar("title"),
+    PlanRow::collection("tags"),
+    PlanRow::nested("owner", vec![
+        PlanRow::scalar("name"),
+        PlanRow::raw("meta"),
+    ]),
+])?;
+
+let doc = teptris::Document::parse(b"title = \"d\"\n[owner]\nname = \"r\"\n")?;
+let v = d.walk(&doc)?; // only planned keys materialize`}
+    />
+    <p>
+      Compile a plan once, walk any number of documents in ONE native
+      pass — unplanned keys are never materialized. MISSING rows are
+      absent (rust has no null); <code>raw</code> rows re-use the plain
+      node accessors on the untouched subtree.
+    </p>
+
     <h2 id="performance">Performance</h2>
     <p>
       Against <strong>toml 0.8</strong> (the ecosystem standard,
