@@ -14,7 +14,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const resultsDir = join(root, 'src/data/benchmarks/results');
 
 const TECHS = Object.keys(TECH_LABELS) as Tech[];
-const LANGUAGES = ['c', 'ruby', 'python'] as const;
+const LANGUAGES = ['c', 'ruby', 'python', 'javascript', 'rust'] as const;
 const STATUSES: Status[] = ['win', 'parity', 'loss'];
 
 const loadCampaigns = (): Campaign[] =>
@@ -68,7 +68,7 @@ describe('benchmark campaigns conform to the results schema', () => {
       for (const r of c.results) {
         expect(TECHS, `${c.id}/${r.operation} tech`).toContain(r.tech);
         expect(STATUSES).toContain(r.status);
-        expect(r.competitor).toMatch(/^[a-z0-9][a-z0-9.-]*$/);
+        expect(r.competitor).toMatch(/^[a-z0-9@_][a-z0-9@_./-]*$/); // @-scoped npm names and crate names (toml_edit) are legal
         expect(r.competitor_version.length).toBeGreaterThan(0);
         expect(r.ratio).toBeGreaterThan(0);
 

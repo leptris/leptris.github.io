@@ -18,8 +18,10 @@ const languageLabels: Record<Language, string> = {
   c: 'C / C++',
   ruby: 'Ruby',
   python: 'Python',
+  javascript: 'JavaScript',
+  rust: 'Rust',
 };
-const languageOrder: Language[] = ['c', 'ruby', 'python'];
+const languageOrder: Language[] = ['c', 'ruby', 'python', 'javascript', 'rust'];
 
 const groups = [...techMatrix(tech).values()];
 const competitors = [...new Set(groups.map((g) => g.competitor))].sort();
