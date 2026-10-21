@@ -15,6 +15,7 @@ const campaign = (id: string): Campaign => {
 const tomlC = campaign('toml-c-2026-10-19');
 const tomlRuby = campaign('toml-ruby-2026-10-21');
 const tomlPython = campaign('toml-python-2026-10-21');
+const tomlPythonDumps = campaign('toml-python-dumps-2026-10-21');
 const tomlJs = campaign('toml-js-2026-10-21');
 const tomlRs = campaign('toml-rs-2026-10-21');
 const deficits = frontierFor({ only: ['toml'] });
@@ -153,6 +154,20 @@ const deficits = frontierFor({ only: ['toml'] });
         repository.
       </p>
     </div>
+      <h3 class="sec-subtitle">The dump lane, measured honestly</h3>
+      <p class="sec-lede">
+        Serialization is a separate race with its own record. On this
+        lane teptris keeps the datetime and string shapes against
+        rtoml while rtoml keeps the flat-scalar shapes — and the
+        native-doc path (loads_doc/dumps_doc, which never leaves C)
+        wins the full roundtrip 9 of 9. Losses are tabled, not hidden.
+      </p>
+      <ResultsTable
+        rows={tomlPythonDumps.results.map((result) => ({ result, campaign: tomlPythonDumps }))}
+        competitorHead="rtoml / tomli-w / tomlkit"
+      />
+      <Provenance campaign={tomlPythonDumps} />
+
   </section>
   <section class="sec sec-tint-sky lang-sec" id="javascript">
     <div class="wrap">
