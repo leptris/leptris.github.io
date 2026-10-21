@@ -51,6 +51,7 @@ import xmlRuby from './results/xml-ruby.json';
 import xmlRubyFrontier from './results/xml-ruby-frontier.json';
 import xmlRubySerialbench from './results/xml-ruby-serialbench.json';
 import tomlC from './results/toml-c.json';
+import tomlCEmit from './results/toml-c-emit-2026-10-21.json';
 import tomlJs from './results/toml-js-2026-10-21.json';
 import tomlPython from './results/toml-python.json';
 import tomlPythonDumps from './results/toml-python-dumps-2026-10-21.json';
@@ -66,6 +67,7 @@ const imported = [
   xmlCLanes,
   xsltC,
   tomlC,
+  tomlCEmit,
   tomlRuby,
   tomlPython,
   tomlPythonDumps,
