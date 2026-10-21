@@ -66,26 +66,36 @@ except teptris.TOMLDecodeError as e:
     ),
   },
   {
-    label: 'Native documents',
+    label: 'JS',
     html: await hl(
       `// the reserialize shape at C speed - no host objects materialized
 const doc = teptris.loadsDoc(src);
-teptris.dumpDoc(doc);                 // canonical TOML, 1.4-4.7x smol stringify
-
-# python: the same retained-document path
+teptris.dumpDoc(doc);                 // canonical TOML, 1.4-4.7x smol stringify`,
+      'js',
+    ),
+  },
+  {
+    label: 'Python',
+    html: await hl(
+      `# the same retained-document path
 doc = teptris.loads_doc(src)
 teptris.dumps_doc(doc)                # 3.0-10.1x the rtoml roundtrip
-
-# ruby
-doc = Teptris::TOML.load_doc(src)
-Teptris::TOML.dump_doc(doc)           # 16.5-3751x the tomlib roundtrip
 
 # tooling: machine-readable error spans (E5)
 try:
     teptris.loads("a = ")
 except teptris.TOMLDecodeError as e:
     e.span                            # (start, end) byte offsets`,
-      'mixed',
+      'python',
+    ),
+  },
+  {
+    label: 'Ruby',
+    html: await hl(
+      `# ruby
+doc = Teptris::TOML.load_doc(src)
+Teptris::TOML.dump_doc(doc)           # 16.5-3751x the tomlib roundtrip`,
+      'ruby',
     ),
   },
   {
