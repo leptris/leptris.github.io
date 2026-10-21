@@ -129,6 +129,43 @@ teptris version`}
 cmake --install build    # installs the library AND bin/teptris`}
     />
 
+    <h2 id="provenance">Provenance &amp; verification</h2>
+    <p>
+      How each published artifact traces back to this family&rsquo;s CI
+      (survey recorded 2026-10-20; npm is the only registry with a
+      sigstore-style attestation today):
+    </p>
+    <ul>
+      <li>
+        <strong>npm <code>teptris</code></strong> — signed provenance on
+        every release since v0.3.4: publish runs through GitHub Actions
+        Trusted Publishing (OIDC), and npm attaches a sigstore provenance
+        record; verify with <code>npx</code>/
+        <code>npm audit signatures</code>.
+      </li>
+      <li>
+        <strong>PyPI <code>teptris</code></strong> — wheels upload via
+        API-token <code>twine</code> from the tagged CI train; published
+        releases carry no PEP 740 attestations yet (verified on
+        0.3.7.1). <code>twine 7</code>&rsquo;s
+        <code>--attestations</code> is the adoption path from the next
+        train.
+      </li>
+      <li>
+        <strong>crates.io <code>teptris</code></strong> — publishes
+        through Trusted Publishing (OIDC); crates.io has no attestation
+        system, so integrity is the registry&rsquo;s per-file SHA-256
+        checksum plus the publish run record.
+      </li>
+      <li>
+        <strong>rubygems <code>teptris</code></strong> — the batched
+        release train publishes via OIDC trusted publishing; gems are
+        deliberately unsigned (X.509 gem signing is legacy, with no
+        verification consumer in the ecosystem) and rubygems.org has no
+        attestation system; provenance is the release run record.
+      </li>
+    </ul>
+
     <h2 id="links">Where to go next</h2>
     <ul>
       <li>
