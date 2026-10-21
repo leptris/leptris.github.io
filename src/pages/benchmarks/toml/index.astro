@@ -15,6 +15,8 @@ const campaign = (id: string): Campaign => {
 const tomlC = campaign('toml-c-2026-10-19');
 const tomlRuby = campaign('toml-ruby-2026-10-21');
 const tomlPython = campaign('toml-python-2026-10-21');
+const tomlJs = campaign('toml-js-2026-10-21');
+const tomlRs = campaign('toml-rs-2026-10-21');
 const deficits = frontierFor({ only: ['toml'] });
 ---
 
@@ -148,6 +150,73 @@ const deficits = frontierFor({ only: ['toml'] });
         <code>TEPTRIS_LIB_PATH=… python3 benchmark/lang_tier.py</code> in
         the
         <a href={`${SITE.githubToml.replace('teptris', 'teptris-py')}`}>teptris-py</a>
+        repository.
+      </p>
+    </div>
+  </section>
+  <section class="sec sec-tint-sky lang-sec" id="javascript">
+    <div class="wrap">
+      <p class="sec-label">JavaScript</p>
+      <h2 class="sec-title">The teptris package versus <em>@iarna/toml, smol-toml and @ltd/j-toml</em></h2>
+      <p class="sec-lede">
+        The JS binding runs the engine as WebAssembly and is measured
+        against the three libraries the ecosystem actually installs:
+        @iarna/toml (the long-standing standard), smol-toml (the modern
+        fast one) and @ltd/j-toml. Loads and dumps are both tabled;
+        where a comparator rejects a legal corpus shape the cell is
+        omitted and noted.
+      </p>
+      <ResultsTable
+        rows={tomlJs.results.map((result) => ({ result, campaign: tomlJs }))}
+        competitorHead="@iarna/toml / smol-toml / @ltd/j-toml"
+      />
+      <Provenance campaign={tomlJs} />
+      <p>
+        The honest shape of this tier: loads beat smol-toml on 8 of 9
+        shapes and @iarna everywhere it runs, while smol-toml keeps the
+        dump lane on 8 of 9 shapes — the WASM boundary plus JS object
+        materialization price every serialize. The losses are recorded,
+        not hidden; the native roundtrip
+        (loadsDoc/dumpDoc, staying in C) wins 9 of 9.
+      </p>
+
+      <p class="docs-canonical">
+        To reproduce: run
+        <code>node benchmark/js_tier.mjs</code> in the
+        <a href={SITE.githubTomlTs}>teptris-ts</a>
+        repository.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec sec-tint-amber lang-sec" id="rust">
+    <div class="wrap">
+      <p class="sec-label">Rust</p>
+      <h2 class="sec-title">The teptris crate versus <em>toml and toml_edit</em></h2>
+      <p class="sec-lede">
+        The Rust binding links the engine through the stable C ABI with
+        zero-copy value materialization, measured against the
+        ecosystem&rsquo;s standard <code>toml</code> crate and its
+        editing-focused sibling toml_edit across loads, dumps and the
+        full roundtrip.
+      </p>
+      <ResultsTable
+        rows={tomlRs.results.map((result) => ({ result, campaign: tomlRs }))}
+        competitorHead="toml / toml_edit"
+      />
+      <Provenance campaign={tomlRs} />
+      <p>
+        The widest gap in the family: no language-boundary tax means the
+        engine&rsquo;s margin passes through intact — 4&ndash;11&times;
+        on loads, 3&ndash;6&times; on dumps and 6&ndash;10&times; on the
+        roundtrip against the standard crate, zero losses across all 36
+        cells.
+      </p>
+
+      <p class="docs-canonical">
+        To reproduce: run
+        <code>cargo bench --bench tier -- corpus 20</code> in the
+        <a href={SITE.githubTomlRs}>teptris-rs</a>
         repository.
       </p>
     </div>

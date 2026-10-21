@@ -10,7 +10,7 @@ export type Tech =
   | 'toml'
   | 'yaml';
 
-export type Language = 'c' | 'ruby' | 'python';
+export type Language = 'c' | 'ruby' | 'python' | 'javascript' | 'rust';
 
 export type Status = 'win' | 'parity' | 'loss';
 
@@ -51,7 +51,9 @@ import xmlRuby from './results/xml-ruby.json';
 import xmlRubyFrontier from './results/xml-ruby-frontier.json';
 import xmlRubySerialbench from './results/xml-ruby-serialbench.json';
 import tomlC from './results/toml-c.json';
+import tomlJs from './results/toml-js-2026-10-21.json';
 import tomlPython from './results/toml-python.json';
+import tomlRs from './results/toml-rs-2026-10-21.json';
 import tomlRuby from './results/toml-ruby.json';
 import xsltC from './results/xslt-c.json';
 import yamlC from './results/yaml-c.json';
@@ -65,6 +67,8 @@ const imported = [
   tomlC,
   tomlRuby,
   tomlPython,
+  tomlJs,
+  tomlRs,
   htmlC,
   yamlC,
   jsonC,
