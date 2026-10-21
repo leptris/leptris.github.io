@@ -13,6 +13,7 @@ const campaign = (id: string): Campaign => {
 };
 
 const tomlC = campaign('toml-c-2026-10-19');
+const tomlCEmit = campaign('toml-c-emit-2026-10-21');
 const tomlRuby = campaign('toml-ruby-2026-10-21');
 const tomlPython = campaign('toml-python-2026-10-21');
 const tomlPythonDumps = campaign('toml-python-dumps-2026-10-21');
@@ -125,6 +126,38 @@ const deficits = frontierFor({ only: ['toml'] });
         in the
         <a href={`${SITE.githubToml.replace('teptris', 'teptris-ruby')}`}>teptris-ruby</a>
         repository.
+      </p>
+    </div>
+  </section>
+  <section class="sec sec-tint-rose lang-sec" id="c-emit">
+    <div class="wrap">
+      <p class="sec-label">C — emit</p>
+      <h2 class="sec-title">Serializing back to TOML versus <em>toml11 and tomlplusplus</em></h2>
+      <p class="sec-lede">
+        Every library that has a serializer serializes the parsed
+        document back to TOML; the C section above covers the parse
+        side. tomlc99, tomlc17 and cpptoml have no serializer and are
+        absent for that reason, not by omission. The engine&rsquo;s
+        natural-JSON mode (the one real hosts consume) is faster still
+        than the TOML emit tabled here.
+      </p>
+      <ResultsTable
+        rows={tomlCEmit.results.map((result) => ({ result, campaign: tomlCEmit }))}
+        competitorHead="toml11 / tomlplusplus"
+      />
+      <Provenance campaign={tomlCEmit} />
+      <p>
+        Zero losses across the 18 cells; the spread is wide because
+        toml11&rsquo;s emitter is quadratic on some shapes &mdash; the
+        ratio column reports what the harness measured, per shape.
+      </p>
+
+      <p class="docs-canonical">
+        To reproduce: run
+        <code>scripts/run_benchmarks.sh</code> in the
+        <a href={SITE.githubToml}>teptris</a> repository, or the
+        one-command container from
+        <code>scripts/bench-container/</code>.
       </p>
     </div>
   </section>
