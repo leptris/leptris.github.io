@@ -53,6 +53,7 @@ import xmlRubySerialbench from './results/xml-ruby-serialbench.json';
 import tomlC from './results/toml-c.json';
 import tomlJs from './results/toml-js-2026-10-21.json';
 import tomlPython from './results/toml-python.json';
+import tomlPythonDumps from './results/toml-python-dumps-2026-10-21.json';
 import tomlRs from './results/toml-rs-2026-10-21.json';
 import tomlRuby from './results/toml-ruby.json';
 import xsltC from './results/xslt-c.json';
@@ -67,6 +68,7 @@ const imported = [
   tomlC,
   tomlRuby,
   tomlPython,
+  tomlPythonDumps,
   tomlJs,
   tomlRs,
   htmlC,
