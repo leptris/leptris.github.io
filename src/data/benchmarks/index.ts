@@ -56,6 +56,7 @@ import tomlJs from './results/toml-js-2026-10-21.json';
 import tomlPython from './results/toml-python.json';
 import tomlPythonDumps from './results/toml-python-dumps-2026-10-21.json';
 import tomlRs from './results/toml-rs-2026-10-21.json';
+import tomlRsSerde from './results/toml-rs-serde-2026-10-22.json';
 import tomlRuby from './results/toml-ruby.json';
 import tomlRubyDumps from './results/toml-ruby-dumps-2026-10-22.json';
 import xsltC from './results/xslt-c.json';
@@ -71,6 +72,7 @@ const imported = [
   tomlCEmit,
   tomlRuby,
   tomlRubyDumps,
+  tomlRsSerde,
   tomlPython,
   tomlPythonDumps,
   tomlJs,

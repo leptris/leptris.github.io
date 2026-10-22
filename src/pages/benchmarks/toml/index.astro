@@ -20,6 +20,7 @@ const tomlPython = campaign('toml-python-2026-10-21');
 const tomlPythonDumps = campaign('toml-python-dumps-2026-10-21');
 const tomlJs = campaign('toml-js-2026-10-21');
 const tomlRs = campaign('toml-rs-2026-10-21');
+const tomlRsSerde = campaign('toml-rs-serde-2026-10-22');
 const deficits = frontierFor({ only: ['toml'] });
 ---
 
@@ -283,6 +284,23 @@ const deficits = frontierFor({ only: ['toml'] });
         repository.
       </p>
     </div>
+      <h3 class="sec-subtitle">The serde lane</h3>
+      <p class="sec-lede">
+        The ecosystem&rsquo;s dominant API shape, measured
+        head-to-head: both crates&rsquo; derives deserialize the same
+        415 KB struct-shaped document (2000 array-of-tables entries
+        against 8 typed fields). The derive layer preserves
+        essentially the whole engine margin &mdash; and the
+        direct-into-struct follow-up is bounded by the measured
+        Value&rarr;struct walk, 11.6% of the path, recorded rather
+        than pursued.
+      </p>
+      <ResultsTable
+        rows={tomlRsSerde.results.map((result) => ({ result, campaign: tomlRsSerde }))}
+        competitorHead="toml 0.8 serde path"
+      />
+      <Provenance campaign={tomlRsSerde} />
+
   </section>
 
   <section class="sec" id="deficits">
