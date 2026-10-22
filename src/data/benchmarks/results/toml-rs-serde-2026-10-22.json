@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "id": "toml-rs-serde-2026-10-22",
+  "language": "rust",
+  "subject": {
+    "name": "teptris (crates.io)",
+    "version": "0.1.6 - the serde feature (default on)"
+  },
+  "harness": {
+    "label": "benches/serde_tier.rs - derive-vs-derive over a 415 KB struct-shaped document (2000 array-of-tables entries x 8 typed fields), best-of-20",
+    "url": "https://github.com/leptris/teptris-rs/tree/main/benches"
+  },
+  "machine": "Apple M1 Max, macOS 14.1.1, arm64",
+  "date": "2026-10-22",
+  "stat": "best of 20; the Value->struct walk is 0.26 ms (11.6% of the derive path) - the direct-into-struct fusion ceiling, recorded not pursued",
+  "results": [
+    {
+      "tech": "toml",
+      "operation": "parse-derive",
+      "operation_label": "Parse \u2014 derive into structs",
+      "competitor": "toml",
+      "competitor_version": "0.8 serde path",
+      "leptris_value": 2.29,
+      "unit": "ms",
+      "ratio": 4.93,
+      "status": "win",
+      "competitor_value": 11.28,
+      "note": "from_str::<Doc> (derive)"
+    },
+    {
+      "tech": "toml",
+      "operation": "parse-value",
+      "operation_label": "Parse \u2014 Value model",
+      "competitor": "toml",
+      "competitor_version": "0.8 serde path",
+      "leptris_value": 2.03,
+      "unit": "ms",
+      "ratio": 5.67,
+      "status": "win",
+      "competitor_value": 11.5,
+      "note": "loads -> Value"
+    },
+    {
+      "tech": "toml",
+      "operation": "dump",
+      "operation_label": "Dump \u2014 to_string",
+      "competitor": "toml",
+      "competitor_version": "0.8 serde path",
+      "leptris_value": 2.56,
+      "unit": "ms",
+      "ratio": 3.93,
+      "status": "win",
+      "competitor_value": 10.05,
+      "note": "to_string(&Doc)"
+    }
+  ]
+}
