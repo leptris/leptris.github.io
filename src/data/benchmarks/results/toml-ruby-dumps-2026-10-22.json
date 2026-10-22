@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "id": "toml-ruby-dumps-2026-10-22",
+  "language": "ruby",
+  "subject": {
+    "name": "teptris-ruby",
+    "version": "0.3.6.3 (main, engine v0.3.6 pin, PGO build)"
+  },
+  "harness": {
+    "label": "benchmark/dump_tier.rb \u2014 TOML.dump vs Tomlib.dump over materialized corpus documents (materialization untimed)",
+    "url": "https://github.com/leptris/teptris-ruby/tree/main/benchmark"
+  },
+  "machine": "Apple M1 Max, macOS 14.1.1, arm64; Ruby 3.4.8",
+  "date": "2026-10-22",
+  "stat": "best of 40",
+  "results": [
+    {
+      "tech": "toml",
+      "operation": "dump-array-heavy",
+      "operation_label": "Dump \u2014 array heavy",
+      "competitor": "tomlib",
+      "competitor_version": "0.7.3",
+      "leptris_value": 2.61,
+      "unit": "ms",
+      "ratio": 9.25,
+      "status": "win",
+      "competitor_value": 24.15
+    },
+    {
+      "tech": "toml",
+      "operation": "dump-cargo-like",
+      "operation_label": "Dump \u2014 cargo like",
+      "competitor": "tomlib",
+      "competitor_version": "0.7.3",
+      "leptris_value": 1.47,
+      "unit": "ms",
+      "ratio": 9.37,
+      "status": "win",
+      "competitor_value": 13.78
+    },
+    {
+      "tech": "toml",
+      "operation": "dump-datetime-heavy",
+      "operation_label": "Dump \u2014 datetime heavy",
+      "competitor": "tomlib",
+      "competitor_version": "0.7.3",
+      "leptris_value": 6.13,
+      "unit": "ms",
+      "ratio": 3.63,
+      "status": "win",
+      "competitor_value": 22.25
+    },
+    {
+      "tech": "toml",
+      "operation": "dump-deep-tables",
+      "operation_label": "Dump \u2014 deep tables",
+      "competitor": "tomlib",
+      "competitor_version": "0.7.3",
+      "leptris_value": 0.9,
+      "unit": "ms",
+      "ratio": 8.66,
+      "status": "win",
+      "competitor_value": 7.79
+    },
+    {
+      "tech": "toml",
+      "operation": "dump-mixed",
+      "operation_label": "Dump \u2014 mixed",
+      "competitor": "tomlib",
+      "competitor_version": "0.7.3",
+      "leptris_value": 2.58,
+      "unit": "ms",
+      "ratio": 7.57,
+      "status": "win",
+      "competitor_value": 19.53
+    },
+    {
+      "tech": "toml",
+      "operation": "dump-scalar-float",
+      "operation_label": "Dump \u2014 scalar float",
+      "competitor": "tomlib",
+      "competitor_version": "0.7.3",
+      "leptris_value": 9.03,
+      "unit": "ms",
+      "ratio": 7.32,
+      "status": "win",
+      "competitor_value": 66.09
+    },
+    {
+      "tech": "toml",
+      "operation": "dump-scalar-int",
+      "operation_label": "Dump \u2014 scalar int",
+      "competitor": "tomlib",
+      "competitor_version": "0.7.3",
+      "leptris_value": 6.3,
+      "unit": "ms",
+      "ratio": 5.21,
+      "status": "win",
+      "competitor_value": 32.8
+    },
+    {
+      "tech": "toml",
+      "operation": "dump-scalar-string",
+      "operation_label": "Dump \u2014 scalar string",
+      "competitor": "tomlib",
+      "competitor_version": "0.7.3",
+      "leptris_value": 4.43,
+      "unit": "ms",
+      "ratio": 4.49,
+      "status": "win",
+      "competitor_value": 19.89
+    },
+    {
+      "tech": "toml",
+      "operation": "dump-table-heavy",
+      "operation_label": "Dump \u2014 table heavy",
+      "competitor": "tomlib",
+      "competitor_version": "0.7.3",
+      "leptris_value": 7.01,
+      "unit": "ms",
+      "ratio": 7.67,
+      "status": "win",
+      "competitor_value": 53.74
+    }
+  ]
+}

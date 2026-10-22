@@ -15,6 +15,7 @@ const campaign = (id: string): Campaign => {
 const tomlC = campaign('toml-c-2026-10-19');
 const tomlCEmit = campaign('toml-c-emit-2026-10-21');
 const tomlRuby = campaign('toml-ruby-2026-10-21');
+const tomlRubyDumps = campaign('toml-ruby-dumps-2026-10-22');
 const tomlPython = campaign('toml-python-2026-10-21');
 const tomlPythonDumps = campaign('toml-python-dumps-2026-10-21');
 const tomlJs = campaign('toml-js-2026-10-21');
@@ -128,6 +129,20 @@ const deficits = frontierFor({ only: ['toml'] });
         repository.
       </p>
     </div>
+      <h3 class="sec-subtitle">The dump lane</h3>
+      <p class="sec-lede">
+        Serialization measured over materialized corpus documents
+        (materialization untimed): TOML.dump versus Tomlib.dump, the
+        only other Ruby TOML writer, at best-of-40 on Apple silicon.
+        The native-doc path (load_doc/dump_doc, never leaving C) is
+        tabled separately in its own section of the Ruby page.
+      </p>
+      <ResultsTable
+        rows={tomlRubyDumps.results.map((result) => ({ result, campaign: tomlRubyDumps }))}
+        competitorHead="tomlib"
+      />
+      <Provenance campaign={tomlRubyDumps} />
+
   </section>
   <section class="sec sec-tint-rose lang-sec" id="c-emit">
     <div class="wrap">
