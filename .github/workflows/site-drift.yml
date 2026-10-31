@@ -1,0 +1,79 @@
+# Site-drift check: the version table in src/data/site.ts vs the live
+# registries. The refresh kept lapsing after release waves (three
+# incidents) - this cron opens a drift issue the moment the site
+# advertises less than what is published, mirroring teptris's
+# pin-freshness lane.
+name: site-drift
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+concurrency:
+  group: site-drift
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Compare site.ts against the registries
+        run: |
+          set -e
+          site() { grep -oP "(?<=${1}: ')[^']+" src/data/site.ts | head -1; }
+          reg_gem()   { curl -s https://rubygems.org/api/v1/versions/leptris/latest.json | python3 -c "import json,sys; print(json.load(sys.stdin)['version'])"; }
+          reg_pypi()  { curl -s "https://pypi.org/pypi/$1/json" | python3 -c "import json,sys; print(json.load(sys.stdin)['info']['version'])"; }
+          reg_npm()   { npm view "$1" version; }
+          reg_crates(){ curl -s -A "site-drift" "https://crates.io/api/v1/crates/$1" | python3 -c "import json,sys; print(json.load(sys.stdin)['crate']['max_stable_version'])"; }
+          {
+            echo "stale<<DRIFT"
+            check() {
+              if [ "$2" != "$3" ]; then
+                echo "$1: site=$2 registry=$3"
+              fi
+            }
+            check "leptris (rubygems)" "$(site gem)"     "$(reg_gem)"
+            check "leptris (pypi)"     "$(site py)"      "$(reg_pypi leptris)"
+            check "teptris ruby"       "$(site tomlRuby)" "$(reg_gem)"
+            check "teptris py"         "$(site tomlPy)"   "$(reg_pypi teptris)"
+            check "teptris ts (npm)"   "$(site tomlJs)"   "$(reg_npm teptris)"
+            check "teptris rs (crates)" "$(site tomlRs)"  "$(reg_crates teptris)"
+            echo "DRIFT"
+          } > drift.txt
+          cat drift.txt
+          echo "HAS_DRIFT=$(grep -c ': site=' drift.txt || true)" >> "$GITHUB_ENV"
+
+      - name: Open or update the drift issue
+        if: env.HAS_DRIFT != '0'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const drift = fs.readFileSync('drift.txt', 'utf8').trim();
+            const body = 'The site version table lags the registries:\n\n```\n'
+              + drift + '\n```\n\n'
+              + 'Refresh `src/data/site.ts` (versions + dates) and close this issue. '
+              + 'Opened by the site-drift cron - the refresh has lapsed repeatedly '
+              + 'after release waves.';
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'site-drift',
+            });
+            if (existing.data.length > 0) {
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing.data[0].number, body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: 'site.ts version table lags the registries',
+                body, labels: ['site-drift'],
+              });
+            }
