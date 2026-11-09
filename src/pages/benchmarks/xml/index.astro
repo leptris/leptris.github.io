@@ -15,6 +15,7 @@ const campaign = (id: string): Campaign => {
 };
 
 const xmlCMatrix = campaign('xml-c-matrix-2026-09-12');
+const xmlCPugixmlWrites = campaign('xml-c-pugixml-writes-2026-11');
 const xmlCLanes = campaign('xml-c-lanes-2026-09-12');
 const xmlRuby = campaign('xml-ruby-2026-09-12');
 const xmlRubySerialbench = campaign('xml-ruby-serialbench-2026-09');
@@ -35,6 +36,20 @@ const cParseBlocks = [
     rows: [
       { who: 'libleptris', val: '191 µs', w: 29.8 },
       { who: 'pugixml', val: '642 µs', w: 100, them: true },
+    ],
+  },
+];
+
+const cWritesBlocks = [
+  {
+    title: 'DOM append and attribute-dense parse+read vs pugixml, measured in C (2026-11 refresh)',
+    sub: 'bench_append_attr_pugixml, min of 5; the attrparse workload is parse + walk + read every attribute on BOTH engines',
+    chip: 'append 1.6× ahead · attrparse parity',
+    rows: [
+      { who: 'libleptris', ver: '1.9.414.0', val: '22.7 ns/child (append)', w: 63 },
+      { who: 'pugixml', val: '36.0 ns/child (append)', w: 100, them: true },
+      { who: 'libleptris', ver: '1.9.414.0', val: '1.60 µs (attr parse+read)', w: 89 },
+      { who: 'pugixml', val: '1.42 µs (attr parse+read)', w: 100, them: true },
     ],
   },
 ];
@@ -105,6 +120,16 @@ const pyBlocks = [
       <div class="reveal">
         <BenchBars client:visible blocks={cParseBlocks} />
       </div>
+
+      <h3>DOM writes and attribute-dense parse+read <em>(2026-11 refresh)</em></h3>
+      <div class="reveal">
+        <BenchBars client:visible blocks={cWritesBlocks} />
+      </div>
+
+      <ResultsTable
+        rows={xmlRows(xmlCPugixmlWrites)}
+        competitorHead="pugixml 1.16 (same run)"
+      />
 
       <h3>Parse, SAX, serialization and mutation</h3>
       <ResultsTable
