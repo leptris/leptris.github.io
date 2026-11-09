@@ -83,11 +83,15 @@ teptris.planFree(plan);`}
       Against the JS ecosystem&rsquo;s parsers over the engine bench
       corpus: <strong>2–4× @iarna/toml</strong> — the long-standing
       standard, which also rejects mixed-type arrays that are legal
-      TOML 1.0 — and <strong>parity with smol-toml</strong>, the modern
-      fast pure-JS parser: teptris wins the datetime-heavy shapes
-      (1.5×) and deep tables; smol wins string-heavy inputs, where the
-      wasm→JS bridge prices every string. The tier&rsquo;s real edge
-      is correctness: the <strong>full TOML 1.1 draft grammar</strong>
+      TOML 1.0 — and <strong>best 6-of-9 over smol-toml</strong>, the
+      modern fast pure-JS parser. Loads wins everywhere (up to
+      3.8×); dumps win datetime-heavy <strong>2.4×</strong> (the
+      engine parses RFC 3339 literals — since engine 0.3.27 they cross
+      the bridge as raw text and never touch a JS regex), mixed 1.3×,
+      ints 1.2×, tables 1.1×; the three residual losses (0.80–0.90×)
+      are the price of walking the host&rsquo;s plain objects against
+      smol&rsquo;s own parsed tree. The tier&rsquo;s real edge stays
+      correctness: the <strong>full TOML 1.1 draft grammar</strong>
       with the same parse/emit behavior as the native bindings.
     </p>
 
