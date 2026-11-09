@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "id": "xml-c-pugixml-writes-2026-11",
+  "language": "c",
+  "subject": {
+    "name": "libleptris",
+    "version": "1.9.414.0 (main)"
+  },
+  "harness": {
+    "label": "bench_append_attr_pugixml — min of 5 repetitions, parse + walk + read on both engines",
+    "url": "https://github.com/leptris/leptris/tree/main/benchmarks/modification"
+  },
+  "machine": "Apple M1 Max (arm64) — local, quiet windows",
+  "date": "2026-11-09",
+  "stat": "min of 5 (Release + LTO)",
+  "results": [
+    {
+      "tech": "xml",
+      "operation": "dom-append-10k-children",
+      "operation_label": "DOM append — 10000 children (one parent)",
+      "competitor": "pugixml",
+      "competitor_version": "1.16",
+      "leptris_value": 22.7,
+      "competitor_value": 36.0,
+      "unit": "ns/child",
+      "ratio": 1.59,
+      "status": "win",
+      "note": "fresh bench_append_attr_pugixml post-v1.9.414; the doc-level index cost noted in earlier revisions is gone"
+    },
+    {
+      "tech": "xml",
+      "operation": "dom-mutcycle",
+      "operation_label": "DOM mutation cycle",
+      "competitor": "pugixml",
+      "competitor_version": "1.16",
+      "leptris_value": 24.8,
+      "competitor_value": 23.7,
+      "unit": "ns/child",
+      "ratio": 0.96,
+      "status": "parity"
+    },
+    {
+      "tech": "xml",
+      "operation": "attrparse-parse-read-64-attr",
+      "operation_label": "Attr-dense parse + read (64 attrs, parse + walk + read every name and value)",
+      "competitor": "pugixml",
+      "competitor_version": "1.16",
+      "leptris_value": 1600,
+      "competitor_value": 1420,
+      "unit": "ns/doc",
+      "ratio": 0.89,
+      "status": "parity",
+      "note": "methodology corrected in v1.9.414: parse + walk + read every attribute on BOTH engines, min of 5 (the earlier row compared leptris's deferred handle against pugixml's eager parse). Full-window CPU-clock head-to-head at 4M docs: 5.45 s user vs 5.45 s user — user-CPU parity (#1842)."
+    }
+  ]
+}
