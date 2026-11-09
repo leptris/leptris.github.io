@@ -70,7 +70,7 @@ yeptris.dump({"k": [1, 2]})`,
 
 <BaseLayout
   title="Yeptris — YAML at library speed"
-  description="yeptris: a YAML 1.2 parser, writer and streamer in pure C11 with zero required dependencies and a stable C ABI — 395/395 yaml-test-suite, up to 3.4x libyaml, with first-class Psych-compatible Ruby and PyYAML-compatible Python bindings."
+  description="yeptris: a YAML 1.2 parser, writer and streamer in pure C11 with zero required dependencies and a stable C ABI — 395/395 yaml-test-suite, ahead of rapidyaml on every CI referee shape, with Psych-compatible Ruby, PyYAML-compatible Python, Rust and JavaScript bindings."
 >
   <!-- ————— hero ————— -->
   <section class="hero">
@@ -83,9 +83,9 @@ yeptris.dump({"k": [1, 2]})`,
         <p class="hero-lede">
           <strong>yeptris</strong> is the YAML counterpart of libleptris: a
           YAML 1.2 parser, writer and streamer in pure C11 — zero required
-          dependencies, a stable C ABI, opaque handles — with a
-          Psych-compatible Ruby gem and a PyYAML-compatible Python package
-          shaped like the incumbents.
+          dependencies, a stable C ABI, opaque handles — with bindings shaped
+          like the incumbents: a Psych-compatible Ruby gem, a PyYAML-compatible
+          Python package, a Rust crate and a JavaScript/WASM package.
         </p>
         <div class="hero-actions">
           <a class="btn solid" href="/docs/yeptris-getting-started">Get started</a>
@@ -93,8 +93,8 @@ yeptris.dump({"k": [1, 2]})`,
         </div>
         <ul class="hero-points">
           <li><strong>Speed with a referee</strong> — every figure comes from the open benchmark lane: interleaved runs, pinned competitors, medians, a performance ledger kept in the repository.</li>
-          <li><strong>Conformance first</strong> — 395/395 on the yaml-test-suite, the libyaml emission goldens with zero divergences, ASan/UBSan/TSan suites, and a nightly libFuzzer lane.</li>
-          <li><strong>One core, three surfaces</strong> — the same C11 engine from C, Ruby, and Python; bindings version in lockstep with the engine.</li>
+          <li><strong>Conformance first</strong> — 395/395 on the yaml-test-suite, the libyaml emission goldens with zero divergences, ASan/UBSan/TSan suites, and a nightly libFuzzer lane 220+ rounds deep with every catch shipped or carried.</li>
+          <li><strong>One core, five runtimes</strong> — the same C11 engine from C, Ruby, Python, Rust, and JavaScript; every runtime releases in lockstep with the engine.</li>
         </ul>
       </div>
       <div class="hero-mark">
@@ -107,7 +107,7 @@ yeptris.dump({"k": [1, 2]})`,
   <div class="stats">
     <div class="wrap">
       <div class="stat"><span class="n" data-count="395" data-suffix="/395">0/395</span><span class="l">yaml-test-suite</span></div>
-      <div class="stat"><span class="n" data-count="3.36" data-suffix="×">0×</span><span class="l">scalar-heavy vs libyaml, dev hardware</span></div>
+      <div class="stat"><span class="n" data-count="11.6" data-suffix="×">0×</span><span class="l">scalar-heavy vs libyaml, the CI referee</span></div>
       <div class="stat"><span class="n" data-count="279" data-suffix="">0</span><span class="l">libyaml emission goldens, zero divergences</span></div>
       <div class="stat"><span class="n" data-count="14" data-suffix="">0</span><span class="l">prebuilt platform gems, lockstep releases</span></div>
       <div class="stat"><span class="n" data-raw="zero">zero</span><span class="l">required runtime dependencies</span></div>
@@ -129,14 +129,15 @@ yeptris.dump({"k": [1, 2]})`,
 
       <div class="feat-grid">
         <div class="feat feat-speed reveal">
-          <span class="big">up to 3.36×<small> / libyaml, per shape</small></span>
+          <span class="big">1.8–8.5×<small> / rapidyaml, per shape</small></span>
           <h3>The race, in the open</h3>
           <p>
-            Same-binary, min-of-N against libyaml: scalar-heavy 3.36×,
-            block-nested ~2.3×, wide mappings ~2.4×, anchor-heavy ~1.8×.
-            The interleaved head-to-head against rapidyaml runs in CI on
-            every push — nine document shapes across DOM, pull, recorder
-            and emit.
+            The interleaved head-to-head runs in CI on every push — nine
+            document shapes across DOM, pull, recorder and emit, medians of
+            rounds on fresh runners: every shape ahead of rapidyaml
+            (1.8–8.5× ubuntu; 1.5–4.0× macOS, with anchor-heavy the one
+            parity cell). Against libyaml the DOM lane reads 5.8–11.6× and
+            emit 4.7–21.5× per shape.
           </p>
         </div>
         <div class="feat feat-bound sage reveal" data-d="1">
@@ -146,8 +147,9 @@ yeptris.dump({"k": [1, 2]})`,
             The full verification matrix: yaml-test-suite pinned at
             <code>da267a5</code>, psych-pure&rsquo;s 67 corpus files,
             JSONTestSuite 95/95 accept and 188/188 reject in strict mode,
-            405-input libyaml parse differential with full-record equality,
-            1091 fuzz inputs across chunkings.
+            the 405-input libyaml parse differential with full-record
+            equality — and the fuzz nightly, 220+ rounds in, every catch
+            shipped or carried: fourteen engine fixes, 110 pins green.
           </p>
         </div>
         <div class="feat feat-conform reveal" data-d="2">
@@ -228,11 +230,14 @@ yeptris.dump({"k": [1, 2]})`,
     <div class="wrap">
       <h2 class="reveal">Fast as hares.<br /><em>Parsed at library speed.</em></h2>
       <p class="reveal" data-d="1">
-        yeptris v{VERSIONS.yaml} — libyeptris v{VERSIONS.yaml}, the yeptris
-        gem v{VERSIONS.yamlRuby}, the yeptris package v{VERSIONS.yamlPy}.
-        Repos canonical: <a href={`${SITE.githubYaml}`}>yeptris</a>,
+        yeptris v{VERSIONS.yaml} live across all five runtimes — libyeptris
+        v{VERSIONS.yaml}, the yeptris gem v{VERSIONS.yamlRuby}, the yeptris
+        package v{VERSIONS.yamlPy}, the Rust crate and the JS/WASM package at
+        the same C semver. Repos canonical: <a href={`${SITE.githubYaml}`}>yeptris</a>,
         <a href={`${SITE.githubYamlRuby}`}> yeptris-ruby</a>,
-        <a href={`${SITE.githubYamlPy}`}> yeptris-py</a>.
+        <a href={`${SITE.githubYamlPy}`}> yeptris-py</a>,
+        <a href={`${SITE.githubYamlRs}`}> yeptris-rs</a>,
+        <a href={`${SITE.githubYamlTs}`}> yeptris-ts</a>.
       </p>
     </div>
   </section>
