@@ -126,8 +126,10 @@ $ teptris validate broken.toml     # exit 1 with line:col on error`,
         <p class="hero-lede">
           <strong>teptris</strong> is the TOML sibling of libleptris: a
           parser and writer in pure C99 — zero required dependencies, a
-          stable C ABI, opaque handles — with first-class Ruby and Python
-          bindings shaped like <code>tomlib</code> and <code>tomllib</code>.
+          stable C ABI, opaque handles — with first-class bindings on
+          four runtimes shaped like the incumbents
+          (<code>tomllib</code>, <code>tomlib</code>, idiomatic Rust,
+          typed ESM), plus JSON Schema 2020-12 validation built in.
         </p>
         <div class="hero-actions">
           <a class="btn solid" href="/docs/teptris-getting-started">Get started</a>
@@ -135,8 +137,9 @@ $ teptris validate broken.toml     # exit 1 with line:col on error`,
         </div>
         <ul class="hero-points">
           <li><strong>Speed with a referee</strong> — every figure comes from the open benchmark lane: interleaved runs, pinned competitors, medians, ledger kept in the repository.</li>
-          <li><strong>Conformance first</strong> — 714/714 on BurntSushi&rsquo;s toml-test (1.1 view), the round-trip property, ASan/UBSan/TSan suites, and a nightly libFuzzer lane.</li>
-          <li><strong>One core, three surfaces</strong> — the same C99 engine from C, Ruby, and Python; a typed-JSON CLI thrown in.</li>
+          <li><strong>Conformance first</strong> — 720/720 on BurntSushi&rsquo;s toml-test (1.1 view), the round-trip property, ASan/UBSan/TSan suites, and a nightly libFuzzer lane.</li>
+          <li><strong>Schema validation, SOTA-complete</strong> — JSON Schema 2020-12 compiled once, validated many: 1011/1011 on the official draft-2020-12 suite, 1173/1173 through tombi&rsquo;s own harness, dialect-gated format/content.</li>
+          <li><strong>One core, five surfaces</strong> — the same C99 engine from C, Ruby, Python, Rust, and JavaScript/Wasm; a typed-JSON CLI thrown in.</li>
         </ul>
       </div>
       <div class="hero-mark">
@@ -182,7 +185,7 @@ $ teptris validate broken.toml     # exit 1 with line:col on error`,
           </p>
         </div>
         <div class="feat feat-bound sage reveal" data-d="1">
-          <span class="big">714/714<small> toml-test, 1.1 view</small></span>
+          <span class="big">720/720<small> toml-test, 1.1 view</small></span>
           <h3>Conformant where it counts</h3>
           <p>
             The TOML 1.1 draft grammar as a strict superset of 1.0 —
