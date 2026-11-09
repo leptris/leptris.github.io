@@ -12,7 +12,7 @@ const campaign = (id: string): Campaign => {
   return found;
 };
 
-const jsonC = campaign('json-c-2026-09-25');
+const jsonC = campaign('json-c-2026-11-09');
 const deficits = frontierFor({ only: ['json'] });
 ---
 
@@ -32,11 +32,13 @@ const deficits = frontierFor({ only: ['json'] });
         accepts all 95 valid inputs and rejects all 188 invalid inputs.
         The measurements below race the JSON-shaped corpora through the
         committed benchmark matrix against the YAML incumbents and against
-        simdjson, the reference JSON parser, in the same run. Two
+        simdjson, the reference JSON parser, in the same run. Three
         consumption routes are measured against simdjson: DOM
-        construction, which builds a navigable document, and the tape
+        construction, which builds a navigable document; the strict tape
         route introduced in yeptris 0.2.2, which validates into compact
-        parallel columns with no document model. The simdjson comparison
+        parallel columns with no document model; and the lenient tape,
+        which defers number typing to the consumer — the bulk-drain lane
+        the bindings ride. The simdjson comparison
         is stated with both numbers and is the honest centerpiece of this
         page.
       </p>
@@ -99,12 +101,20 @@ const deficits = frontierFor({ only: ['json'] });
         simdjson&rsquo;s own harness idiom: it parses a pre-built padded
         string, so no input-copy tax sits in its timed loop (the
         calibration itself is ledger history — an earlier version of this
-        table flattered us). Calibrated, the DOM route measures 0.70×
-        simdjson on the flat document shape and 0.95× on the record-heavy
-        shape — the bracket of per-member overhead the ledger&rsquo;s
-        slices have been cutting — while the packed-record tape route
-        trades tree materialization for bulk access. The walk is the
-        residual, recorded slice by slice in the ledger.
+        table flattered us). Calibrated, the 2026-11-09 round reads the
+        flat document shape <strong>over simdjson parity</strong> — DOM
+        1.04×, strict tape 1.13× — while the record-heavy shape reads
+        0.70× DOM / 0.71× strict tape: single-document simplicity is
+        won, the users corpus&rsquo;s longer strings are the residual.
+        The lenient tape rows (deferred number typing — a cheaper
+        contract than RFC 8259, the bulk-drain ceiling the bindings
+        ride) read 1.02× and 0.68×. The residual is per-ISA codegen —
+        the arm64 macOS leg reads the same routes 0.67–0.95× (the dev
+        M1 Max lenient lane 0.78× after the 2026-11-08 whole-pass cuts)
+        — and the named levers are the NEON arm codegen question and
+        the codegen shape arms, not another walk-level arm (three
+        dispatch-level attacks measured dead). The walk is recorded
+        slice by slice in the ledger.
       </p>
 
       <p class="docs-canonical">

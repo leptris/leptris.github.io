@@ -19,6 +19,8 @@ export const SITE = {
   pypiTeptris: 'https://pypi.org/project/teptris/',
   githubYamlRuby: 'https://github.com/leptris/yeptris-ruby',
   githubYamlPy: 'https://github.com/leptris/yeptris-py',
+  githubYamlRs: 'https://github.com/leptris/yeptris-rs',
+  githubYamlTs: 'https://github.com/leptris/yeptris-ts',
   rubygemsYeptris: 'https://rubygems.org/gems/yeptris',
   pypiYeptris: 'https://pypi.org/project/yeptris/',
 } as const;
@@ -40,12 +42,12 @@ export const VERSIONS = {
   tomlJsDate: '2026-10-31',
   tomlRs: '0.3.12',
   tomlRsDate: '2026-10-31',
-  yaml: '0.6.22',
-  yamlDate: '2026-09-25',
-  yamlRuby: '0.6.22.1',
-  yamlRubyDate: '2026-09-25',
-  yamlPy: '0.6.22.1',
-  yamlPyDate: '2026-09-25',
+  yaml: '0.6.60',
+  yamlDate: '2026-11-03',
+  yamlRuby: '0.6.60.1',
+  yamlRubyDate: '2026-11-03',
+  yamlPy: '0.6.60.0',
+  yamlPyDate: '2026-11-03',
 } as const;
 
 export interface NavEntry {
