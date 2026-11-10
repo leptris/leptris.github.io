@@ -65,6 +65,34 @@ yeptris.dump({"k": [1, 2]})`,
       'python',
     ),
   },
+  {
+    label: 'Rust',
+    html: await hl(
+      `use yeptris::Document;
+
+let doc = Document::parse(b"name: yeptris\\nlangs: [c, rust]\\n").unwrap();
+let root = doc.first_root().unwrap();
+assert_eq!(root.get("name").unwrap().str(), Some("yeptris"));
+assert_eq!(root.get("langs").unwrap().items().count(), 2);
+
+// the serde bridge
+let cfg: Config = yeptris::from_str("name: engine\\nport: 8080\\n").unwrap();`,
+      'rust',
+    ),
+  },
+  {
+    label: 'JavaScript',
+    html: await hl(
+      `import { load, dump } from "yeptris";
+
+const doc = await load("name: yeptris\\nlangs:\\n- c\\n- rust\\n");
+// { name: "yeptris", langs: ["c", "rust"] }
+
+const yaml = await dump({ name: "yeptris", langs: ["c", "rust"] });
+// the engine's canonical, byte-stable YAML`,
+      'javascript',
+    ),
+  },
 ];
 ---
 
@@ -93,7 +121,7 @@ yeptris.dump({"k": [1, 2]})`,
         </div>
         <ul class="hero-points">
           <li><strong>Speed with a referee</strong> — every figure comes from the open benchmark lane: interleaved runs, pinned competitors, medians, a performance ledger kept in the repository.</li>
-          <li><strong>Conformance first</strong> — 395/395 on the yaml-test-suite, the libyaml emission goldens with zero divergences, ASan/UBSan/TSan suites, and a nightly libFuzzer lane 220+ rounds deep with every catch shipped or carried.</li>
+          <li><strong>Conformance first</strong> — 395/395 on the yaml-test-suite, the libyaml emission goldens with zero divergences, ASan/UBSan/TSan suites, and a nightly libFuzzer lane 240+ rounds deep with every catch shipped or carried.</li>
           <li><strong>One core, five runtimes</strong> — the same C11 engine from C, Ruby, Python, Rust, and JavaScript; every runtime releases in lockstep with the engine.</li>
         </ul>
       </div>
@@ -148,8 +176,8 @@ yeptris.dump({"k": [1, 2]})`,
             <code>da267a5</code>, psych-pure&rsquo;s 67 corpus files,
             JSONTestSuite 95/95 accept and 188/188 reject in strict mode,
             the 405-input libyaml parse differential with full-record
-            equality — and the fuzz nightly, 220+ rounds in, every catch
-            shipped or carried: fourteen engine fixes, 110 pins green.
+            equality — and the fuzz nightly, 240+ rounds in, every catch
+            shipped or carried: seventeen engine fixes, 133 pins green.
           </p>
         </div>
         <div class="feat feat-conform reveal" data-d="2">
@@ -198,7 +226,7 @@ yeptris.dump({"k": [1, 2]})`,
   <section class="sec-alt sec-tint-rose" id="install">
     <div class="wrap">
       <p class="sec-label reveal" data-num="03">The chase begins</p>
-      <h2 class="sec-title reveal">Install, <em>three ways</em></h2>
+      <h2 class="sec-title reveal">Install, <em>five ways</em></h2>
       <div class="reveal" data-d="1">
         <table class="doc-table">
           <tr><th>surface</th><th>command</th><th>what you get</th></tr>
@@ -216,6 +244,16 @@ yeptris.dump({"k": [1, 2]})`,
             <td>C</td>
             <td><code>cmake -B build -S . &amp;&amp; cmake --build build</code></td>
             <td class="note">LTO on by default; <code>cmake --install</code> carries headers and pkg-config</td>
+          </tr>
+          <tr>
+            <td>Rust</td>
+            <td><code>cargo add yeptris</code></td>
+            <td class="note">thin safe FFI over libyeptris — <code>YEPTRIS_LIB_PATH</code> or the opt-in <code>vendored</code> feature (a checked-in engine snapshot, statically linked)</td>
+          </tr>
+          <tr>
+            <td>JavaScript</td>
+            <td><code>npm install yeptris</code></td>
+            <td class="note">the engine compiled to WebAssembly (ES module) — <code>load</code>/<code>dump</code>/<code>events</code>/schema validation over the recorder bulk drain</td>
           </tr>
         </table>
       </div>

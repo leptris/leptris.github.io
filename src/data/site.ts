@@ -42,12 +42,12 @@ export const VERSIONS = {
   tomlJsDate: '2026-11-09',
   tomlRs: '0.3.27',
   tomlRsDate: '2026-11-09',
-  yaml: '0.6.60',
-  yamlDate: '2026-11-03',
-  yamlRuby: '0.6.60.1',
-  yamlRubyDate: '2026-11-03',
-  yamlPy: '0.6.60.0',
-  yamlPyDate: '2026-11-03',
+  yaml: '0.6.61',
+  yamlDate: '2026-11-10',
+  yamlRuby: '0.6.61.1',
+  yamlRubyDate: '2026-11-10',
+  yamlPy: '0.6.61.0',
+  yamlPyDate: '2026-11-10',
 } as const;
 
 export interface NavEntry {
