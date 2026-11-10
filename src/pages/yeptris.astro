@@ -65,12 +65,40 @@ yeptris.dump({"k": [1, 2]})`,
       'python',
     ),
   },
+  {
+    label: 'Rust',
+    html: await hl(
+      `use yeptris::Document;
+
+let doc = Document::parse(b"name: yeptris\\nlangs: [c, rust]\\n").unwrap();
+let root = doc.first_root().unwrap();
+assert_eq!(root.get("name").unwrap().str(), Some("yeptris"));
+assert_eq!(root.get("langs").unwrap().items().count(), 2);
+
+// the serde bridge
+let cfg: Config = yeptris::from_str("name: engine\\nport: 8080\\n").unwrap();`,
+      'rust',
+    ),
+  },
+  {
+    label: 'JavaScript',
+    html: await hl(
+      `import { load, dump } from "yeptris";
+
+const doc = await load("name: yeptris\\nlangs:\\n- c\\n- rust\\n");
+// { name: "yeptris", langs: ["c", "rust"] }
+
+const yaml = await dump({ name: "yeptris", langs: ["c", "rust"] });
+// the engine's canonical, byte-stable YAML`,
+      'javascript',
+    ),
+  },
 ];
 ---
 
 <BaseLayout
   title="Yeptris — YAML at library speed"
-  description="yeptris: a YAML 1.2 parser, writer and streamer in pure C11 with zero required dependencies and a stable C ABI — 395/395 yaml-test-suite, up to 3.4x libyaml, with first-class Psych-compatible Ruby and PyYAML-compatible Python bindings."
+  description="yeptris: a YAML 1.2 parser, writer and streamer in pure C11 with zero required dependencies and a stable C ABI — 395/395 yaml-test-suite, 5.8x–11.6x libyaml on the open referee, with Psych-compatible Ruby, PyYAML-compatible Python, Rust, and JavaScript/WASM bindings."
 >
   <!-- ————— hero ————— -->
   <section class="hero">
@@ -83,9 +111,9 @@ yeptris.dump({"k": [1, 2]})`,
         <p class="hero-lede">
           <strong>yeptris</strong> is the YAML counterpart of libleptris: a
           YAML 1.2 parser, writer and streamer in pure C11 — zero required
-          dependencies, a stable C ABI, opaque handles — with a
-          Psych-compatible Ruby gem and a PyYAML-compatible Python package
-          shaped like the incumbents.
+          dependencies, a stable C ABI, opaque handles — with bindings for
+          Ruby (Psych-compatible), Python (PyYAML-compatible), Rust, and
+          JavaScript/WASM shaped like the incumbents.
         </p>
         <div class="hero-actions">
           <a class="btn solid" href="/docs/yeptris-getting-started">Get started</a>
@@ -93,8 +121,8 @@ yeptris.dump({"k": [1, 2]})`,
         </div>
         <ul class="hero-points">
           <li><strong>Speed with a referee</strong> — every figure comes from the open benchmark lane: interleaved runs, pinned competitors, medians, a performance ledger kept in the repository.</li>
-          <li><strong>Conformance first</strong> — 395/395 on the yaml-test-suite, the libyaml emission goldens with zero divergences, ASan/UBSan/TSan suites, and a nightly libFuzzer lane.</li>
-          <li><strong>One core, three surfaces</strong> — the same C11 engine from C, Ruby, and Python; bindings version in lockstep with the engine.</li>
+          <li><strong>Conformance first</strong> — 395/395 on the yaml-test-suite, the libyaml emission goldens with zero divergences, ASan/UBSan/TSan suites, and a nightly libFuzzer lane 240+ rounds deep.</li>
+          <li><strong>One core, five runtimes</strong> — the same C11 engine from C, Ruby, Python, Rust, and JavaScript/WASM; bindings version in lockstep with the engine.</li>
         </ul>
       </div>
       <div class="hero-mark">
@@ -107,7 +135,7 @@ yeptris.dump({"k": [1, 2]})`,
   <div class="stats">
     <div class="wrap">
       <div class="stat"><span class="n" data-count="395" data-suffix="/395">0/395</span><span class="l">yaml-test-suite</span></div>
-      <div class="stat"><span class="n" data-count="3.36" data-suffix="×">0×</span><span class="l">scalar-heavy vs libyaml, dev hardware</span></div>
+      <div class="stat"><span class="n" data-count="11.6" data-suffix="×">0×</span><span class="l">DOM vs libyaml at the top shape, the CI referee round</span></div>
       <div class="stat"><span class="n" data-count="279" data-suffix="">0</span><span class="l">libyaml emission goldens, zero divergences</span></div>
       <div class="stat"><span class="n" data-count="14" data-suffix="">0</span><span class="l">prebuilt platform gems, lockstep releases</span></div>
       <div class="stat"><span class="n" data-raw="zero">zero</span><span class="l">required runtime dependencies</span></div>
@@ -129,14 +157,16 @@ yeptris.dump({"k": [1, 2]})`,
 
       <div class="feat-grid">
         <div class="feat feat-speed reveal">
-          <span class="big">up to 3.36×<small> / libyaml, per shape</small></span>
+          <span class="big">5.8–11.6×<small> / libyaml DOM, the referee</small></span>
           <h3>The race, in the open</h3>
           <p>
-            Same-binary, min-of-N against libyaml: scalar-heavy 3.36×,
-            block-nested ~2.3×, wide mappings ~2.4×, anchor-heavy ~1.8×.
-            The interleaved head-to-head against rapidyaml runs in CI on
-            every push — nine document shapes across DOM, pull, recorder
-            and emit.
+            The interleaved head-to-head runs in CI on fresh runners —
+            medians, nine document shapes, every figure reproducible
+            from the harness. Against libyaml: DOM 5.8×–11.6× per
+            shape, emit 4.7×–21.5×. Against rapidyaml: 1.8×–8.5× on
+            ubuntu, 1.5×–4.0× on macOS, anchor-heavy the one parity
+            cell. The JSON routes sit at parity-to-lead vs simdjson,
+            and the ledger names the remaining lanes.
           </p>
         </div>
         <div class="feat feat-bound sage reveal" data-d="1">
@@ -147,7 +177,8 @@ yeptris.dump({"k": [1, 2]})`,
             <code>da267a5</code>, psych-pure&rsquo;s 67 corpus files,
             JSONTestSuite 95/95 accept and 188/188 reject in strict mode,
             405-input libyaml parse differential with full-record equality,
-            1091 fuzz inputs across chunkings.
+            543 tracked fuzz inputs across chunkings — behind a nightly
+            libFuzzer lane 240+ rounds deep, every catch pinned.
           </p>
         </div>
         <div class="feat feat-conform reveal" data-d="2">
@@ -168,7 +199,9 @@ yeptris.dump({"k": [1, 2]})`,
             Ruby: fat platform gems (no C extension — FFI), every major
             OS×arch tier, lockstep-released with the engine. Python:
             self-contained wheels over ctypes, zero compilation at install.
-            C: <code>cmake --install</code> with pkg-config.
+            Rust: the <code>yeptris</code> crate on crates.io. JS: the
+            <code>yeptris</code> package on npm (the emcc build of the
+            engine). C: <code>cmake --install</code> with pkg-config.
           </p>
         </div>
       </div>
@@ -184,7 +217,10 @@ yeptris.dump({"k": [1, 2]})`,
         Ruby mirrors <code>Psych</code> (its YAML 1.1 implicit typing is the
         default; <code>schema: :core_12</code> switches to the 1.2 core
         schema), and drops in beside it — including the error names.
-        Python mirrors <code>PyYAML</code>&rsquo;s safe surface.
+        Python mirrors <code>PyYAML</code>&rsquo;s safe surface. Rust rides
+        the thin FFI + serde; JavaScript/WASM ships
+        <code>load</code>/<code>dump</code>/<code>events</code> over the
+        recorder bulk drain.
       </p>
       <div class="reveal" data-d="1">
         <CodeTabs client:visible tabs={tabs} />
@@ -196,7 +232,7 @@ yeptris.dump({"k": [1, 2]})`,
   <section class="sec-alt sec-tint-rose" id="install">
     <div class="wrap">
       <p class="sec-label reveal" data-num="03">The chase begins</p>
-      <h2 class="sec-title reveal">Install, <em>three ways</em></h2>
+      <h2 class="sec-title reveal">Install, <em>five ways</em></h2>
       <div class="reveal" data-d="1">
         <table class="doc-table">
           <tr><th>surface</th><th>command</th><th>what you get</th></tr>
@@ -215,6 +251,16 @@ yeptris.dump({"k": [1, 2]})`,
             <td><code>cmake -B build -S . &amp;&amp; cmake --build build</code></td>
             <td class="note">LTO on by default; <code>cmake --install</code> carries headers and pkg-config</td>
           </tr>
+          <tr>
+            <td>Rust</td>
+            <td><code>cargo add yeptris</code></td>
+            <td class="note">thin safe FFI over libyeptris — <code>YEPTRIS_LIB_PATH</code> or the opt-in <code>vendored</code> feature (a checked-in engine snapshot, statically linked)</td>
+          </tr>
+          <tr>
+            <td>JavaScript</td>
+            <td><code>npm install yeptris</code></td>
+            <td class="note">the engine compiled to WebAssembly (ES module) — <code>load</code>/<code>dump</code>/<code>events</code>/schema validation over the recorder bulk drain</td>
+          </tr>
         </table>
       </div>
       <p class="reveal" data-d="2" style="margin-top:1.8rem">
@@ -229,10 +275,15 @@ yeptris.dump({"k": [1, 2]})`,
       <h2 class="reveal">Fast as hares.<br /><em>Parsed at library speed.</em></h2>
       <p class="reveal" data-d="1">
         yeptris v{VERSIONS.yaml} — libyeptris v{VERSIONS.yaml}, the yeptris
-        gem v{VERSIONS.yamlRuby}, the yeptris package v{VERSIONS.yamlPy}.
-        Repos canonical: <a href={`${SITE.githubYaml}`}>yeptris</a>,
+        gem v{VERSIONS.yamlRuby}, the yeptris package v{VERSIONS.yamlPy},
+        the yeptris crate v{VERSIONS.yamlRs}, the yeptris npm package
+        v{VERSIONS.yamlTs} — one engine, five runtimes, released in
+        lockstep. Repos canonical:
+        <a href={`${SITE.githubYaml}`}>yeptris</a>,
         <a href={`${SITE.githubYamlRuby}`}> yeptris-ruby</a>,
-        <a href={`${SITE.githubYamlPy}`}> yeptris-py</a>.
+        <a href={`${SITE.githubYamlPy}`}> yeptris-py</a>,
+        <a href={`${SITE.githubYamlRs}`}> yeptris-rs</a>,
+        <a href={`${SITE.githubYamlTs}`}> yeptris-ts</a>.
       </p>
     </div>
   </section>
