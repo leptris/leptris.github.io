@@ -4,7 +4,7 @@
   "language": "c",
   "subject": {
     "name": "libleptris",
-    "version": "1.9.415.0 + attrparse cuts (PR leptris#2001)"
+    "version": "1.9.416.0 + attrparse cuts through PR leptris#2006"
   },
   "harness": {
     "label": "bench_append_attr_pugixml — CI Benchmark workflow (quiet GH runners, Release + LTO, min of 5); attrparse row = parse + free per doc, 4 elems x 16 attrs",
@@ -45,12 +45,12 @@
       "operation_label": "Attr-dense parse (64 attrs) — macos-latest (clang, arm64), CI-gated",
       "competitor": "pugixml",
       "competitor_version": "1.16",
-      "leptris_value": 1830.8,
-      "competitor_value": 2036.6,
+      "leptris_value": 1512.4,
+      "competitor_value": 1492.4,
       "unit": "ns/doc",
-      "ratio": 1.11,
-      "status": "win",
-      "note": "CI Benchmark leg, quiet runner, Release + LTO. Dup-table growth and dup-probe inlining cuts ride this number."
+      "ratio": 1.01,
+      "status": "parity",
+      "note": "post-A3d + AVX2 sizing pre-scan (PRs #2005/#2006); within the ~5-10% run-variance band"
     },
     {
       "tech": "xml",
@@ -58,12 +58,12 @@
       "operation_label": "Attr-dense parse (64 attrs) — ubuntu-24.04-arm (gcc-13 + glibc), CI-gated",
       "competitor": "pugixml",
       "competitor_version": "1.16",
-      "leptris_value": 2091.7,
-      "competitor_value": 1850.3,
+      "leptris_value": 2222.4,
+      "competitor_value": 1850.2,
       "unit": "ns/doc",
-      "ratio": 0.88,
+      "ratio": 0.83,
       "status": "loss",
-      "note": "mild linux penalty (same toolchain family as the macos win arm); run-to-run CI variance is ~5-10%"
+      "note": "gcc-13 + glibc, arm64; the fused scanner loop is the remaining named lever (TODO.max-perf/15 Track D)"
     },
     {
       "tech": "xml",
@@ -71,12 +71,25 @@
       "operation_label": "Attr-dense parse (64 attrs) — ubuntu-latest x86-64 (gcc-13), CI-gated",
       "competitor": "pugixml",
       "competitor_version": "1.16",
-      "leptris_value": 2793.4,
-      "competitor_value": 1914.7,
+      "leptris_value": 1709.6,
+      "competitor_value": 1891.3,
       "unit": "ns/doc",
+      "ratio": 1.11,
+      "status": "win",
+      "note": "the AVX2 sizing pre-scan (PR #2006) transformed this lane — the scalar pre-scan was the dominant tax (was 0.69); bench_parse_ab same run: text rows 3.4-3.5x behind -> 1.38-1.69x, attr 1.5MB now AHEAD (0.75x)"
+    },
+    {
+      "tech": "xml",
+      "operation": "attrparse-shape-rows-bench-parse-ab",
+      "operation_label": "Shape-fair parse rows (bench_parse_ab, 1.5/5/13MB attr+text) — ubuntu-x86, post-cuts",
+      "competitor": "pugixml",
+      "competitor_version": "1.16",
+      "leptris_value": 1272.7,
+      "competitor_value": 1850.8,
+      "unit": "MB/s (text 1.5MB representative)",
       "ratio": 0.69,
       "status": "loss",
-      "note": "the extra ~30% deficit vs the arm leg is x86-64-specific codegen of the fused scanner under gcc-13 — named lever in TODO.max-perf/15 Track D addendum 3; bench_parse_ab in the same run shows text-shape parse 3.3x behind and a ~13MB arena-reservation collapse (5.1-5.8x)"
+      "note": "the whole shape family moved with the two cuts: attr 1.5/5/13MB = 0.75x/0.93x/1.03x (ahead/parity), text 1.38-1.69x (was 3.4-3.5x); macos 13MB collapse resolved 5.1-5.8x -> 2.18x/1.87x (PRs #2003/#2005)"
     }
   ]
 }
