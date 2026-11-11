@@ -63,7 +63,13 @@ except teptris.TOMLDecodeError as e:
       Both directions are native. End to end (parse + materialize into
       Python objects) teptris is <strong>4.8–6× rtoml</strong> (the
       rust-backed incumbent), <strong>19–42× the stdlib&rsquo;s
-      tomllib</strong>, and hundreds of times tomlkit per shape.
+      tomllib</strong>, and hundreds of times tomlkit per shape. On
+      writes, <code>dumps</code> wins <strong>5 of 9 corpus shapes
+      outright</strong> against rtoml — datetimes ~1.9×, strings ~1.5×
+      — with the rest at parity and exactly one named loss
+      (flat ints, rtoml&rsquo;s own best shape; engine 0.3.28&rsquo;s
+      writer keeps zero heap in the keyed emit path, -14…-22% on the
+      flat corpus in one release).
     </p>
 
     <h2 id="values">The value contract</h2>
