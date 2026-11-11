@@ -81,12 +81,12 @@
     {
       "tech": "xml",
       "operation": "attrparse-shape-rows-bench-parse-ab",
-      "operation_label": "Shape-fair parse rows (bench_parse_ab, 1.5/5/13MB attr+text) — ubuntu-x86, post-cuts",
+      "operation_label": "Shape-fair parse rows (bench_parse_ab, 1.5/5/13MB attr+text) - ubuntu-x86, post-cuts (text 1.5MB representative)",
       "competitor": "pugixml",
       "competitor_version": "1.16",
       "leptris_value": 1272.7,
       "competitor_value": 1850.8,
-      "unit": "MB/s (text 1.5MB representative)",
+      "unit": "MB/s",
       "ratio": 0.69,
       "status": "loss",
       "note": "the whole shape family moved with the two cuts: attr 1.5/5/13MB = 0.75x/0.93x/1.03x (ahead/parity), text 1.38-1.69x (was 3.4-3.5x); macos 13MB collapse resolved 5.1-5.8x -> 2.18x/1.87x (PRs #2003/#2005)"
