@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "id": "xml-c-pugixml-writes-2026-11-ci",
+  "id": "xml-c-pugixml-writes-2026-11",
   "language": "c",
   "subject": {
     "name": "libleptris",
