@@ -4,7 +4,7 @@
   "language": "c",
   "subject": {
     "name": "libleptris",
-    "version": "1.9.416.0 + attrparse cuts through PR leptris#2006"
+    "version": "1.9.416.0 + attrparse cuts through PR leptris#2009"
   },
   "harness": {
     "label": "bench_append_attr_pugixml — CI Benchmark workflow (quiet GH runners, Release + LTO, min of 5); attrparse row = parse + free per doc, 4 elems x 16 attrs",
@@ -45,12 +45,12 @@
       "operation_label": "Attr-dense parse (64 attrs) — macos-latest (clang, arm64), CI-gated",
       "competitor": "pugixml",
       "competitor_version": "1.16",
-      "leptris_value": 1512.4,
-      "competitor_value": 1492.4,
+      "leptris_value": 1996.0,
+      "competitor_value": 2189.5,
       "unit": "ns/doc",
-      "ratio": 0.99,
-      "status": "parity",
-      "note": "post-A3d + AVX2 sizing pre-scan (PRs #2005/#2006); within the ~5-10% run-variance band"
+      "ratio": 1.1,
+      "status": "win",
+      "note": "post-fast-out (PR #2009); single-run - the macos lane needs repeated-run medians (see the shape-row noise note)"
     },
     {
       "tech": "xml",
@@ -58,12 +58,12 @@
       "operation_label": "Attr-dense parse (64 attrs) — ubuntu-24.04-arm (gcc-13 + glibc), CI-gated",
       "competitor": "pugixml",
       "competitor_version": "1.16",
-      "leptris_value": 2222.4,
-      "competitor_value": 1850.2,
+      "leptris_value": 2202.8,
+      "competitor_value": 1849.0,
       "unit": "ns/doc",
-      "ratio": 0.83,
+      "ratio": 0.84,
       "status": "loss",
-      "note": "gcc-13 + glibc, arm64; the fused scanner loop is the remaining named lever (TODO.max-perf/15 Track D)"
+      "note": "gcc-13 + glibc, arm64; the fused scanner loop is the remaining named lever (TODO.max-perf/15 Track D addendum 6)"
     },
     {
       "tech": "xml",
@@ -71,12 +71,12 @@
       "operation_label": "Attr-dense parse (64 attrs) — ubuntu-latest x86-64 (gcc-13), CI-gated",
       "competitor": "pugixml",
       "competitor_version": "1.16",
-      "leptris_value": 1709.6,
-      "competitor_value": 1891.3,
+      "leptris_value": 1215.2,
+      "competitor_value": 1262.6,
       "unit": "ns/doc",
-      "ratio": 1.11,
+      "ratio": 1.04,
       "status": "win",
-      "note": "the AVX2 sizing pre-scan (PR #2006) transformed this lane — the scalar pre-scan was the dominant tax (was 0.69); bench_parse_ab same run: text rows 3.4-3.5x behind -> 1.38-1.69x, attr 1.5MB now AHEAD (0.75x)"
+      "note": "post-fast-out (PR #2009): text rows in bench_parse_ab moved to 1.16-1.46x and attr 13MB to parity (0.99x) in the same run; the arc started 3.4-3.5x behind"
     },
     {
       "tech": "xml",
