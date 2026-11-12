@@ -1,0 +1,292 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { SITE, VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Teptris — TOML schema validation docs"
+  description="JSON Schema 2020-12 validation for TOML documents, built into libteptris: compile once, validate many, from C, the CLI, Ruby, Python, JavaScript and Rust — 1789/1789 zero divergences on the official suite."
+>
+  <DocsShell
+    crumb="Teptris — schema validation"
+    title={`Teptris — schema validation (engine v${VERSIONS.toml})`}
+    lede="libteptris validates TOML documents against JSON Schema (draft 2020-12, practical subset). Compile a schema once, validate many documents — the same engine serves C, the CLI, Ruby, Python, JavaScript and Rust. Zero divergences on the entire official test suite: 1789/1789 (2026-11-12)."
+  >
+    <p>
+      A schema is ordinary JSON Schema — the same vocabulary you use for
+      JSON today. The engine compiles it into an immutable, arena-backed
+      graph and validates parsed TOML against it, collecting
+      <em>every</em> violation (up to 256) rather than stopping at the
+      first. The violation shape is identical on every surface:
+    </p>
+    <CodeBlock
+      lang="json"
+      code={`{ "path": "server.port",       // where in the document (dotted TOML path, array indices as items.0.name)
+  "schemaPath": "#/properties/server/properties/port",  // where in the schema
+  "message": "expected a matching type, found string"   // why
+}`}
+    />
+    <p>
+      An empty result means the document is valid. Documents that do
+      not parse raise the binding&rsquo;s parse error (line/column)
+      instead — a syntax failure is never reported as a violation.
+    </p>
+
+    <h2 id="cli">The CLI</h2>
+    <p>
+      <code>teptris validate</code> compiles a schema file, validates a
+      TOML file, prints the violation JSON array on stdout, and exits
+      non-zero when anything fails:
+    </p>
+    <CodeBlock
+      lang="console"
+      code={`$ teptris validate --schema service.json service.toml
+[{"path":"port","schemaPath":"#/properties.port","message":"expected a matching type, found string"}]
+$ echo $?   # 1
+
+$ teptris validate --schema service.json good.toml && echo ok
+ok`}
+    />
+    <p>
+      The output is jq-pipeable — this is the same handback every
+      binding decodes.
+    </p>
+
+    <h2 id="c">C</h2>
+    <p>
+      The stable ABI lives in <code>&lt;teptris/schema.h&gt;</code>
+      (shipped by <code>cmake --install</code>). Compile, validate,
+      free; every buffer handed back is <code>malloc</code>&rsquo;d
+      memory you release:
+    </p>
+    <CodeBlock
+      lang="c"
+      code={`#include <string.h>
+#include <stdlib.h>
+#include <teptris/schema.h>
+
+teptris_schema *sch = NULL;
+char *diag = NULL;
+const char *sj = "{\\"properties\\":{\\"port\\":{\\"type\\":\\"integer\\"}}}";
+
+if (teptris_schema_compile(sj, strlen(sj), &sch, &diag, NULL) != TEPTRIS_OK) {
+    fprintf(stderr, "schema rejected: %s\\n", diag ? diag : "?");
+    teptris_diag_free(diag);
+    return 1;
+}
+char *buf = NULL; size_t n = 0;
+const char *doc = "port = \\"x\\"\\n";
+teptris_schema_validate(sch, doc, strlen(doc), &buf, &n);
+/* buf = [{"path":"port","schemaPath":"#/properties.port",
+ *        "message":"expected a matching type, found string"}] */
+free(buf);
+teptris_schema_free(sch);`}
+    />
+    <Callout kind="info">
+      <code>teptris_schema_compile_ex</code> takes a base directory so
+      relative <code>$ref</code>s resolve against local files. The
+      library never touches the network: absolute-URI references are
+      rejected at compile.
+    </Callout>
+
+    <h2 id="ruby">Ruby</h2>
+    <CodeBlock
+      lang="ruby"
+      code={`require "teptris"
+
+schema = Teptris::Schema.compile('{"properties":{"port":{"type":"integer"}}}')
+
+schema.valid?("port = 8080\\n")        # => true
+schema.validate("port = \\"x\\"\\n")
+# => [#<Teptris::Schema::Violation path: "port",
+#        schema_path: "#/properties.port",
+#        message: "expected a matching type, found string">]
+
+# each violation answers .path, .schema_path, .message (and .to_h)`}
+    />
+    <p>
+      Compile failures raise <code>Teptris::Error</code> carrying the
+      engine&rsquo;s diagnostic JSON; documents that do not parse raise
+      <code>Teptris::ParseError</code> with line/column.
+    </p>
+
+    <h2 id="python">Python</h2>
+    <CodeBlock
+      lang="python"
+      code={`import teptris
+
+schema = teptris.compile_schema('{"properties":{"port":{"type":"integer"}}}')
+
+schema.valid('port = 8080\\n')     # => True
+schema.validate('port = "x"\\n')
+# => [{"path": "port",
+#      "schema_path": "#/properties.port",
+#      "message": "expected a matching type, found string"}]`}
+    />
+    <p>
+      <code>teptris.Schema</code> accepts str or bytes; violations come
+      back as plain dicts with <code>path</code> /
+      <code>schema_path</code> / <code>message</code>. Malformed
+      documents raise <code>TOMLDecodeError</code>.
+    </p>
+
+    <h2 id="javascript">JavaScript / TypeScript</h2>
+    <CodeBlock
+      lang="ts"
+      code={`import { init } from "teptris";
+
+const api = await init();
+const schema = api.compileSchema('{"properties":{"port":{"type":"integer"}}}');
+
+schema.validate("port = 8080\\n");  // => []
+schema.validate('port = "x"\\n');
+// => [{ path: "port", schemaPath: "#/properties.port",
+//       message: "expected a matching type, found string" }]`}
+    />
+    <p>
+      The handle is wasm-side — call <code>schema.free()</code> when
+      done. Compile failures throw <code>Error</code> carrying the
+      diagnostic JSON.
+    </p>
+
+    <h2 id="rust">Rust</h2>
+    <CodeBlock
+      lang="rust"
+      code={`use teptris::schema::Schema;
+
+let schema = Schema::compile(r#"{"properties":{"port":{"type":"integer"}}}"#).unwrap();
+
+let violations = schema.validate(b"port = \\"x\\"\\n").unwrap();
+assert_eq!(violations[0].path, "port");
+assert_eq!(violations[0].schema_path, "#/properties.port");
+assert!(schema.validate(b"port = 8080\\n").unwrap().is_empty());`}
+    />
+    <p>
+      Compile failures return <code>SchemaCompileError</code> carrying
+      the diagnostic verbatim. A compiled <code>Schema</code> is
+      <code>Send + Sync</code> — share it across threads.
+    </p>
+
+    <h2 id="policies">The four TOML/JSON policies</h2>
+    <p>
+      TOML and JSON differ in exactly four places; each difference has
+      a documented policy (engine contract — <code>SCHEMAS.md</code> in
+      the repository):
+    </p>
+    <ol>
+      <li>
+        <strong>null</strong> — TOML has no null. A branch requiring
+        null matches no TOML value; optionality stays with
+        <code>required</code> + absence, so the JSON idiom
+        <code>"type": ["string", "null"]</code> behaves as an optional
+        string.
+      </li>
+      <li>
+        <strong>integer</strong> — TOML&rsquo;s integer is a distinct
+        type from float: <code>1</code> and <code>1.0</code> differ.
+        <code>"type": "integer"</code> matches only TOML integers;
+        <code>"type": "number"</code> matches both.
+      </li>
+      <li>
+        <strong>datetimes</strong> — TOML&rsquo;s four datetime shapes
+        validate as <code>"type": "string"</code>, and the
+        <code>format</code> keywords <code>date-time</code>,
+        <code>date</code>, <code>time</code> check the datetime shape —
+        a TOML datetime of the matching shape passes, and so does a
+        string whose content parses as that shape.
+      </li>
+      <li>
+        <strong>non-finite floats</strong> — <code>nan</code>,
+        <code>inf</code>, <code>-inf</code> are TOML floats matching
+        <code>"type": "number"</code>; nan fails every
+        range/multipleOf, inf violates any <code>maximum</code>. No
+        special-casing.
+      </li>
+    </ol>
+
+    <h2 id="subset">What compiles — and what rejects</h2>
+    <p>
+      The engine implements the practical 2020-12 subset: types,
+      enums/consts, numeric and string constraints, required/
+      properties/additionalProperties, items/prefixItems/contains,
+      allOf/anyOf/oneOf/not, <code>$ref</code> (local pointers,
+      <code>$anchor</code>s, recursive definitions),
+      <code>$defs</code>/<code>definitions</code>, default/
+      examples/deprecated/annotations, and content keywords. Unknown
+      keywords are ignored (extensions, per the spec).
+    </p>
+    <p>
+      Constructs that would <em>silently change results</em> if ignored
+      are rejected at compile with a diagnostic naming the problem —
+      never silently skipped:
+    </p>
+    <CodeBlock
+      lang="console"
+      code={`schema.compile('{"properties":{"p":{"pattern":"((a"}}}')
+# => schema rejected: {"error":"unterminated group at pattern"}`}
+    />
+    <p>
+      That class: <code>unevaluatedProperties</code>/
+      <code>unevaluatedItems</code>, <code>$dynamicRef</code>/
+      <code>$dynamicAnchor</code>/
+      <code>$recursiveRef</code>/<code>$recursiveAnchor</code>,
+      backreferences and lookaround in patterns, and any remote
+      (absolute-URI) <code>$ref</code> — a parser library never touches
+      the network.
+    </p>
+
+    <h2 id="formats">Formats: annotation by default, assertion on demand</h2>
+    <p>
+      Draft 2020-12 makes <code>format</code> annotation-only by
+      default, and teptris follows the spec: schemas that declare the
+      standard 2020-12 dialect treat <code>format</code> as an
+      annotation. Schemas that opt in via the sanctioned
+      <a href="https://json-schema.org/draft/2020-12/format-assertion">
+      format-assertion dialect</a>
+      (<code>{`{"$schema": "https://json-schema.org/draft/2020-12/format-assertion"}`}</code>)
+      get format checking. When formats assert, the battery is real:
+    </p>
+    <CodeBlock
+      lang="text"
+      code={`date, time, date-time, datetime-local, time-local   RFC 3339 (leap seconds at the UTC day end)
+email, idn-email                                    RFC 5322 / RFC 6531 (quoted locals, LDH labels)
+hostname, idn-hostname                              RFC 1035/5891 + UTS #46 + IDNA:
+                                                      NFC, RFC 3492 punycode, RFC 5892 context rules,
+                                                      RFC 5893 bidi rules, wire-form length gates
+uri, uri-reference, iri, iri-reference              RFC 3986/3987 (authority, port, IPv6 literals, IRI unicode)
+uri-template                                        RFC 6570 (operators, varname dots, :N / * modifiers)
+uuid                                                RFC 4122 (8-4-4-4-12 hex)
+json-pointer, relative-json-pointer                 RFC 6901
+regex                                               the engine's own NFA (a compile trial)
+duration                                            RFC 3339 duration grammar (strict canonical order)`}
+    />
+    <p>
+      Every case above is asserted against the official JSON Schema
+      test suite&rsquo;s unified model — 1789/1789, zero divergences —
+      including the punycode, context-rule and bidi corners of
+      internationalized hostnames.
+    </p>
+
+    <h2 id="patterns">Patterns are ReDoS-immune</h2>
+    <p>
+      <code>pattern</code> and <code>patternProperties</code> run on a
+      linear-time NFA (Thompson construction): no backtracking, no
+      pathological inputs, no host hangs. The practical ECMA subset is
+      supported: literals, <code>.</code>, classes, groups,
+      alternation, greedy quantifiers, anchors, <code>\b</code>,
+      <code>\d \w \s</code> (and negations), <code>\xNN</code>,
+      <code>\uNNNN</code>; lazy quantifiers are accepted (boolean match
+      semantics are identical).
+    </p>
+
+    <Callout kind="info">
+      The complete semantics — the four policies, the subset, the
+      format battery — are the engine contract documented in
+      <code>SCHEMAS.md</code> at
+      <a href="https://github.com/leptris/teptris">leptris/teptris</a>.
+    </Callout>
+  </DocsShell>
+</BaseLayout>
