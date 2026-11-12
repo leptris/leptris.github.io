@@ -1,0 +1,207 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Yeptris — validation and schema docs"
+  description="Four distinct faces: parse-time schema modes, the schema-family validation walk, the JSON productions family, and schema descriptors that materialize typed columns in one C pass. C and Ruby, every snippet executed against the shipped gem."
+>
+  <DocsShell
+    crumb="Yeptris — validation and schemas"
+    title={`Yeptris — validation and schemas (engine v${VERSIONS.yaml})`}
+    lede="Yeptris ships four distinct faces that are easy to blur: the parse-time schema MODES (YAML 1.2 core vs 1.1-compat — how implicit typing resolves), the schema-family VALIDATION walk (spec-conformance diagnostics), the JSON productions family (the spec 10.2 restriction), and schema DESCRIPTORS (typed columns materialized in one C pass — no intermediate document). This page keeps them apart and documents each with snippets executed against the shipped gem."
+  >
+    <Callout kind="note">
+      Every snippet on this page was executed against the released
+      <code>yeptris 0.6.63</code> gem before publishing. The C snippets
+      compile against <code>&lt;yeptris/validate.h&gt;</code> from the same
+      release. The Python binding exposes none of these faces today —
+      the page says so rather than implying parity.
+    </Callout>
+
+    <h2 id="faces">The four faces, kept apart</h2>
+    <p>
+      <strong>1. Parse-time schema modes</strong> —
+      <code>Document.parse(src, schema: :core_12)</code> vs
+      <code>:compat_11</code>: which implicit productions resolve during
+      the parse (1.2 core vs the 1.1-compat family psych rides). This is
+      a parse input, not a validation verdict.
+    </p>
+    <p>
+      <strong>2. The schema-family validation walk</strong> —
+      <code>document.validate(schema:)</code> /
+      <code>yeptris_validate</code>: the document is parsed, then checked
+      against the YAML 1.2 spec's own conformance rules — explicit-tag
+      consistency (spec 10.3 resolution), canonical-form mapping-key
+      uniqueness (spec 3.2.1.3 — <code>0o13</code> and <code>0xB</code>
+      are the same key). Whole reports, not callbacks.
+    </p>
+    <p>
+      <strong>3. The JSON productions family</strong> —
+      <code>schema: :json_12</code>: the same walk restricted to the
+      spec 10.2 JSON productions — implicit resolution stays JSON-shaped
+      (core extensions like <code>0o</code>/<code>0x</code> integers,
+      <code>+12.3</code>, and the <code>True</code>/<code>~</code>
+      casings stay strings per example 10.8), mapping keys must be
+      strings, and explicit non-JSON tags are rejected.
+    </p>
+    <p>
+      <strong>4. Schema descriptors</strong> —
+      <code>Yeptris::Schema</code>: one native pass fills typed columns
+      against a caller-compiled descriptor (KIND scalar/sequence/mapping,
+      TYPE str/int/float/bool/null/any, REQUIRED, FIRST_WINS duplicate
+      policy) — the intermediate generic document never exists. This is
+      the lutaml-model KV path (issue #184).
+    </p>
+    <p>
+      A fourth concept — <em>schema descriptors are not JSON Schema</em>.
+      There is no JSON-Schema face in yeptris today; TOML users want
+      teptris, which has one.
+    </p>
+
+    <h2 id="walk">The validation walk (Ruby)</h2>
+    <p>
+      <code>Document.parse</code> under a schema, then
+      <code>validate</code> — an array of
+      <code>Yeptris::Validation::Diagnostic</code>; empty means valid.
+      A duplicate key (the diagnostic carries path, 1-based line/col,
+      a numeric code, and a bounded detail):
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`require "yeptris"
+
+doc = Yeptris::Document.parse("---\\nname: x\\nname: y\\n", schema: :core_12)
+doc.validate(schema: :core_12)
+# => [#<Yeptris::Validation::Diagnostic duplicate-key path="" line=3 col=1
+#      detail="duplicate mapping key (\\"name\\")">]`}
+    />
+    <p>
+      Canonical-form key uniqueness: <code>0o13</code> and
+      <code>0xB</code> both resolve to 11, so as keys of one mapping
+      they collide:
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`doc = Yeptris::Document.parse("---\\n0o13: x\\n0xB: y\\n", schema: :core_12)
+doc.validate(schema: :core_12)
+# => [#<Yeptris::Validation::Diagnostic duplicate-key path="" line=3 col=1
+#      detail="duplicate mapping key (\\"0xB\\")">]`}
+    />
+
+    <h2 id="json">The JSON productions family</h2>
+    <p>
+      <code>schema: :json_12</code> applies the spec 10.2 restriction:
+      mapping keys must be strings (a complex key is a violation), and
+      an explicit non-JSON tag is rejected with the instance path:
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`doc = Yeptris::Document.parse("? [complex, key]\\n: v\\n", schema: :json_12)
+doc.validate(schema: :json_12)
+# => [#<Yeptris::Validation::Diagnostic key-not-string path="" line=2 col=4
+#      detail="mapping key is a sequence">]
+
+doc = Yeptris::Document.parse("---\\na: !!custom v\\n", schema: :json_12)
+doc.validate(schema: :json_12)
+# => [#<Yeptris::Validation::Diagnostic non-json-type path="/a" line=2 col=13
+#      detail="explicit custom tag is not a JSON type">]`}
+    />
+    <p>
+      The core-only productions stay strings here —
+      <code>a: True</code> under <code>:json_12</code> is a plain string
+      <code>"True"</code> (spec example 10.8), so it validates clean:
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`doc = Yeptris::Document.parse("---\\na: True\\n", schema: :json_12)
+doc.validate(schema: :json_12)
+# => []`}
+    />
+
+    <h2 id="diagnostics">Diagnostic anatomy</h2>
+    <p>
+      Every diagnostic — Ruby and C — carries the same shape:
+      <code>path</code> (a JSON-pointer instance path, <code>/a/b/0</code>
+      for array items, <code>~0</code>/<code>~1</code> escaped, root
+      relative per document; multi-document streams prefix the document
+      index — <code>/1/a/b</code> is <code>a/b</code> of document 1),
+      <code>line</code>/<code>col</code> (1-based; 0 = unknown — arena-
+      owned scalars have no input position, the path still names them),
+      a stable numeric <code>code</code> (bindings hard-code the values;
+      the ABI test pins the head — appending only), and a bounded
+      <code>detail</code> string.
+    </p>
+
+    <h2 id="c">C</h2>
+    <p>
+      <code>yeptris_validate</code> parses and validates in one call.
+      Statuses compose: <code>YEPTRIS_OK</code> (valid — empty report) or
+      <code>YEPTRIS_ERROR_SCHEMA</code> (the report carries diagnostics).
+      Every diagnostic is a flat <code>yeptris_diagnostic</code> struct
+      (16 + 256 + 128 bytes, ABI-pinned); the report frees in one call:
+    </p>
+    <CodeBlock
+      lang="c"
+      code={`#include <stdio.h>
+#include <string.h>
+#include <yeptris/validate.h>
+
+const char *doc = "---\\nname: x\\nname: y\\n";
+yeptris_validate_report *report = NULL;
+YeptrisStatus st = yeptris_validate(doc, strlen(doc), YEPTRIS_SCHEMA_12_CORE, &report);
+if (st != YEPTRIS_OK && st != YEPTRIS_ERROR_SCHEMA) return 1;
+
+size_t n = yeptris_validate_report_count(report);
+for (size_t i = 0; i < n; i++) {
+    const yeptris_diagnostic *d = yeptris_validate_report_at(report, i);
+    printf("code=%u path=%s line=%u col=%u detail=%s\\n",
+           d->code, d->path, d->line, d->col, d->detail);
+}
+yeptris_validate_report_free(report);
+/* code=4 path= line=3 col=1 detail=duplicate mapping key ("name") */`}
+    />
+
+    <h2 id="descriptors">Schema descriptors</h2>
+    <p>
+      The descriptor face compiles a flat table (the root entry first;
+      container entries point at their children via
+      <code>child_index</code>/<code>child_count</code>) and one native
+      pass fills typed columns — lutaml-model's KV path rides this.
+      Requires engine C >= 0.6.13
+      (<code>Yeptris::Schema.headroom_supported?</code> is the probe):
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`require "yeptris"
+
+desc = [
+  { kind: :mapping, child_index: 1, child_count: 3 },
+  { wire_name: "id",    kind: :scalar, type: :int },
+  { wire_name: "name",  kind: :scalar, type: :str },
+  { wire_name: "active", kind: :scalar, type: :bool },
+]
+Yeptris::Schema.load_records("id: 42\\nname: widget\\nactive: true\\n", desc: desc)
+# => [{ id: 42, name: "widget", active: true }]`}
+    />
+    <p>
+      <code>load_records</code> zips the columns into record hashes:
+      mapping root → one hash, sequence-of-mappings → one hash per
+      element, sequence-of-scalars → <code>{'{ value: ... }'}</code> hashes.
+      Absent keys are <em>omitted</em> (not nil-filled) — absent seeds
+      defaults; explicit nil is a present value. The
+      <code>:any</code> type rides a C tag from engine 0.6.12+ —
+      <code>headroom_supported?</code> gates it.
+    </p>
+
+    <Callout kind="note">
+      <strong>Python</strong>: the yeptris package exposes none of these
+      faces today — the faces are engine-side and Ruby-side only. The
+      page will gain a Python section when the binding ships them.
+    </Callout>
+  </DocsShell>
+</BaseLayout>

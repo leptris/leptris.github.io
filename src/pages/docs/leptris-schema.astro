@@ -1,0 +1,175 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="Leptris — schema surfaces docs"
+  description="Four schema surfaces in one engine: XSD compile today (validation riding its scoped slices), RelaxNG grammars, Schematron patterns, and DTD — from C and Ruby, capability-flagged, every snippet executed against the shipped gem."
+>
+  <DocsShell
+    crumb="Leptris — schema surfaces"
+    title={`Leptris — schema surfaces (engine v${VERSIONS.xml})`}
+    lede="libleptris ships four schema surfaces — XSD, RelaxNG, Schematron, and DTD — behind one set of capability flags, so a build declares what it carries and the bindings expose the faces the engine has. This page documents each with snippets executed against the shipped gem."
+  >
+    <Callout kind="note">
+      Every snippet on this page was executed against the released
+      <code>leptris 1.9.415</code> gem before publishing. The status of
+      each surface is stated honestly: what compiles and validates
+      today, and what waits on a scoped slice.
+    </Callout>
+
+    <h2 id="capability">Capability flags — the documented probe</h2>
+    <p>
+      Schema surfaces are compile-time features; a build declares what it
+      carries through the <code>LEPTRIS_CAP_*</code> flags
+      (<code>LEPTRIS_CAP_XSD</code>, <code>LEPTRIS_CAP_XSD_SET</code>,
+      <code>LEPTRIS_CAP_RELAXNG</code>, <code>LEPTRIS_CAP_SCHEMATRON</code>).
+      The Ruby bindings surface the same probe — check before reaching
+      for a face on a slim build:
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`require "leptris"
+require "leptris/xml"
+
+Leptris::XML::XSD.compile(xsd_text)        # raises a build error on a slim build`}
+    />
+
+    <h2 id="xsd">XSD — the compile face</h2>
+    <p>
+      Compile once from text, a file, or a multi-document set
+      (<code>leptris_xsd_compile</code>, <code>leptris_xsd_compile_file</code>,
+      <code>leptris_xsd_compile_set</code>); the schema handle is
+      error-carrying (<code>leptris_xsd_error</code> names the last
+      compile problem on an invalid handle) and reports its top-level
+      declaration count:
+    </p>
+    <CodeBlock
+      lang="c"
+      code={`#include <stdio.h>
+#include <string.h>
+#include <leptris.h>
+
+const char *xsd =
+    "<xs:schema xmlns:xs=\\"http://www.w3.org/2001/XMLSchema\\">"
+    "<xs:element name=\\"note\\" type=\\"NoteType\\"/>"
+    "<xs:complexType name=\\"NoteType\\"><xs:sequence>"
+    "<xs:element name=\\"to\\" type=\\"xs:string\\"/>"
+    "<xs:element name=\\"from\\" type=\\"xs:string\\"/>"
+    "</xs:sequence></xs:complexType></xs:schema>";
+
+LeptrisStatus st = 0;
+LeptrisXsdSchema schema = leptris_xsd_compile(xsd, strlen(xsd), &st);
+if (schema == NULL) {
+    printf("compile failed: %s\\n", leptris_xsd_error(NULL));
+    return 1;
+}
+printf("declarations: %ld\\n", (long)leptris_xsd_declaration_count(schema));
+leptris_xsd_free(schema);
+/* declarations: 2 */`}
+    />
+    <p>
+      The same face in Ruby — <code>Leptris::XML::XSD</code> (autoloaded
+      from <code>leptris/xml</code>; <code>compile</code>,
+      <code>compile_file</code>, <code>compile_set</code>):
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`require "leptris"
+require "leptris/xml"
+
+schema = Leptris::XML::XSD.compile(<<~XSD)
+  <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="note" type="NoteType"/>
+    <xs:complexType name="NoteType">
+      <xs:sequence>
+        <xs:element name="to" type="xs:string"/>
+        <xs:element name="from" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:schema>
+XSD
+schema.class           # => Leptris::XML::XSD::Schema
+schema.declaration_count  # => 2`}
+    />
+    <Callout kind="warn">
+      <strong>XSD status</strong>: today the face compiles schemas —
+      lexical validation rides the built-in/simpleType checks
+      (<code>leptris_xsd_builtin_valid</code> and the simpleType face);
+      the full <em>document validation</em> slice is scoped at
+      leptris#1075 (a five-slice plan, pending the binding-parity
+      contract decision before slice 1). This page will grow the
+      validate section when that lands — the compile face is what ships
+      today.
+    </Callout>
+
+    <h2 id="relaxng">RelaxNG</h2>
+    <p>
+      Parse a RelaxNG grammar
+      (<code>Leptris::XML::RelaxNG.parse</code> /
+      <code>parse_file</code>; the C face is the
+      <code>leptris_relaxng_*</code> family, capability
+      <code>LEPTRIS_CAP_RELAXNG</code>):
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`require "leptris"
+require "leptris/xml"
+
+rng = Leptris::XML::RelaxNG.parse(<<~RNG)
+  <element name="note" xmlns="http://relaxng.org/ns/structure/1.0">
+    <element name="to"><text/></element>
+  </element>
+RNG
+rng.class  # => Leptris::XML::RelaxNG::Schema`}
+    />
+
+    <h2 id="schematron">Schematron</h2>
+    <p>
+      Parse a Schematron pattern sheet
+      (<code>Leptris::XML::Schematron.parse</code> /
+      <code>parse_file</code>; the C face carries
+      <code>leptris_schematron_parse</code>,
+      <code>_parse_phase</code> (phase selection),
+      <code>_valid</code>, and the error handback via
+      <code>leptris_schematron_error</code> /
+      <code>leptris_last_error</code>; capability
+      <code>LEPTRIS_CAP_SCHEMATRON</code>; the FFI attach lives in the
+      binding, engine >= 1.9.126):
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`require "leptris"
+require "leptris/xml"
+
+sch = Leptris::XML::Schematron.parse(<<~SCH)
+  <schema xmlns="http://purl.oclc.org/dsdl/schematron">
+    <pattern>
+      <rule context="note">
+        <assert test="to">needs a to</assert>
+      </rule>
+    </pattern>
+  </schema>
+SCH
+sch.class  # => Leptris::XML::Schematron::Schema`}
+    />
+
+    <h2 id="dtd">DTD</h2>
+    <p>
+      The DTD surface rides <code>src/include/leptris/dtd.h</code> —
+      internal/external subset parsing over the same engine; the binding
+      exposes it through the same autoload pattern as the faces above.
+    </p>
+
+    <Callout kind="note">
+      <strong>Python</strong>: the leptris package's schema exposure is
+      under audit in the same pass as this page (leptris#2023) — faces
+      that are engine-side only will be stated as such there rather than
+      implying parity.
+    </Callout>
+  </DocsShell>
+</BaseLayout>
