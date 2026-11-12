@@ -16,10 +16,12 @@ import { VERSIONS } from '~/data/site';
     lede="libleptris ships four schema surfaces — XSD, RelaxNG, Schematron, and DTD — behind one set of capability flags, so a build declares what it carries and the bindings expose the faces the engine has. This page documents each with snippets executed against the shipped gem."
   >
     <Callout kind="note">
-      Every snippet on this page was executed against the released
-      <code>leptris 1.9.415</code> gem before publishing. The status of
-      each surface is stated honestly: what compiles and validates
-      today, and what waits on a scoped slice.
+      Every snippet on this page was executed against released
+      artifacts before publishing — the <code>leptris</code> gem
+      (1.9.415 for the original snippets, re-verified on 1.9.418.1), the
+      1.9.418.0 PyPI wheel, and the engine built from main. The status
+      of each surface is stated honestly: what compiles and validates
+      today, and what remains on the roadmap.
     </Callout>
 
     <h2 id="capability">Capability flags — the documented probe</h2>
@@ -27,7 +29,8 @@ import { VERSIONS } from '~/data/site';
       Schema surfaces are compile-time features; a build declares what it
       carries through the <code>LEPTRIS_CAP_*</code> flags
       (<code>LEPTRIS_CAP_XSD</code>, <code>LEPTRIS_CAP_XSD_SET</code>,
-      <code>LEPTRIS_CAP_RELAXNG</code>, <code>LEPTRIS_CAP_SCHEMATRON</code>).
+      <code>LEPTRIS_CAP_RELAXNG</code>, <code>LEPTRIS_CAP_SCHEMATRON</code>,
+      <code>LEPTRIS_CAP_DTD</code>).
       The Ruby bindings surface the same probe — check before reaching
       for a face on a slim build:
     </p>
@@ -94,17 +97,37 @@ schema = Leptris::XML::XSD.compile(<<~XSD)
   </xs:schema>
 XSD
 schema.class           # => Leptris::XML::XSD::Schema
-schema.declaration_count  # => 2`}
+schema.declaration_count  # => 2
+
+doc = Leptris::XML.parse('<note><to>you</to><from>me</from></note>')
+schema.valid?(doc)             # => true
+schema.valid?(Leptris::XML.parse('<note/>'))
+# => false (missing required children)
+schema.validate_errors(Leptris::XML.parse('<note><to>x</to></note>'))
+# => ["element 'note' @1:7: element 'note': children do not match the content model"]`}
     />
-    <Callout kind="warn">
-      <strong>XSD status</strong>: today the face compiles schemas —
-      lexical validation rides the built-in/simpleType checks
-      (<code>leptris_xsd_builtin_valid</code> and the simpleType face);
-      the full <em>document validation</em> slice is scoped at
-      leptris#1075 (a five-slice plan, pending the binding-parity
-      contract decision before slice 1). This page will grow the
-      validate section when that lands — the compile face is what ships
-      today.
+    <CodeBlock
+      lang="c"
+      code={`LeptrisStatus st = 0;
+LeptrisDocument doc = leptris_parse_string("<note><to>x</to></note>", 23, &st);
+if (leptris_xsd_validate(schema, doc) == 0)
+    for (size_t i = 0; i < leptris_xsd_error_count(schema); i++)
+        printf("%s\\n", leptris_xsd_error_at(schema, i));
+// => element 'note' @1:7: element 'note': children do not match the content model
+leptris_document_free(doc);`}
+    />
+    <Callout kind="note">
+      <strong>XSD status</strong>: document validation ships —
+      <code>leptris_xsd_validate</code> assesses an instance against the
+      compiled schema and accumulates <em>every</em> failure
+      (<code>leptris_xsd_error_count</code> /
+      <code>leptris_xsd_error_at</code>; the gem&rsquo;s
+      <code>valid?</code> / <code>validate_errors</code> ride the same
+      walk). XSD 1.1 constructs gate on the versioning attributes
+      (<code>vc:minVersion</code> / <code>@version</code>); the dialect
+      in force is probeable via <code>leptris_xsd_version</code>. The
+      #1075 slice plan that scoped this work is closed — its slices
+      landed.
     </Callout>
 
     <h2 id="relaxng">RelaxNG</h2>
@@ -166,10 +189,13 @@ sch.class  # => Leptris::XML::Schematron::Schema`}
     </p>
 
     <Callout kind="note">
-      <strong>Python</strong>: the leptris package's schema exposure is
-      under audit in the same pass as this page (leptris#2023) — faces
-      that are engine-side only will be stated as such there rather than
-      implying parity.
+      <strong>Python</strong>: the leptris package ships all four faces
+      — <code>leptris.XSD</code>, <code>leptris.RelaxNG</code>,
+      <code>leptris.Schematron</code>, <code>leptris.DTD</code> — the
+      same compile-once/validate-many shape (<code>validate()</code>
+      answers a boolean; <code>error_log</code> is the findings list
+      from the most recent validate). Verified against the released
+      1.9.418.0 wheel.
     </Callout>
   </DocsShell>
 </BaseLayout>
