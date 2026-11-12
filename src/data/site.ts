@@ -105,6 +105,12 @@ export const DOCS_NAV: DocsEntry[] = [
   },
 
   {
+    href: '/docs/leptris-schema',
+    label: 'Leptris — schema surfaces',
+    blurb: 'XSD, RelaxNG, Schematron, DTD — the four schema surfaces behind the capability flags, from C and Ruby.',
+  },
+
+  {
     href: '/docs/parsing',
     label: 'Parsing models',
     blurb: 'DOM, SAX, StAX-style pull, iterparse — when to pick each.',
@@ -155,5 +161,10 @@ export const DOCS_NAV: DocsEntry[] = [
     href: '/docs/yeptris-python',
     label: 'Yeptris — Python',
     blurb: 'The yeptris package — PyYAML-shaped safe_load/safe_dump, ctypes FFI, no compilation.',
+  },
+  {
+    href: '/docs/yeptris-validation',
+    label: 'Yeptris — validation and schemas',
+    blurb: 'The four faces kept apart: parse-time schema modes, the spec-conformance validation walk, the JSON productions family, and typed schema descriptors.',
   },
 ];
