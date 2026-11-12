@@ -138,7 +138,7 @@ $ teptris validate broken.toml     # exit 1 with line:col on error`,
         <ul class="hero-points">
           <li><strong>Speed with a referee</strong> — every figure comes from the open benchmark lane: interleaved runs, pinned competitors, medians, ledger kept in the repository.</li>
           <li><strong>Conformance first</strong> — 720/720 on BurntSushi&rsquo;s toml-test (1.1 view), the round-trip property, ASan/UBSan/TSan suites, and a nightly libFuzzer lane.</li>
-          <li><strong>Schema validation, SOTA-complete</strong> — JSON Schema 2020-12 compiled once, validated many: 1013/1013 on the official draft-2020-12 suite, 1173/1173 through tombi&rsquo;s own harness, dialect-gated format/content.</li>
+          <li><strong>Schema validation, SOTA-complete</strong> — JSON Schema 2020-12 compiled once, validated many: <strong>1789/1789, zero divergences on the entire unified official suite</strong> (2026-11-12), 1173/1173 through tombi&rsquo;s own harness; the format battery is real RFC/Unicode engines &mdash; RFC 5322/6531/3986/3987/6570/3339/4122/5891/5892/5893/3492 and UTS&nbsp;#46 with IDNA (NFC, punycode, context and bidi rules) &mdash; dialect-gated format/content.</li>
           <li><strong>One core, five surfaces</strong> — the same C99 engine from C, Ruby, Python, Rust, and JavaScript/Wasm; a typed-JSON CLI thrown in.</li>
         </ul>
       </div>
