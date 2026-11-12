@@ -28,7 +28,7 @@ import { VERSIONS } from '~/data/site';
       code={`XSD         element 'server' @1:22: attribute 'port': lexical value does not match its type
 RELAX NG    1:10: error: element "server" missing required attribute "port"   (Jing's spelling)
 Schematron  the rule's <assert> fired (boolean result, or the SVRL document)
-DTD         a structured error record (element, attribute, message)`}
+DTD         a structured error record (element name, position, message)`}
     />
     <p>
       Whether a build carries a face is answerable at runtime — the
@@ -83,10 +83,10 @@ const char* xsd =
 
 LeptrisStatus st = LEPTRIS_OK;
 LeptrisXsdSchema s = leptris_xsd_compile(xsd, strlen(xsd), &st);
-if (!s) { fprintf(stderr, "%s\\n", leptris_xsd_error(s)); return 1; }
+if (st != LEPTRIS_OK) { fprintf(stderr, "%s\\n", leptris_xsd_error(s)); return 1; }
 
 LeptrisDocument d =
-    leptris_parse_string("<server port=\\"http\\"/>", 20, &st);
+    leptris_parse_string("<server port=\\"http\\"/>", 21, &st);
 if (leptris_xsd_validate(s, d) == 0)
     for (size_t i = 0; i < leptris_xsd_error_count(s); i++)
         printf("%s\\n", leptris_xsd_error_at(s, i));
@@ -97,19 +97,47 @@ leptris_xsd_free(s);`}
     />
     <p>
       <code>leptris_xsd_compile_set(paths, n, &amp;st)</code> compiles
-      several schema documents into one schema — imports resolve across
-      the whole set, in any unit order. Validation is position-aware:
-      each finding names the element, its line and column, and the
-      failed component.
+      several schema documents into one schema — declarations merge
+      across the whole set, with a shared visited-set closing
+      include/import cycles between members, so components declared in
+      importing documents are visible to the head. Validation is
+      position-aware: each finding names the element, its line and
+      column, and the failed component. The remaining C faces:
+      <code>leptris_xsd_declaration_count</code> enumerates top-level
+      declarations; <code>leptris_xsd_builtin_valid</code>,
+      <code>leptris_xsd_simple_valid</code> and
+      <code>leptris_xsd_content_valid</code> expose the datatype,
+      facet and content-model layers directly;
+      <code>leptris_xsd_version</code> reports the effective XSD
+      version (<code>"1.0"</code> or <code>"1.1"</code>); and
+      <code>leptris_xsd_error_report</code> hands back the whole
+      finding list as structured records (failure class, component,
+      line, column, message).
     </p>
     <Callout kind="note">
-      Validation targets XSD 1.0 semantics; XSD 1.1-only constructs are
-      gated on <code>vc:minVersion</code> — a schema that opts into 1.1
-      through the versioning attributes reads 1.1 semantics where the
-      two dialects differ (for example, 1.1 lifted the
-      one-ID-per-element rule). The conformance lane runs the W3C XML
-      Schema test suite continuously; suite-driven fixes ride every
-      release.
+      Status, stated plainly (issue <code>#1075</code>, closed): the
+      tier-1 charter ships — compilation (include/import/redefine,
+      derivation, groups, substitution groups), the built-in datatype
+      table with facets, content models, instance validation with
+      accumulated findings, and <code>xs:key</code>/
+      <code>xs:unique</code>/<code>xs:keyref</code> identity
+      constraints — and so does the XSD 1.1 set: <code>xs:assert</code>,
+      <code>xs:assertion</code>, <code>xs:alternative</code>
+      (conditional type assignment) and <code>xs:openContent</code>.
+      A schema opts into 1.1 semantics through the root
+      <code>@version="1.1"</code> attribute or the versioning
+      namespace&rsquo;s <code>vc:minVersion="1.1"</code>
+      (<code>vc:maxVersion="1.0"</code> pins a 1.0 target);
+      <code>leptris_xsd_version()</code> tells you which semantics a
+      compiled schema carries. One deliberate boundary remains:
+      <code>xs:anyAttribute</code> is lax by design — undeclared
+      attributes are accepted, and strict-undeclared-element handling
+      is owner-scoped. The conformance gate is a differential corpus
+      against the libxml2 oracle (the Nokogiri-parity target&rsquo;s
+      own engine): 1056 schema/instance pairs vendored from
+      libxml2&rsquo;s <code>test/schemas</code>, with a pinned
+      monotonic pass floor and a disposition ledger for every row
+      still open.
     </Callout>
 
     <h2 id="relaxng">RELAX NG</h2>
@@ -133,9 +161,15 @@ leptris_rng_free(g);`}
     />
     <p>
       Errors accumulate: <code>leptris_rng_error_report()</code> hands
-      back the whole list as records. A schema parsed from a file
-      resolves <code>&lt;include href="..."&gt;</code> relative to the
-      file&rsquo;s directory, following Jing&rsquo;s override rules.
+      back the whole list as structured records, and
+      <code>leptris_rng_error_count</code> /
+      <code>_message</code> / <code>_line</code> / <code>_column</code>
+      enumerate entries individually
+      (<code>leptris_rng_error</code> keeps returning the first
+      message). <code>leptris_rng_parse_file()</code> compiles a
+      schema from a path, resolving <code>&lt;include
+      href="..."&gt;</code> relative to the file&rsquo;s directory,
+      following Jing&rsquo;s override rules.
     </p>
 
     <h2 id="schematron">Schematron</h2>
@@ -148,7 +182,7 @@ leptris_rng_free(g);`}
     " </rule></pattern></schema>";
 
 LeptrisSchematron sch_h = leptris_schematron_parse(sch, strlen(sch), &st);
-LeptrisDocument d = leptris_parse_string("<server port='8080'/>", 22, &st);
+LeptrisDocument d = leptris_parse_string("<server port='8080'/>", 21, &st);
 int ok = leptris_schematron_valid(sch_h, d);   // 1 = every assert passed
 
 /* the report form: leptris_schematron_validate() returns the SVRL
@@ -158,8 +192,9 @@ leptris_schematron_free(sch_h);`}
     />
     <p>
       <code>leptris_schematron_parse_phase()</code> compiles with a
-      selected phase; schema errors publish to the thread-global error
-      channel (<code>leptris_last_error</code>).
+      selected phase and <code>leptris_schematron_parse_file()</code>
+      compiles from a path; schema errors publish to the thread-global
+      error channel (<code>leptris_last_error</code>).
     </p>
 
     <h2 id="dtd">DTD</h2>
@@ -171,10 +206,12 @@ const char* dtd =
     "<!ELEMENT server EMPTY><!ATTLIST server port CDATA #REQUIRED>";
 LeptrisDTD* dt = leptris_dtd_parse(dtd, strlen(dtd));
 
-LeptrisDocument d = leptris_parse_string("<server port='8080'/>", 22, &st);
-LeptrisDTDError* err = NULL;
-int ok = leptris_dtd_validate(d, dt, err);   // 1 = valid
-leptris_dtd_error_free(err);
+LeptrisDocument d = leptris_parse_string("<server port='8080'/>", 21, &st);
+LeptrisDTDError err = {0};
+int ok = leptris_dtd_validate(d, dt, &err);  // 1 valid, 0 invalid
+// on failure err carries element name + position + message, e.g.
+// "Element 'server' missing #REQUIRED attribute 'port'"
+leptris_dtd_error_free(&err);
 leptris_document_free(d);
 leptris_dtd_free(dt);`}
     />
@@ -246,8 +283,10 @@ dtd.valid?(Leptris::XML.parse('<server/>'))               # => true`}
       XSD additionally offers <code>compile_file</code> /
       <code>compile_set</code> (imports resolve across the set) and
       <code>builtin_valid?</code> for direct access to the built-in
-      lexical table. Compile failures raise
-      <code>Leptris::XML::Error</code> with the engine&rsquo;s detail.
+      lexical table. A schema that cannot be used at all raises
+      <code>Leptris::XML::Error</code>; a well-formed but invalid
+      schema compiles to a handle whose <code>#error</code> carries
+      the engine&rsquo;s detail.
     </p>
 
     <h2 id="python">Python</h2>
@@ -276,8 +315,11 @@ rng.validate(XML('<server port="8080"/>'))   # => True`}
     />
     <p>
       <code>error_log</code> is a property (the list from the most
-      recent validate), and <code>leptris.DTD</code> /
-      <code>leptris.Schematron</code> expose the same shape.
+      recent validate), and <code>leptris.DTD</code> mirrors the same
+      shape (<code>validate</code> + <code>error_log</code>).
+      <code>leptris.Schematron</code> follows the SVRL model instead:
+      <code>validate()</code> returns the SVRL report document, and
+      <code>is_valid</code> is the boolean.
     </p>
 
     <h2 id="surfaces">Surface coverage</h2>
@@ -295,6 +337,15 @@ Rust           engine-side only (descriptor face; the public crate
                surface is DOM/XPath today)
 TypeScript     not yet`}
     />
+    <p>
+      The C probe behind each column: <code>LEPTRIS_CAP_XSD</code> for
+      compile + validate (<code>LEPTRIS_CAP_XSD_SET</code> adds the
+      multi-document set face), <code>LEPTRIS_CAP_RELAXNG</code>,
+      <code>LEPTRIS_CAP_SCHEMATRON</code> and
+      <code>LEPTRIS_CAP_DTD</code>. All four faces are part of the
+      core engine build — no compile-time option turns them off — so
+      every shipping build answers yes to all of them.
+    </p>
 
     <Callout kind="note">
       Every snippet on this page executed against the shipped artifacts
