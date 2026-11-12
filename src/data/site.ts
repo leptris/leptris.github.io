@@ -135,6 +135,11 @@ export const DOCS_NAV: DocsEntry[] = [
     label: 'Teptris — Rust',
     blurb: 'The teptris crate — hand-maintained FFI over the C engine, 7-45x the toml crate on loads.',
   },
+  {
+    href: '/docs/teptris-schema',
+    label: 'Teptris — schema validation',
+    blurb: 'JSON Schema 2020-12 for TOML documents — compile once, validate many, from every surface; 1789/1789 on the official suite.',
+  },
 
   {
     href: '/docs/yeptris-getting-started',
