@@ -4,7 +4,7 @@
   "language": "c",
   "subject": {
     "name": "libleptris",
-    "version": "1.9.417.0"
+    "version": "1.9.418.0"
   },
   "harness": {
     "label": "bench_append_attr_pugixml — CI Benchmark workflow (quiet GH runners, Release + LTO, min of 5); attrparse row = parse + free per doc, 4 elems x 16 attrs",
