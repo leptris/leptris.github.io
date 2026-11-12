@@ -85,7 +85,7 @@ teptris_schema_validate(sch, doc, strlen(doc), &buf, &n);
 free(buf);
 teptris_schema_free(sch);`}
     />
-    <Callout kind="info">
+    <Callout kind="note">
       <code>teptris_schema_compile_ex</code> takes a base directory so
       relative <code>$ref</code>s resolve against local files. The
       library never touches the network: absolute-URI references are
@@ -282,7 +282,7 @@ duration                                            RFC 3339 duration grammar (s
       semantics are identical).
     </p>
 
-    <Callout kind="info">
+    <Callout kind="note">
       The complete semantics — the four policies, the subset, the
       format battery — are the engine contract documented in
       <code>SCHEMAS.md</code> at
