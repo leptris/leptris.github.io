@@ -4,14 +4,14 @@
   "language": "c",
   "subject": {
     "name": "libleptris",
-    "version": "1.9.416.0 + attrparse cuts through PR leptris#2009"
+    "version": "1.9.417.0"
   },
   "harness": {
     "label": "bench_append_attr_pugixml — CI Benchmark workflow (quiet GH runners, Release + LTO, min of 5); attrparse row = parse + free per doc, 4 elems x 16 attrs",
     "url": "https://github.com/leptris/leptris/tree/main/benchmarks/modification"
   },
   "machine": "Apple M1 Max (arm64) — local, quiet windows",
-  "date": "2026-11-11",
+  "date": "2026-11-12",
   "stat": "min of 5 (Release + LTO)",
   "results": [
     {
