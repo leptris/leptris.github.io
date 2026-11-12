@@ -1,0 +1,307 @@
+---
+import BaseLayout from '~/components/BaseLayout.astro';
+import DocsShell from '~/components/DocsShell.astro';
+import CodeBlock from '~/components/CodeBlock.astro';
+import Callout from '~/components/Callout.astro';
+import { VERSIONS } from '~/data/site';
+---
+
+<BaseLayout
+  title="libleptris — schema validation docs (XSD, RelaxNG, Schematron, DTD)"
+  description="Four schema families in one engine: XSD, RELAX NG, Schematron and DTD validation — compile once, validate many, from C, the CLI, Ruby and Python, with a capability probe for each face."
+>
+  <DocsShell
+    crumb="Schema validation"
+    title={`Schema validation — XSD, RelaxNG, Schematron, DTD (engine v${VERSIONS.lib})`}
+    lede="libleptris validates documents against four schema families: W3C XML Schema (XSD), RELAX NG, Schematron and DTD. Every family follows the same shape — compile the schema once into an immutable handle, validate any number of documents against it, and collect every violation rather than stopping at the first."
+  >
+    <h2 id="model">The model</h2>
+    <p>
+      Each family compiles a schema document (or a set of them) into a
+      handle, validates parsed documents against it, and reports
+      failures in the family&rsquo;s native diagnostic style — the
+      engine speaks each vocabulary instead of flattening them into one
+      generic shape:
+    </p>
+    <CodeBlock
+      lang="text"
+      code={`XSD         element 'server' @1:22: attribute 'port': lexical value does not match its type
+RELAX NG    1:10: error: element "server" missing required attribute "port"   (Jing's spelling)
+Schematron  the rule's <assert> fired (boolean result, or the SVRL document)
+DTD         a structured error record (element, attribute, message)`}
+    />
+    <p>
+      Whether a build carries a face is answerable at runtime — the
+      capability probe returns a bitmask:
+    </p>
+    <CodeBlock
+      lang="c"
+      code={`LeptrisCapabilities caps = leptris_capabilities();
+caps.caps & LEPTRIS_CAP_XSD;         // XSD compile + validate
+caps.caps & LEPTRIS_CAP_XSD_SET;     // multi-document schema sets
+caps.caps & LEPTRIS_CAP_RELAXNG;     // RELAX NG
+caps.caps & LEPTRIS_CAP_SCHEMATRON;  // Schematron
+caps.caps & LEPTRIS_CAP_DTD;         // DTD`}
+    />
+
+    <h2 id="cli">The CLI</h2>
+    <p>
+      <code>leptris validate</code> takes <code>--xsd</code>,
+      <code>--rng</code>, <code>--schematron</code> or
+      <code>--dtd</code>, prints every finding, and exits non-zero when
+      anything fails:
+    </p>
+    <CodeBlock
+      lang="console"
+      code={`$ leptris validate --xsd port.xsd bad.xml
+xsd: invalid
+  element 'server' @1:10: attribute 'port': required but absent
+$ echo $?   # 1
+
+$ leptris validate --rng server.rng bad.xml
+rng: invalid
+  1:10: error: element "server" missing required attribute "port"`}
+    />
+
+    <h2 id="xsd">XSD — W3C XML Schema</h2>
+    <p>
+      The C face lives in <code>&lt;leptris.h&gt;</code>: compile from
+      text, a file, or a multi-document set; validate; enumerate every
+      failure:
+    </p>
+    <CodeBlock
+      lang="c"
+      code={`#include <string.h>
+#include <leptris.h>
+#include <leptris/dom/document.h>
+
+const char* xsd =
+    "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>"
+    " <xs:element name='server'><xs:complexType>"
+    "  <xs:attribute name='port' type='xs:integer' use='required'/>"
+    " </xs:complexType></xs:element></xs:schema>";
+
+LeptrisStatus st = LEPTRIS_OK;
+LeptrisXsdSchema s = leptris_xsd_compile(xsd, strlen(xsd), &st);
+if (!s) { fprintf(stderr, "%s\\n", leptris_xsd_error(s)); return 1; }
+
+LeptrisDocument d =
+    leptris_parse_string("<server port=\\"http\\"/>", 20, &st);
+if (leptris_xsd_validate(s, d) == 0)
+    for (size_t i = 0; i < leptris_xsd_error_count(s); i++)
+        printf("%s\\n", leptris_xsd_error_at(s, i));
+// => element 'server' @1:22: attribute 'port': lexical value does not match its type
+
+leptris_document_free(d);
+leptris_xsd_free(s);`}
+    />
+    <p>
+      <code>leptris_xsd_compile_set(paths, n, &amp;st)</code> compiles
+      several schema documents into one schema — imports resolve across
+      the whole set, in any unit order. Validation is position-aware:
+      each finding names the element, its line and column, and the
+      failed component.
+    </p>
+    <Callout kind="note">
+      Validation targets XSD 1.0 semantics; XSD 1.1-only constructs are
+      gated on <code>vc:minVersion</code> — a schema that opts into 1.1
+      through the versioning attributes reads 1.1 semantics where the
+      two dialects differ (for example, 1.1 lifted the
+      one-ID-per-element rule). The conformance lane runs the W3C XML
+      Schema test suite continuously; suite-driven fixes ride every
+      release.
+    </Callout>
+
+    <h2 id="relaxng">RELAX NG</h2>
+    <CodeBlock
+      lang="c"
+      code={`const char* rng =
+    "<element name='server' xmlns='http://relaxng.org/ns/structure/1.0'>"
+    " <attribute name='port'>"
+    "  <data type='integer'"
+    "   datatypeLibrary='http://www.w3.org/2001/XMLSchema-datatypes'/>"
+    " </attribute></element>";
+
+LeptrisRelaxNG g = leptris_rng_parse(rng, strlen(rng), &st);
+LeptrisDocument d = leptris_parse_string("<server/>", 9, &st);
+if (leptris_rng_validate(g, d) == 0)
+    printf("%s\\n", leptris_rng_error(g));
+// => 1:10: error: element "server" missing required attribute "port"
+
+leptris_document_free(d);
+leptris_rng_free(g);`}
+    />
+    <p>
+      Errors accumulate: <code>leptris_rng_error_report()</code> hands
+      back the whole list as records. A schema parsed from a file
+      resolves <code>&lt;include href="..."&gt;</code> relative to the
+      file&rsquo;s directory, following Jing&rsquo;s override rules.
+    </p>
+
+    <h2 id="schematron">Schematron</h2>
+    <CodeBlock
+      lang="c"
+      code={`const char* sch =
+    "<schema xmlns='http://purl.oclc.org/dsdl/schematron'>"
+    " <pattern><rule context='server'>"
+    "  <assert test='@port'>server needs a port</assert>"
+    " </rule></pattern></schema>";
+
+LeptrisSchematron sch_h = leptris_schematron_parse(sch, strlen(sch), &st);
+LeptrisDocument d = leptris_parse_string("<server port='8080'/>", 22, &st);
+int ok = leptris_schematron_valid(sch_h, d);   // 1 = every assert passed
+
+/* the report form: leptris_schematron_validate() returns the SVRL
+ * document; leptris_schematron_error() names the fired assert */
+leptris_document_free(d);
+leptris_schematron_free(sch_h);`}
+    />
+    <p>
+      <code>leptris_schematron_parse_phase()</code> compiles with a
+      selected phase; schema errors publish to the thread-global error
+      channel (<code>leptris_last_error</code>).
+    </p>
+
+    <h2 id="dtd">DTD</h2>
+    <CodeBlock
+      lang="c"
+      code={`#include <leptris/dtd.h>
+
+const char* dtd =
+    "<!ELEMENT server EMPTY><!ATTLIST server port CDATA #REQUIRED>";
+LeptrisDTD* dt = leptris_dtd_parse(dtd, strlen(dtd));
+
+LeptrisDocument d = leptris_parse_string("<server port='8080'/>", 22, &st);
+LeptrisDTDError* err = NULL;
+int ok = leptris_dtd_validate(d, dt, err);   // 1 = valid
+leptris_dtd_error_free(err);
+leptris_document_free(d);
+leptris_dtd_free(dt);`}
+    />
+    <p>
+      A document&rsquo;s own internal subset rides along via
+      <code>leptris_document_get_dtd()</code>; external subsets parse
+      with <code>leptris_dtd_parse_external_subset()</code>, and a
+      parameter-entity loader hook
+      (<code>leptris_dtd_set_pe_loader()</code>) lets the host control
+      entity resolution. Shipped today: element content models (EMPTY/
+      ANY/mixed/element), attribute defaults
+      (<code>#REQUIRED</code>/<code>#IMPLIED</code>/<code>#FIXED</code>)
+      and attribute-type validation. Parameter-entity expansion and
+      ENTITY-typed attribute resolution are on the roadmap.
+    </p>
+
+    <h2 id="ruby">Ruby</h2>
+    <p>
+      The binding exposes all four families under
+      <code>Leptris::XML</code> (snippets verified against the shipped
+      gem):
+    </p>
+    <CodeBlock
+      lang="ruby"
+      code={`require "leptris"
+
+# XSD — compile once, validate many
+xsd = Leptris::XML::XSD.compile(<<~XSD)
+  <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="server">
+      <xs:complexType>
+        <xs:attribute name="port" type="xs:integer" use="required"/>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+XSD
+doc = Leptris::XML.parse('<server port="http"/>')
+xsd.valid?(doc)                # => false
+xsd.validate_errors(doc)
+# => ["element 'server' @1:22: attribute 'port': lexical value does not match its type"]
+
+# RELAX NG
+rng = Leptris::XML::RelaxNG.parse(<<~RNG)
+  <element name="server" xmlns="http://relaxng.org/ns/structure/1.0">
+    <attribute name="port">
+      <data type="integer" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"/>
+    </attribute>
+  </element>
+RNG
+rng.valid?(Leptris::XML.parse('<server port="8080"/>'))   # => true
+rng.validate_errors(Leptris::XML.parse('<server/>'))
+# => [{line: 1, column: 10, message: 'element "server" missing required attribute "port"'}]
+
+# Schematron
+sch = Leptris::XML::Schematron.parse(<<~SCH)
+  <schema xmlns="http://purl.oclc.org/dsdl/schematron">
+    <pattern><rule context="server">
+      <assert test="@port">server needs a port</assert>
+    </rule></pattern>
+  </schema>
+SCH
+sch.valid?(Leptris::XML.parse('<server port="8080"/>'))   # => true
+
+# DTD
+dtd = Leptris::XML::DTD.parse("<!ELEMENT server EMPTY>")
+dtd.valid?(Leptris::XML.parse('<server/>'))               # => true`}
+    />
+    <p>
+      XSD additionally offers <code>compile_file</code> /
+      <code>compile_set</code> (imports resolve across the set) and
+      <code>builtin_valid?</code> for direct access to the built-in
+      lexical table. Compile failures raise
+      <code>Leptris::XML::Error</code> with the engine&rsquo;s detail.
+    </p>
+
+    <h2 id="python">Python</h2>
+    <CodeBlock
+      lang="python"
+      code={`import leptris
+from leptris import XML
+
+xsd = leptris.XSD('''<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="server"><xs:complexType>
+    <xs:attribute name="port" type="xs:integer" use="required"/>
+  </xs:complexType></xs:element>
+</xs:schema>''')
+
+doc = XML('<server port="http"/>')
+xsd.validate(doc)        # => False
+xsd.error_log            # => ["element 'server' @1:22: attribute 'port': "
+                         #      "lexical value does not match its type"]
+
+rng = leptris.RelaxNG('''<element name="server" xmlns="http://relaxng.org/ns/structure/1.0">
+  <attribute name="port">
+    <data type="integer" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"/>
+  </attribute>
+</element>''')
+rng.validate(XML('<server port="8080"/>'))   # => True`}
+    />
+    <p>
+      <code>error_log</code> is a property (the list from the most
+      recent validate), and <code>leptris.DTD</code> /
+      <code>leptris.Schematron</code> expose the same shape.
+    </p>
+
+    <h2 id="surfaces">Surface coverage</h2>
+    <p>
+      Which surfaces carry which faces today:
+    </p>
+    <CodeBlock
+      lang="text"
+      code={`                XSD    RelaxNG    Schematron    DTD
+C              yes      yes         yes        yes
+CLI            yes      yes         yes        yes
+Ruby           yes      yes         yes        yes
+Python         yes      yes         yes        yes
+Rust           engine-side only (descriptor face; the public crate
+               surface is DOM/XPath today)
+TypeScript     not yet`}
+    />
+
+    <Callout kind="note">
+      Every snippet on this page executed against the shipped artifacts
+      before publishing (engine v{VERSIONS.lib}, gem 1.9.418.1, wheel
+      1.9.418.0). The conformance ledger behind the XSD and RelaxNG
+      lanes is suite-driven — verdict waves from the field become
+      vendored regression pins in the engine repository.
+    </Callout>
+  </DocsShell>
+</BaseLayout>

@@ -26,12 +26,12 @@ export const SITE = {
 } as const;
 
 export const VERSIONS = {
-  lib: '1.9.156',
-  libDate: '2026-09-13',
-  gem: '1.9.156.0',
-  gemDate: '2026-09-13',
-  py: '1.9.156.0',
-  pyDate: '2026-09-13',
+  lib: '1.9.418',
+  libDate: '2026-11-12',
+  gem: '1.9.418.1',
+  gemDate: '2026-11-12',
+  py: '1.9.418.0',
+  pyDate: '2026-11-12',
   toml: '0.3.30',
   tomlDate: '2026-11-12',
   tomlRuby: '0.3.30.0',
@@ -97,6 +97,11 @@ export const DOCS_NAV: DocsEntry[] = [
     href: '/docs/xpath',
     label: 'XPath 1.0',
     blurb: 'All 13 axes, 27 functions, 15 operators — W3C-conformant.',
+  },
+  {
+    href: '/docs/leptris-schema',
+    label: 'Schema validation',
+    blurb: 'XSD, RelaxNG, Schematron and DTD — compile once, validate many, from C, the CLI, Ruby and Python.',
   },
   {
     href: '/docs/internals',
