@@ -12,7 +12,7 @@ import { VERSIONS } from '~/data/site';
 >
   <DocsShell
     crumb="Leptris — schema surfaces"
-    title={`Leptris — schema surfaces (engine v${VERSIONS.xml})`}
+    title={`Leptris — schema surfaces (engine v${VERSIONS.lib})`}
     lede="libleptris ships four schema surfaces — XSD, RelaxNG, Schematron, and DTD — behind one set of capability flags, so a build declares what it carries and the bindings expose the faces the engine has. This page documents each with snippets executed against the shipped gem."
   >
     <Callout kind="note">
@@ -139,7 +139,7 @@ rng.class  # => Leptris::XML::RelaxNG::Schema`}
       <code>leptris_schematron_error</code> /
       <code>leptris_last_error</code>; capability
       <code>LEPTRIS_CAP_SCHEMATRON</code>; the FFI attach lives in the
-      binding, engine >= 1.9.126):
+      binding, engine 1.9.126+):
     </p>
     <CodeBlock
       lang="ruby"
