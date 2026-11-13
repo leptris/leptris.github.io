@@ -121,7 +121,7 @@ const yaml = await dump({ name: "yeptris", langs: ["c", "rust"] });
         </div>
         <ul class="hero-points">
           <li><strong>Speed with a referee</strong> — every figure comes from the open benchmark lane: interleaved runs, pinned competitors, medians, a performance ledger kept in the repository.</li>
-          <li><strong>Conformance first</strong> — 395/395 on the yaml-test-suite, the libyaml emission goldens with zero divergences, ASan/UBSan/TSan suites, and a nightly libFuzzer lane 240+ rounds deep with every catch shipped or carried.</li>
+          <li><strong>Conformance first</strong> — 395/395 on the yaml-test-suite, the libyaml emission goldens with zero divergences, ASan/UBSan/TSan suites, and a nightly libFuzzer lane 250+ rounds deep with every catch shipped or carried.</li>
           <li><strong>One core, five runtimes</strong> — the same C11 engine from C, Ruby, Python, Rust, and JavaScript; every runtime releases in lockstep with the engine.</li>
         </ul>
       </div>
@@ -176,8 +176,11 @@ const yaml = await dump({ name: "yeptris", langs: ["c", "rust"] });
             <code>da267a5</code>, psych-pure&rsquo;s 67 corpus files,
             JSONTestSuite 95/95 accept and 188/188 reject in strict mode,
             the 405-input libyaml parse differential with full-record
-            equality — and the fuzz nightly, 240+ rounds in, every catch
-            shipped or carried: seventeen engine fixes, 140 pins green.
+            equality — and the fuzz nightly, 250+ rounds in, every catch
+            shipped or carried: eighteen engine fixes, 180 fuzzing-gated
+            pins green (the comparator leg fuzzes its own corpus snapshot,
+            and the flow-soup family&rsquo;s density is measured with 40
+            exact-bytes shapes pinned).
             And the emitter writes stored files the way Psych and libyaml
             do: block plain and single-quoted scalars fold at 80 columns
             by default (Psych&rsquo;s <code>line_width: -1</code> unwraps),
