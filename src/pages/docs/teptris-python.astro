@@ -19,12 +19,13 @@ import { SITE, VERSIONS } from '~/data/site';
     <CodeBlock lang="bash" code={`pip install teptris`} />
     <p>
       <code>pip</code> resolves a wheel for your platform —
-      manylinux/musllinux x86_64, aarch64 and armv7l (32-bit ARM, built
-      under qemu), macOS arm64 and x86_64, Windows AMD64 and ARM64.
-      CPython 3.10–3.14 gets a version-specific wheel (PGO-built, with
-      the datetime C-API fast paths); everything else resolves the
-      <code>cp39-abi3</code> wheel, which covers every CPython ≥ 3.9
-      including future minors. The extension statically links the
+      manylinux/musllinux x86_64, aarch64, armv7l, ppc64le, s390x,
+      riscv64 and i686 (the emulated legs build under qemu or 32-bit
+      containers), macOS arm64 and x86_64, and Windows AMD64, ARM64
+      and 32-bit x86. CPython 3.10–3.14 gets a version-specific wheel
+      (PGO-built, with the datetime C-API fast paths; a cp314t
+      free-threaded wheel ships on every native platform), and a
+      cp312 wheel covers the emulated arches. The extension statically links the
       engine, so each wheel is a single self-contained module. Every
       other platform installs the sdist, which vendors the engine and
       compiles it with the installing interpreter&rsquo;s compiler — a
