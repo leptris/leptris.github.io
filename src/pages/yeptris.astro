@@ -121,7 +121,7 @@ const yaml = await dump({ name: "yeptris", langs: ["c", "rust"] });
         </div>
         <ul class="hero-points">
           <li><strong>Speed with a referee</strong> — every figure comes from the open benchmark lane: interleaved runs, pinned competitors, medians, a performance ledger kept in the repository.</li>
-          <li><strong>Conformance first</strong> — 395/395 on the yaml-test-suite, the libyaml emission goldens with zero divergences, ASan/UBSan/TSan suites, and a nightly libFuzzer lane 250+ rounds deep with every catch shipped or carried.</li>
+          <li><strong>Conformance first</strong> — 395/395 on the yaml-test-suite, the libyaml emission goldens with zero divergences, ASan/UBSan/TSan suites, and a nightly libFuzzer lane 270+ rounds deep with every catch shipped or carried.</li>
           <li><strong>One core, five runtimes</strong> — the same C11 engine from C, Ruby, Python, Rust, and JavaScript; every runtime releases in lockstep with the engine.</li>
         </ul>
       </div>
@@ -137,7 +137,7 @@ const yaml = await dump({ name: "yeptris", langs: ["c", "rust"] });
       <div class="stat"><span class="n" data-count="395" data-suffix="/395">0/395</span><span class="l">yaml-test-suite</span></div>
       <div class="stat"><span class="n" data-count="11.6" data-suffix="×">0×</span><span class="l">scalar-heavy vs libyaml, the CI referee</span></div>
       <div class="stat"><span class="n" data-count="279" data-suffix="">0</span><span class="l">libyaml emission goldens, zero divergences</span></div>
-      <div class="stat"><span class="n" data-count="14" data-suffix="">0</span><span class="l">prebuilt platform gems, lockstep releases</span></div>
+      <div class="stat"><span class="n" data-count="15" data-suffix="">0</span><span class="l">prebuilt platform gems, lockstep releases</span></div>
       <div class="stat"><span class="n" data-raw="zero">zero</span><span class="l">required runtime dependencies</span></div>
     </div>
   </div>
@@ -163,9 +163,9 @@ const yaml = await dump({ name: "yeptris", langs: ["c", "rust"] });
             The interleaved head-to-head runs in CI on every push — nine
             document shapes across DOM, pull, recorder and emit, medians of
             rounds on fresh runners: every shape ahead of rapidyaml
-            (1.8–8.5× ubuntu; 1.5–4.0× macOS, with anchor-heavy the one
-            parity cell). Against libyaml the DOM lane reads 5.8–11.6× and
-            emit 4.7–21.5× per shape.
+            (1.8–8.5× ubuntu; 1.5–4.0× macOS; anchor-heavy — the one parity
+            cell — moved to 1.34× on the per-line memo). Against libyaml the
+            DOM lane reads 5.8–11.6× and emit 4.7–21.5× per shape.
           </p>
         </div>
         <div class="feat feat-bound sage reveal" data-d="1">
@@ -176,11 +176,15 @@ const yaml = await dump({ name: "yeptris", langs: ["c", "rust"] });
             <code>da267a5</code>, psych-pure&rsquo;s 67 corpus files,
             JSONTestSuite 95/95 accept and 188/188 reject in strict mode,
             the 405-input libyaml parse differential with full-record
-            equality — and the fuzz nightly, 250+ rounds in, every catch
-            shipped or carried: eighteen engine fixes, 181 fuzzing-gated
-            pins green (the comparator leg fuzzes its own corpus snapshot,
-            and the flow-soup family&rsquo;s density is measured with 41
-            exact-bytes shapes pinned).
+            equality — and the fuzz nightly, 270+ rounds in, every catch
+            shipped or carried: eighteen engine fixes — none since r248 —
+            and 235 fuzzing-gated pins green. The classifier era: the
+            flow-soup family proved measured-unbounded (five consecutive
+            carries r263–r267), so the law-verifying classifier derives
+            both engines&rsquo; expected dumps and requires them
+            byte-exact, and the r272 mining harvest closed the decline
+            surface (72 shapes: 48 exact-bytes pins + 10 classifier
+            extensions).
             And the emitter writes stored files the way Psych and libyaml
             do: block plain and single-quoted scalars fold at 80 columns
             by default (Psych&rsquo;s <code>line_width: -1</code> unwraps),
@@ -199,7 +203,7 @@ const yaml = await dump({ name: "yeptris", langs: ["c", "rust"] });
           </p>
         </div>
         <div class="feat feat-speed reveal" data-d="3">
-          <span class="big">14<small> prebuilt gem rows · abi3 wheels</small></span>
+          <span class="big">15<small> prebuilt gem rows · abi3 wheels</small></span>
           <h3>Packaging that installs</h3>
           <p>
             Ruby: fat platform gems (no C extension — FFI), every major

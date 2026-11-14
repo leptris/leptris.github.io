@@ -72,12 +72,15 @@ const deficits = frontierFor({ only: ['yaml'] });
         dispatch: all five YAML shapes are ahead — block-heavy 5.95×,
         wide-mapping 4.97×, deep-nesting 2.98×, scalar-heavy 2.59×,
         anchor-heavy 1.76× (the shape the ledger once named the open
-        target — its residual now lives in the shared per-line lanes,
-        not the anchor table). The ARM macOS leg reads 1.5–4.0× on the
-        same shapes with anchor-heavy at parity, and it is tracked with
-        the same discipline. Every optimization attempt on these rows is
-        recorded in the ledger with before-and-after numbers, including
-        the attempts that measured flat and were reverted.
+        target — its residual lived in the shared per-line lanes, not
+        the anchor table, and the per-line memo that fused those lanes
+        has since closed it: the matched A/B h2h reads 1.34×, the last
+        DOM cell past rapidyaml). The ARM macOS leg reads 1.5–4.0× on
+        the same shapes — anchor-heavy included — and every cell is
+        tracked with the same discipline. Every optimization attempt on
+        these rows is recorded in the ledger with before-and-after
+        numbers, including the attempts that measured flat and were
+        reverted.
       </p>
       <ResultsTable
         rows={yamlC.results
