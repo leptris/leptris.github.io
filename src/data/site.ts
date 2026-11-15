@@ -42,11 +42,11 @@ export const VERSIONS = {
   tomlJsDate: '2026-11-13',
   tomlRs: '0.3.31',
   tomlRsDate: '2026-11-13',
-  yaml: '0.6.67',
+  yaml: '0.6.68',
   yamlDate: '2026-11-15',
-  yamlRuby: '0.6.67.0',
+  yamlRuby: '0.6.68.0',
   yamlRubyDate: '2026-11-15',
-  yamlPy: '0.6.67.0',
+  yamlPy: '0.6.68.0',
   yamlPyDate: '2026-11-15',
 } as const;
 
