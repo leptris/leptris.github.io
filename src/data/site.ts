@@ -26,12 +26,12 @@ export const SITE = {
 } as const;
 
 export const VERSIONS = {
-  lib: '1.9.434',
-  libDate: '2026-11-22',
-  gem: '1.9.434.0',
-  gemDate: '2026-11-22',
-  py: '1.9.434.0',
-  pyDate: '2026-11-22',
+  lib: '1.9.437',
+  libDate: '2026-11-23',
+  gem: '1.9.437.0',
+  gemDate: '2026-11-23',
+  py: '1.9.437.0',
+  pyDate: '2026-11-23',
   toml: '0.3.31',
   tomlDate: '2026-11-13',
   tomlRuby: '0.3.31.0',
