@@ -26,11 +26,11 @@ export const SITE = {
 } as const;
 
 export const VERSIONS = {
-  lib: '1.9.443',
+  lib: '1.9.445',
   libDate: '2026-11-25',
-  gem: '1.9.443.0',
+  gem: '1.9.445.0',
   gemDate: '2026-11-25',
-  py: '1.9.443.0',
+  py: '1.9.445.0',
   pyDate: '2026-11-25',
   toml: '0.3.33',
   tomlDate: '2026-11-23',
