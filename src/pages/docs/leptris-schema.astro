@@ -126,12 +126,20 @@ leptris_document_free(doc);`}
       walk). XSD 1.1 constructs gate on the versioning attributes
       (<code>vc:minVersion</code> / <code>@version</code>); the dialect
       in force is probeable via <code>leptris_xsd_version</code>. On the
-      official W3C XML Schema 1.1 suite the validator stands at
-      <strong>1795/2206 (81.4%)</strong> with all seven 1.1 constructs
-      shipped — assertion facets, alternatives (CTA), override,
-      openContent, identity constraints, datatype facets — plus
-      targetNamespace qualification enforcement. The #1075 slice plan
-      that scoped this work is closed — its slices landed.
+      official W3C XML Schema suites (w3c/xsdtests, pinned snapshot):
+      <strong>1041/1056 (98.6%) on 1.0</strong> and
+      <strong>1813/2206 (82.2%) on 1.1</strong> — driving to 100% via
+      the open tail-class slices (leptris/leptris#2181 umbrella). The
+      shipped 1.1 construct set: assertion facets with full XQuery
+      semantics (absent focus, fn:doc base-URI resolution, FOAR0001,
+      subtree scoping, castable-as), conditional type assignment
+      (alternatives), override, openContent with derivation
+      inheritance, identity-constraint extensions, datatype facets on
+      the 1.1 builtins, default attribute groups
+      (<code>xs:schema/@defaultAttributes</code>, §3.4.2.5), and
+      targetNamespace qualification enforcement. Floor pins ride CI
+      (<code>XsdConformance11.ManifestExpectationsMatch</code>) and are
+      monotonic.
     </Callout>
 
     <h2 id="relaxng">RelaxNG</h2>
