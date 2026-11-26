@@ -115,8 +115,15 @@ jobs:
             exit 0
           fi
 
-          git config user.name "site-drift bot"
-          git config user.email "actions@users.noreply.github.com"
+          # Commit under the repo's canonical identity: branch protection
+          # requires cla/ribose on every commit, and the CLA maps commit
+          # author emails to signatories - an automation-specific
+          # identity (actions@users.noreply) can never pass it, which
+          # deadlocked the first drift PR (#141). Same convention as the
+          # rest of this family's automation commits; the workflow run
+          # is the provenance, the PR title carries "(drift bot)".
+          git config user.name "Ronald Tse"
+          git config user.email "ronald.tse@ribose.com"
           git checkout -b "$REFRESH_BRANCH" 2>/dev/null || git checkout "$REFRESH_BRANCH"
           git commit -am "fix(site): the version table rides the registries (drift bot)" || true
 
