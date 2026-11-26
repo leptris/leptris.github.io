@@ -1,0 +1,5 @@
+id: leptris
+name: Leptris
+base: https://www.leptris.org
+contentDir: src/content/blog
+outDir: dist/news-data
