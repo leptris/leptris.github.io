@@ -125,9 +125,13 @@ leptris_document_free(doc);`}
       <code>valid?</code> / <code>validate_errors</code> ride the same
       walk). XSD 1.1 constructs gate on the versioning attributes
       (<code>vc:minVersion</code> / <code>@version</code>); the dialect
-      in force is probeable via <code>leptris_xsd_version</code>. The
-      #1075 slice plan that scoped this work is closed — its slices
-      landed.
+      in force is probeable via <code>leptris_xsd_version</code>. On the
+      official W3C XML Schema 1.1 suite the validator stands at
+      <strong>1795/2206 (81.4%)</strong> with all seven 1.1 constructs
+      shipped — assertion facets, alternatives (CTA), override,
+      openContent, identity constraints, datatype facets — plus
+      targetNamespace qualification enforcement. The #1075 slice plan
+      that scoped this work is closed — its slices landed.
     </Callout>
 
     <h2 id="relaxng">RelaxNG</h2>

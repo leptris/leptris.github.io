@@ -86,6 +86,17 @@ const benchBlocks = [
     ],
   },
   {
+    title: 'Mutation cycle — create + append + free, vs pugixml (v1.9.447)',
+    sub: 'Same-runner CI legs, min-of-N least-noise protocol, pugixml pinned to 1.14; behavior-probed on the released artifacts',
+    chip: 'x86_64 25% faster · arm64 29% faster',
+    rows: [
+      { who: 'leptris', ver: 'x86_64', val: '8.3 ns/child', w: 75 },
+      { who: 'pugixml', ver: 'x86_64', val: '11.1 ns/child', w: 100, them: true },
+      { who: 'leptris', ver: 'arm64', val: '14.1 ns/child', w: 71 },
+      { who: 'pugixml', ver: 'arm64', val: '19.8 ns/child', w: 100, them: true },
+    ],
+  },
+  {
     title: 'Write side — serialize, vs pugixml',
     sub: '2 MB text-heavy and attr-heavy documents',
     chip: '1.5× vs pugixml',
@@ -191,7 +202,9 @@ const benchBlocks = [
             Interleaved A/B gates against pugixml and libxml2 on every shape —
             text-heavy, attr-heavy, deep, pretty, markup-rich. Median-of-runs,
             fresh build dirs, the harness published alongside the numbers.
-            Serialize is 1.5–1.6× ahead of pugixml; the XPath engine serves
+            The mutation cycle (create + append + free) is 25–29% ahead of
+            pugixml on same-runner CI legs with the competitor version pinned;
+            serialize is 1.5–1.6× ahead of pugixml; the XPath engine serves
             repeated <code>//x</code> from a subtree-interval index at
             effectively no cost.
           </p>
@@ -211,7 +224,9 @@ const benchBlocks = [
           <h3>Conformant where it counts</h3>
           <p>
             XPath 1.0: <strong>438/438</strong> on the W3C suite. XSLT:
-            <strong>205/205</strong> byte-identical to libxslt. HTML: the
+            <strong>205/205</strong> byte-identical to libxslt. XSD 1.1:
+            <strong>1795/2206</strong> — 81.4% of the official W3C suite,
+            all seven 1.1 constructs shipped. HTML: the
             html5lib tree suite, rising every release. XML 1.0 namespaces,
             DTD validation phases 1–7, XInclude, exclusive C14N, RELAX NG and
             Schematron behind one <code>validate</code> — semantics pinned by
@@ -275,10 +290,14 @@ const benchBlocks = [
       </div>
 
       <p class="bench-note reveal">
-        Shapes where pugixml still leads (attr-heavy parse ~1.5×, its duplicate-allowing
-        attribute API ~1.6× on raw append) are documented with their measured floors in
-        the repository&rsquo;s perf ledger — nothing is cherry-picked, and the harness
-        that produced every number is in the tree.
+        The write side now wins on every measured mutation shape — append is
+        3.9× ahead on x86_64 (2.8× on arm64), and even the distinct-names
+        shape that stresses a duplicate-rejecting index stays ahead. Where
+        pugixml still leads (attr-heavy parse, and the macOS mutation leg
+        under the pinned min-of-4 protocol) the rows are documented with
+        their measured floors in the deficits table — nothing is
+        cherry-picked, and the harness that produced every number is in the
+        tree.
       </p>
 
       <p class="reveal" data-d="2" style="margin-top:1.8rem">
