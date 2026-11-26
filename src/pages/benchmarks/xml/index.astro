@@ -15,6 +15,7 @@ const campaign = (id: string): Campaign => {
 };
 
 const xmlCMatrix = campaign('xml-c-matrix-2026-09-12');
+const xmlCPugixmlMutation = campaign('xml-c-pugixml-mutation-2026-11');
 const xmlCPugixmlWrites = campaign('xml-c-pugixml-writes-2026-11');
 const xmlCLanes = campaign('xml-c-lanes-2026-09-12');
 const xmlRuby = campaign('xml-ruby-2026-09-12');
@@ -42,14 +43,33 @@ const cParseBlocks = [
 
 const cWritesBlocks = [
   {
-    title: 'DOM append and attribute-dense parse+read vs pugixml, measured in C (2026-11 refresh)',
-    sub: 'bench_append_attr_pugixml, min of 5; the attrparse workload is parse + walk + read every attribute on BOTH engines',
-    chip: 'append 1.6× ahead · attrparse parity',
+    title: 'The mutation scoreboard — create + append + free, vs pugixml (the #2132 wave, v1.9.447)',
+    sub: 'Same-runner CI legs, min-of-N least-noise protocol, pugixml pinned to 1.14 on every leg, behavior-probed on the released artifacts',
+    chip: 'x86_64 25% faster · arm64 29% faster · macOS −13% (kept in view)',
     rows: [
-      { who: 'libleptris', ver: '1.9.414.0', val: '22.7 ns/child (append)', w: 63 },
-      { who: 'pugixml', val: '36.0 ns/child (append)', w: 100, them: true },
-      { who: 'libleptris', ver: '1.9.414.0', val: '1.60 µs (attr parse+read)', w: 89 },
-      { who: 'pugixml', val: '1.42 µs (attr parse+read)', w: 100, them: true },
+      { who: 'leptris', ver: 'x86_64 · v1.9.447', val: '8.3 ns/child', w: 75 },
+      { who: 'pugixml', ver: 'x86_64 · 1.14', val: '11.1 ns/child', w: 100, them: true },
+      { who: 'leptris', ver: 'arm64 · v1.9.447', val: '14.1 ns/child', w: 71 },
+      { who: 'pugixml', ver: 'arm64 · 1.14', val: '19.8 ns/child', w: 100, them: true },
+      { who: 'leptris', ver: 'macOS · v1.9.447', val: '14.6 ns/child', w: 100 },
+      { who: 'pugixml', ver: 'macOS · 1.14', val: '12.9 ns/child', w: 88, them: true },
+    ],
+  },
+  {
+    title: 'Append and attr-dense parse+read — same legs',
+    sub: 'append-uniq gives every child a distinct name — the pathological shape for a duplicate-rejecting index',
+    chip: 'append 3.9× x86_64 · 2.8× arm64 · attrparse 12% x86_64, 4.5% macOS',
+    rows: [
+      { who: 'leptris', ver: 'append · x86_64', val: '8.6 ns/child', w: 26 },
+      { who: 'pugixml', ver: 'append · x86_64', val: '33.2 ns/child', w: 100, them: true },
+      { who: 'leptris', ver: 'append · arm64', val: '14.8 ns/child', w: 36 },
+      { who: 'pugixml', ver: 'append · arm64', val: '41.5 ns/child', w: 100, them: true },
+      { who: 'leptris', ver: 'append-uniq · x86_64', val: '23.0 ns/child', w: 67 },
+      { who: 'pugixml', ver: 'append-uniq · x86_64', val: '34.2 ns/child', w: 100, them: true },
+      { who: 'leptris', ver: 'attrparse · x86_64', val: '1035 ns/doc', w: 89 },
+      { who: 'pugixml', ver: 'attrparse · x86_64', val: '1168 ns/doc', w: 100, them: true },
+      { who: 'leptris', ver: 'attrparse · macOS', val: '1429 ns/doc', w: 95 },
+      { who: 'pugixml', ver: 'attrparse · macOS', val: '1497 ns/doc', w: 100, them: true },
     ],
   },
 ];
@@ -121,15 +141,36 @@ const pyBlocks = [
         <BenchBars client:visible blocks={cParseBlocks} />
       </div>
 
-      <h3>DOM writes and attribute-dense parse+read <em>(2026-11 refresh)</em></h3>
+      <h3>The mutation scoreboard — create + append + free <em>(the #2132 wave, v1.9.447)</em></h3>
       <div class="reveal">
         <BenchBars client:visible blocks={cWritesBlocks} />
       </div>
 
       <ResultsTable
+        rows={xmlRows(xmlCPugixmlMutation)}
+        competitorHead="pugixml 1.14 (pinned, same runner)"
+      />
+      <Provenance campaign={xmlCPugixmlMutation} />
+
+      <Callout>
+        <p>
+          <strong>The macOS leg is kept in view.</strong> Under the honest
+          min-of-4 pinned protocol the mutation cycle measures ~13% behind
+          pugixml on macOS — 14.6 vs 12.9 ns/child. It is a loss row in the
+          data and in the measured-deficits table at the foot of this page,
+          not a hidden cell. The named closing lever has already landed: the
+          release trains now build PGO&rsquo;d binaries (#2168). On arm64 the
+          attrparse row sits within ~9% of pugixml, and the instruction-diet
+          cut merged to close it (#2178, riding v1.9.447).
+        </p>
+      </Callout>
+
+      <h3>DOM writes and attribute-dense parse+read <em>(2026-11-12 refresh)</em></h3>
+      <ResultsTable
         rows={xmlRows(xmlCPugixmlWrites)}
         competitorHead="pugixml 1.16 (same run)"
       />
+      <Provenance campaign={xmlCPugixmlWrites} />
 
       <h3>Parse, SAX, serialization and mutation</h3>
       <ResultsTable

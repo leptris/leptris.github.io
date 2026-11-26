@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "id": "xml-c-pugixml-mutation-2026-11",
+  "language": "c",
+  "subject": {
+    "name": "libleptris",
+    "version": "1.9.447"
+  },
+  "harness": {
+    "label": "bench_append_attr_pugixml — the #2132 mutation campaign; same-runner CI legs, min-of-N least-noise protocol, pugixml pinned to 1.14 on every leg, every row behavior-probed on the released artifacts; mutcycle = create + append + free per child, attrparse = parse + read every attribute per doc (4 elems x 16 attrs)",
+    "url": "https://github.com/leptris/leptris/pull/2132"
+  },
+  "machine": "GitHub Actions CI runners, one runner class per leg — ubuntu-24.04 (x86_64), ubuntu-24.04-arm (arm64), macos-latest (arm64); ratios are same-runner",
+  "date": "2026-11-26",
+  "stat": "min of N (least-noise protocol), same runner per leg",
+  "results": [
+    {
+      "tech": "xml",
+      "operation": "dom-mutcycle-x64",
+      "operation_label": "Mutation cycle (create + append + free) — ubuntu-24.04 x86_64, same-runner CI",
+      "competitor": "pugixml",
+      "competitor_version": "1.14 (pinned)",
+      "leptris_value": 8.3,
+      "competitor_value": 11.1,
+      "unit": "ns/child",
+      "ratio": 1.34,
+      "status": "win",
+      "note": "25% faster; the create path rides the per-document name interning shipped in v1.9.446"
+    },
+    {
+      "tech": "xml",
+      "operation": "dom-mutcycle-arm",
+      "operation_label": "Mutation cycle (create + append + free) — ubuntu-24.04-arm (arm64), same-runner CI",
+      "competitor": "pugixml",
+      "competitor_version": "1.14 (pinned)",
+      "leptris_value": 14.1,
+      "competitor_value": 19.8,
+      "unit": "ns/child",
+      "ratio": 1.4,
+      "status": "win",
+      "note": "29% faster"
+    },
+    {
+      "tech": "xml",
+      "operation": "dom-mutcycle-macos",
+      "operation_label": "Mutation cycle (create + append + free) — macos-latest (arm64), min-of-4 pinned protocol",
+      "competitor": "pugixml",
+      "competitor_version": "1.14 (pinned)",
+      "leptris_value": 14.6,
+      "competitor_value": 12.9,
+      "unit": "ns/child",
+      "ratio": 0.88,
+      "status": "loss",
+      "note": "~13% behind, kept in view: the macOS leg is the measured-protocol row, and the PGO'd release binaries (PR #2168) are the named closing lever"
+    },
+    {
+      "tech": "xml",
+      "operation": "dom-append-x64",
+      "operation_label": "DOM append — ubuntu-24.04 x86_64, same-runner CI",
+      "competitor": "pugixml",
+      "competitor_version": "1.14 (pinned)",
+      "leptris_value": 8.6,
+      "competitor_value": 33.2,
+      "unit": "ns/child",
+      "ratio": 3.86,
+      "status": "win",
+      "note": "3.9x faster"
+    },
+    {
+      "tech": "xml",
+      "operation": "dom-append-arm",
+      "operation_label": "DOM append — ubuntu-24.04-arm (arm64), same-runner CI",
+      "competitor": "pugixml",
+      "competitor_version": "1.14 (pinned)",
+      "leptris_value": 14.8,
+      "competitor_value": 41.5,
+      "unit": "ns/child",
+      "ratio": 2.8,
+      "status": "win",
+      "note": "2.8x faster"
+    },
+    {
+      "tech": "xml",
+      "operation": "dom-append-uniq-x64",
+      "operation_label": "DOM append, distinct names per child — ubuntu-24.04 x86_64, same-runner CI",
+      "competitor": "pugixml",
+      "competitor_version": "1.14 (pinned)",
+      "leptris_value": 23.0,
+      "competitor_value": 34.2,
+      "unit": "ns/child",
+      "ratio": 1.49,
+      "status": "win",
+      "note": "the pathological shape for a duplicate-rejecting index — still ahead"
+    },
+    {
+      "tech": "xml",
+      "operation": "dom-append-uniq-arm",
+      "operation_label": "DOM append, distinct names per child — ubuntu-24.04-arm (arm64), same-runner CI",
+      "competitor": "pugixml",
+      "competitor_version": "1.14 (pinned)",
+      "leptris_value": 29.1,
+      "competitor_value": 39.3,
+      "unit": "ns/child",
+      "ratio": 1.35,
+      "status": "win",
+      "note": "the pathological shape for a duplicate-rejecting index — still ahead"
+    },
+    {
+      "tech": "xml",
+      "operation": "attrparse-x64",
+      "operation_label": "Attr-dense parse + read every attribute — ubuntu-24.04 x86_64, same-runner CI",
+      "competitor": "pugixml",
+      "competitor_version": "1.14 (pinned)",
+      "leptris_value": 1035.0,
+      "competitor_value": 1168.0,
+      "unit": "ns/doc",
+      "ratio": 1.13,
+      "status": "win",
+      "note": "12% faster; the Door A variant runs 984.6 ns/doc — 16% ahead"
+    },
+    {
+      "tech": "xml",
+      "operation": "attrparse-macos",
+      "operation_label": "Attr-dense parse + read every attribute — macos-latest (arm64), min-of-4 pinned protocol",
+      "competitor": "pugixml",
+      "competitor_version": "1.14 (pinned)",
+      "leptris_value": 1429.0,
+      "competitor_value": 1497.0,
+      "unit": "ns/doc",
+      "ratio": 1.05,
+      "status": "win",
+      "note": "4.5% faster"
+    }
+  ]
+}

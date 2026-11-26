@@ -46,6 +46,7 @@ import htmlC from './results/html-c.json';
 import jsonC from './results/json-c.json';
 import xmlCLanes from './results/xml-c-lanes.json';
 import xmlCMatrix from './results/xml-c-matrix.json';
+import xmlCPugixmlMutation from './results/xml-c-pugixml-mutation.json';
 import xmlCPugixmlWrites from './results/xml-c-pugixml-writes.json';
 import xmlPython from './results/xml-python.json';
 import xmlRuby from './results/xml-ruby.json';
@@ -67,6 +68,7 @@ import yamlC from './results/yaml-c.json';
 // (test/benchmarks.spec.ts) enforces the literal against the raw files.
 const imported = [
   xmlCMatrix,
+  xmlCPugixmlMutation,
   xmlCPugixmlWrites,
   xmlCLanes,
   xsltC,
